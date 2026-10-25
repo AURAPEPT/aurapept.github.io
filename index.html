@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AURAPEPT · Calculateur</title>
+<meta name="description" content="Calculateur de reconstitution AURAPEPT : concentration et graduation à prélever sur seringue U-100.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#f3eee4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://aurapept.github.io/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AURAPEPT">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="AURAPEPT · Calculateur de reconstitution">
+<meta property="og:description" content="La bonne graduation U-100 en quatre réglages : concentration, volume et unités à prélever.">
+<meta property="og:url" content="https://aurapept.github.io/">
+<meta property="og:image" content="https://aurapept.github.io/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="AURAPEPT, calculateur de reconstitution : soleil rouge et mont Fuji">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/shippori-mincho-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/zen-kaku-gothic-new-400.woff2" as="font" type="font/woff2" crossorigin>
+<script src="assets/theme.js"></script>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="AURAPEPT, retour en haut">
+      <span class="seal" aria-hidden="true">オ</span>
+      <span><span class="brand-name">AURAPEPT</span><span class="brand-kana">オーラペプト</span></span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#calculateur">Calculateur</a>
+      <a href="#methode">Méthode</a>
+      <a href="#etiquette">Étiquette</a>
+      <a href="#avertissements">Avertissements</a>
+    </nav>
+    <button class="icon-btn" id="themeBtn" type="button" aria-label="Thème"></button>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <noscript><p class="noscript">Le calculateur a besoin de JavaScript. Active-le dans ton navigateur pour voir les résultats.</p></noscript>
+  <section class="hero">
+    <div>
+      <p class="eyebrow"><span class="jp">計算</span>Calculateur de reconstitution</p>
+      <h1>La bonne graduation, en <em>quatre réglages</em>.</h1>
+      <p class="lead">Indique le contenu du flacon, l'eau ajoutée, la quantité voulue et ta seringue. AURAPEPT calcule la concentration et le point de prélèvement en unités U-100, en direct.</p>
+      <div class="cta" id="heroCta">
+        <a class="btn btn-primary" href="#calculateur">Commencer le calcul</a>
+        <a class="btn" href="#methode">Voir la méthode</a>
+      </div>
+      <ul class="facts">
+        <li><b>U-100</b><span>1 mL = 100 unités</span></li>
+        <li><b>mg ↔ mcg</b><span>Conversion automatique</span></li>
+        <li><b>0,3 · 0,5 · 1 mL</b><span>Trois tailles de seringue</span></li>
+      </ul>
+    </div>
+    <figure class="art" aria-hidden="true">
+      <svg viewBox="0 0 480 360" preserveAspectRatio="xMidYMax slice">
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" class="st-sky-top"/>
+            <stop offset="1" class="st-sky-bottom"/>
+          </linearGradient>
+          <linearGradient id="mist" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" class="st-mist-0"/>
+            <stop offset="1" class="st-mist-1"/>
+          </linearGradient>
+        </defs>
+        <rect width="480" height="360" fill="url(#sky)"/>
+        <circle class="sun" cx="338" cy="122" r="58"/>
+        <path d="M0 252 L70 226 L130 240 L196 212 L262 234 L332 216 L404 238 L480 220 L480 300 L0 300 Z" class="ar-far"/>
+        <path d="M30 300 C110 256 162 200 200 158 Q214 142 228 146 L240 152 Q252 144 264 150 C302 196 356 256 450 300 Z" class="ar-fuji"/>
+        <path d="M200 158 Q214 142 228 146 L240 152 Q252 144 264 150 C270 157 276 164 283 172 L274 170 L266 180 L256 170 L246 182 L236 171 L226 183 L216 172 L206 181 L196 172 L183 176 C189 170 194 164 200 158 Z" class="ar-snow"/>
+        <rect x="0" y="246" width="480" height="54" fill="url(#mist)"/>
+        <rect x="0" y="292" width="480" height="68" class="ar-sea"/>
+      </svg>
+      <div class="waves"></div>
+      <div class="art-tag"><span>精密計算</span><span class="seal">オ</span></div>
+    </figure>
+  </section>
+
+  <section class="calc" id="calculateur" aria-label="Calculateur">
+    <div class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title"><span class="jp">設定</span>Réglages</h2>
+        <button class="link-btn" id="reset" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+          Réinitialiser
+        </button>
+      </div>
+      <ol class="steps">
+        <li class="step">
+          <div class="step-top">
+            <span class="hanko" aria-hidden="true">一</span>
+            <div><h3 id="lblVial">Contenu du flacon</h3><p>La quantité inscrite sur l'étiquette du flacon.</p></div>
+          </div>
+          <div class="step-body">
+            <div class="field">
+              <input id="vial" type="text" inputmode="decimal" autocomplete="off" value="5" aria-labelledby="lblVial">
+              <div class="seg" data-group="vialUnit" role="group" aria-label="Unité du flacon">
+                <button type="button" data-v="mg" aria-pressed="true">mg</button>
+                <button type="button" data-v="mcg" aria-pressed="false">mcg</button>
+              </div>
+            </div>
+            <div class="chips">
+              <span class="k">Raccourcis</span>
+              <button type="button" class="chip" data-preset="vial" data-value="2" data-unit="mg">2 mg</button>
+              <button type="button" class="chip" data-preset="vial" data-value="5" data-unit="mg">5 mg</button>
+              <button type="button" class="chip" data-preset="vial" data-value="10" data-unit="mg">10 mg</button>
+            </div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-top">
+            <span class="hanko" aria-hidden="true">二</span>
+            <div><h3 id="lblWater">Eau ajoutée</h3><p>Le volume d'eau injecté dans le flacon.</p></div>
+          </div>
+          <div class="step-body">
+            <div class="field">
+              <input id="water" type="text" inputmode="decimal" autocomplete="off" value="2" aria-labelledby="lblWater">
+              <span class="suffix">mL</span>
+            </div>
+            <div class="chips">
+              <span class="k">Raccourcis</span>
+              <button type="button" class="chip" data-preset="water" data-value="1">1 mL</button>
+              <button type="button" class="chip" data-preset="water" data-value="2">2 mL</button>
+              <button type="button" class="chip" data-preset="water" data-value="3">3 mL</button>
+            </div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-top">
+            <span class="hanko" aria-hidden="true">三</span>
+            <div><h3 id="lblDose">Quantité par prise</h3><p>Ce que tu veux prélever à chaque fois.</p></div>
+          </div>
+          <div class="step-body">
+            <div class="field">
+              <input id="dose" type="text" inputmode="decimal" autocomplete="off" value="250" aria-labelledby="lblDose">
+              <div class="seg" data-group="doseUnit" role="group" aria-label="Unité de la prise">
+                <button type="button" data-v="mg" aria-pressed="false">mg</button>
+                <button type="button" data-v="mcg" aria-pressed="true">mcg</button>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-top">
+            <span class="hanko" aria-hidden="true">四</span>
+            <div><h3>Seringue U-100</h3><p>Sa capacité totale, indiquée sur l'emballage.</p></div>
+          </div>
+          <div class="step-body">
+            <div class="syr-opts" data-group="syringe" role="group" aria-label="Capacité de la seringue">
+              <button type="button" class="syr-opt" data-v="0.3" aria-pressed="false">
+                <span class="mini"><i></i></span><b>0,3 mL</b><span>30 unités</span>
+              </button>
+              <button type="button" class="syr-opt" data-v="0.5" aria-pressed="false">
+                <span class="mini"><i></i></span><b>0,5 mL</b><span>50 unités</span>
+              </button>
+              <button type="button" class="syr-opt" data-v="1" aria-pressed="true">
+                <span class="mini"><i></i></span><b>1 mL</b><span>100 unités</span>
+              </button>
+            </div>
+            <label class="switch"><input id="half" type="checkbox"> Ma seringue a des graduations de 0,5 unité</label>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <section class="panel result" id="resultat" aria-labelledby="resTitle">
+      <div class="panel-head">
+        <h2 class="panel-title" id="resTitle"><span class="jp">結果</span>Résultat</h2>
+        <span class="pill" id="status" data-tone="idle">En attente</span>
+      </div>
+      <div class="result-body">
+        <div>
+          <p class="sr-only" id="srResult" aria-live="polite"></p>
+          <p class="draw-k">Prélever jusqu'à</p>
+          <p class="big"><span id="units">—</span><small>unités</small></p>
+          <p class="draw-sub">soit <b id="ml">—</b> sur une seringue de <b id="capText">1 mL</b></p>
+        </div>
+        <svg id="syr" viewBox="0 0 560 126" role="img" aria-labelledby="syrTitle">
+          <title id="syrTitle">Seringue remplie jusqu'à la graduation calculée</title>
+          <defs><clipPath id="barrelClip"><rect x="70" y="44" width="404" height="46" rx="6"/></clipPath></defs>
+          <line x1="4" y1="67" x2="46" y2="67" class="needle"/>
+          <rect x="44" y="58" width="26" height="18" rx="3" class="hub"/>
+          <rect x="70" y="44" width="404" height="46" rx="6" class="barrel-bg"/>
+          <g clip-path="url(#barrelClip)"><rect id="liquid" x="70" y="44" width="388" height="46" class="liquid"/></g>
+          <g id="plunger">
+            <rect x="82" y="62" width="412" height="10" class="rod"/>
+            <rect x="494" y="40" width="8" height="54" rx="2" class="thumb"/>
+            <rect x="70" y="46" width="12" height="42" rx="2" class="stopper"/>
+          </g>
+          <g id="scale"></g>
+          <rect x="70" y="44" width="404" height="46" rx="6" class="barrel"/>
+          <rect x="474" y="34" width="7" height="66" rx="2" class="flange"/>
+          <g id="pointer"><path d="M70 41 l-7 -10 h14 z" class="marker-fill"/></g>
+          <g id="marker">
+            <rect id="markerBox" x="-26" y="4" width="52" height="27" rx="7" class="marker-fill"/>
+            <text id="markerText" x="0" y="23" class="marker-text">—</text>
+          </g>
+        </svg>
+        <dl class="stats">
+          <div><dt>Concentration</dt><dd id="conc">—</dd></div>
+          <div><dt>Par unité</dt><dd id="perUnit">—</dd></div>
+          <div><dt>Prises par flacon</dt><dd id="count">—</dd></div>
+          <div><dt>Remplissage</dt><dd id="fillPct">—</dd></div>
+        </dl>
+        <ul class="notes" id="notes" hidden></ul>
+        <div class="actions">
+          <button class="btn btn-primary" id="copyLink" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+            Copier le lien
+          </button>
+          <button class="btn" id="copySum" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
+            Copier le résumé
+          </button>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section class="section" id="methode">
+    <div>
+      <p class="eyebrow"><span class="jp">方法</span>Méthode</p>
+      <h2>Le calcul, étape par étape</h2>
+      <p class="intro">Les mêmes opérations que tu ferais à la main, mises à jour avec tes valeurs. Une seringue U-100 contient 100 unités par mL.</p>
+    </div>
+    <ol class="method">
+      <li><div class="lbl"><b>Conversion</b><span>tout en mcg (1 mg = 1000 mcg)</span></div><div class="eq" id="m1">—</div></li>
+      <li><div class="lbl"><b>Concentration</b><span>flacon ÷ eau</span></div><div class="eq" id="m2">—</div></li>
+      <li><div class="lbl"><b>Volume</b><span>prise ÷ concentration</span></div><div class="eq" id="m3">—</div></li>
+      <li><div class="lbl"><b>Unités</b><span>volume × 100</span></div><div class="eq" id="m4">—</div></li>
+    </ol>
+  </section>
+
+  <section class="section" id="etiquette">
+    <div>
+      <p class="eyebrow"><span class="jp">ラベル</span>Étiquette</p>
+      <h2>Une étiquette pour ton flacon</h2>
+      <p class="intro">Elle reprend tes valeurs actuelles. Ajoute un nom et la date de reconstitution, puis imprime-la au format 7 cm.</p>
+    </div>
+    <div class="label-grid">
+      <div class="label-tools">
+        <div>
+          <label for="labelName">Nom sur l'étiquette (facultatif)</label>
+          <input class="text-field" id="labelName" type="text" maxlength="40" placeholder="Ex. : Flacon A" autocomplete="off">
+        </div>
+        <div>
+          <label for="date">Date de reconstitution</label>
+          <input class="text-field" id="date" type="date">
+        </div>
+        <button class="btn btn-primary" id="print" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg>
+          Imprimer l'étiquette
+        </button>
+        <p class="hint">Seule l'étiquette sort à l'impression.</p>
+      </div>
+      <div class="label-stage">
+        <div class="label-card" id="labelCard">
+          <div class="label-brand">
+            <span class="seal" aria-hidden="true">オ</span>
+            <div><b>AURAPEPT</b><span>オーラペプト</span></div>
+          </div>
+          <p class="label-name" id="lName" hidden></p>
+          <dl>
+            <dt>Flacon</dt><dd id="lVial">—</dd>
+            <dt>Eau ajoutée</dt><dd id="lWater">—</dd>
+            <dt>Concentration</dt><dd id="lConc">—</dd>
+            <dt>Prise</dt><dd id="lDraw">—</dd>
+          </dl>
+          <div class="label-date"><span>Reconstitué le</span><b id="lDate">__/__/____</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="avertissements">
+    <div>
+      <p class="eyebrow"><span class="jp">注意</span>Avertissements</p>
+      <h2>À lire avant d'utiliser</h2>
+    </div>
+    <ul class="warn-list">
+      <li>Outil de calcul informatif uniquement. Ce n'est pas un avis médical et aucune quantité n'est recommandée.</li>
+      <li>Vérifie toujours tes saisies et le marquage U-100 de ta seringue. Les résultats sont fournis tels quels, sans garantie.</li>
+      <li>Respecte les règles d'hygiène et de conservation indiquées pour ton produit.</li>
+      <li>Tu es responsable du respect des lois de ton pays.</li>
+    </ul>
+  </section>
+
+  <footer class="footer">
+    <div class="brand">
+      <span class="seal" aria-hidden="true">オ</span>
+      <span><span class="brand-name">AURAPEPT</span><span class="brand-kana">オーラペプト</span></span>
+    </div>
+    <p class="footer-note">Outil informatif, aucun avis médical. Aucune donnée n'est envoyée : les calculs se font dans ton navigateur, qui mémorise seulement ton choix de thème.</p>
+  </footer>
+</main>
+
+<section class="dock is-hidden" id="dock" aria-label="Résultat rapide">
+  <div><span class="k">Prélever</span><b id="dockUnits">—</b><span class="ml" id="dockMl"></span></div>
+  <a href="#resultat">Voir le détail</a>
+</section>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>
