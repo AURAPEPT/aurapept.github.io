@@ -8,7 +8,7 @@ En ligne : https://aurapept.github.io/
 - `index.html` : la page
 - `assets/style.css`, `assets/app.js`, `assets/theme.js` : styles et scripts (aucun code en ligne, pour la politique de sécurité)
 - `assets/fonts/` : polices Shippori Mincho et Zen Kaku Gothic New, hébergées sur le site (sous-ensembles des caractères utilisés), sous licence SIL Open Font License 1.1 (`OFL-*.txt`)
-- `assets/og.png`, `assets/apple-touch-icon.png`, `assets/favicon-32.png` : image de partage et icônes
+- `assets/og-share.png`, `assets/apple-touch-icon.png`, `assets/favicon-32.png` : image de partage et icônes
 
 ## Sécurité et vie privée
 - Aucune requête vers un autre site : polices hébergées localement, aucun traceur, aucune donnée envoyée.
