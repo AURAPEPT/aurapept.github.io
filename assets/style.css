@@ -450,6 +450,13 @@
     background: var(--field); color: var(--sumi); font: 500 1rem var(--f-body);
   }
   .text-field:focus { outline: none; border-color: var(--sumi); box-shadow: 0 0 0 4px var(--ring); }
+  /* Champs date et heure : sur iPhone, Safari leur impose une largeur minimale et ignore width: 100%,
+     ils dépassaient alors du cadre. On les autorise à rétrécir et on garde une hauteur normale. */
+  input.text-field[type="date"], input.text-field[type="datetime-local"] {
+    display: block; min-width: 0; max-width: 100%; min-height: 48px; -webkit-appearance: none; appearance: none;
+  }
+  input.text-field::-webkit-date-and-time-value { min-width: 0; text-align: start; }
+  .label-tools > div { min-width: 0; }
   .hint { margin: 0; font-size: .84rem; color: var(--muted); }
   .label-stage {
     display: grid; place-items: center; padding: clamp(28px, 5vw, 48px) 20px;

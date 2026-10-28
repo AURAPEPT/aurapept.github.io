@@ -118,6 +118,7 @@ html[dir="rtl"] .stage-tag { right: auto; left: 18px; }
 .form-body { display: flex; flex-direction: column; gap: 16px; padding: 20px 24px 24px; }
 .form-body label, .form-label { display: block; margin-bottom: 6px; font-size: .85rem; color: var(--muted); }
 .form-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.form-body > div, .form-row > div { min-width: 0; } /* un champ trop large ne peut plus pousser le panneau */
 @media (max-width: 560px) { .form-row { grid-template-columns: minmax(0, 1fr); } }
 .form-body .field input { padding: 11px 14px; font-size: 1.2rem; }
 .form-body .seg button { min-width: 46px; padding: 0 10px; font-size: .88rem; }
