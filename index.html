@@ -42,6 +42,7 @@
       <a href="#calculateur">Calculateur</a>
       <a href="#methode">Méthode</a>
       <a href="#etiquette">Étiquette</a>
+      <a href="#flacons">Flacons</a>
       <a href="#avertissements">Avertissements</a>
       <a href="peptides/">Atlas</a>
     </nav>
@@ -291,6 +292,22 @@
     </div>
   </section>
 
+  <section class="section" id="flacons">
+    <div>
+      <p class="eyebrow"><span class="jp">記録</span>Mes flacons</p>
+      <h2>Garde tes flacons en mémoire</h2>
+      <p class="intro">Enregistre les réglages d'un flacon pour les retrouver plus tard. Ils restent dans ton navigateur : rien n'est envoyé.</p>
+      <button class="btn btn-primary" id="saveVial" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+        Enregistrer ce flacon
+      </button>
+    </div>
+    <div class="vials">
+      <ul class="vial-list" id="vialList"></ul>
+      <p class="vial-empty" id="vialEmpty">Aucun flacon enregistré pour l'instant. Règle le calculateur, ajoute un nom et une date dans l'étiquette, puis clique sur « Enregistrer ce flacon ».</p>
+    </div>
+  </section>
+
   <section class="section" id="avertissements">
     <div>
       <p class="eyebrow"><span class="jp">注意</span>Avertissements</p>
@@ -314,7 +331,7 @@
       <div><dt>Hébergeur</dt><dd>GitHub, Inc.<br>88 Colin P. Kelly Jr. St.<br>San Francisco, CA 94107, États-Unis<br><a href="https://github.com/">github.com</a></dd></div>
       <div><dt>Contact</dt><dd><a href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer">Telegram AURAPEPT</a></dd></div>
       <div><dt>Droit de réponse</dt><dd>Il s'exerce auprès de l'hébergeur, qui transmet la demande à l'éditeur.</dd></div>
-      <div><dt>Données personnelles</dt><dd>Aucune donnée n'est collectée ni envoyée : pas de compte, pas de cookie, pas de mesure d'audience. Les calculs se font dans ton navigateur, qui garde seulement ton choix de thème (stockage local).</dd></div>
+      <div><dt>Données personnelles</dt><dd>Aucune donnée n'est collectée ni envoyée : pas de compte, pas de cookie, pas de mesure d'audience. Les calculs se font dans ton navigateur, qui garde seulement ton choix de thème et les flacons que tu enregistres (stockage local, sur ton appareil uniquement).</dd></div>
       <div><dt>Polices</dt><dd>Shippori Mincho et Zen Kaku Gothic New, sous licence SIL Open Font License 1.1, hébergées sur ce site.</dd></div>
     </dl>
   </section>
@@ -324,7 +341,7 @@
       <span class="seal" aria-hidden="true">オ</span>
       <span><span class="brand-name">AURAPEPT</span><span class="brand-kana">オーラペプト</span></span>
     </div>
-    <p class="footer-note">Outil informatif, aucun avis médical. Aucune donnée n'est envoyée : les calculs se font dans ton navigateur, qui mémorise seulement ton choix de thème. <a href="peptides/">Atlas des peptides</a> · <a href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer">Telegram</a> · <a href="#mentions">Mentions légales</a></p>
+    <p class="footer-note">Outil informatif, aucun avis médical. Aucune donnée n'est envoyée : les calculs se font dans ton navigateur, qui mémorise seulement ton choix de thème et tes flacons enregistrés. <a href="peptides/">Atlas des peptides</a> · <a href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer">Telegram</a> · <a href="#mentions">Mentions légales</a></p>
   </footer>
 </main>
 

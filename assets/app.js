@@ -306,6 +306,92 @@ $("copyLink").addEventListener("click", () => copy(location.href.split("#")[0], 
 $("copySum").addEventListener("click", () => copy(summary(), "Résumé copié"));
 $("print").addEventListener("click", () => window.print());
 
+/* Mes flacons : enregistrés dans le navigateur (stockage local), jamais envoyés */
+const VIAL_KEY = "aurapept-flacons";
+const mk = (tag, cls, text) => {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+};
+function readVials() {
+  try {
+    const v = JSON.parse(localStorage.getItem(VIAL_KEY) || "[]");
+    return Array.isArray(v) ? v.filter((x) => x && typeof x === "object") : [];
+  } catch (e) { return []; }
+}
+function writeVials(list) {
+  try { localStorage.setItem(VIAL_KEY, JSON.stringify(list)); return true; } catch (e) { return false; }
+}
+function since(iso) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || "")) return "";
+  const [y, m, d] = iso.split("-").map(Number);
+  const now = new Date();
+  const days = Math.round((Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - Date.UTC(y, m - 1, d)) / 86400000);
+  if (days < 0) return "date à venir";
+  if (days === 0) return "aujourd'hui";
+  if (days === 1) return "hier";
+  return `il y a ${days} jours`;
+}
+function renderVials() {
+  const list = readVials();
+  $("vialEmpty").hidden = list.length > 0;
+  $("vialList").replaceChildren(...list.map((x) => {
+    const li = mk("li", "vial");
+    const vial = toMcg(parseNum(x.v), x.vu), water = parseNum(x.w);
+    const conc = vial > 0 && water > 0 ? `${mass(vial / water)}/mL` : "—";
+    li.append(
+      mk("p", "vial-name", x.n || "Flacon sans nom"),
+      mk("p", "vial-meta", `${x.v} ${x.vu} dans ${x.w} mL · ${conc} · prise de ${x.d} ${x.du}`),
+      mk("p", "vial-date", x.date ? `Reconstitué le ${frDate(x.date)} · ${since(x.date)}` : "Date de reconstitution non renseignée"),
+    );
+    const actions = mk("div", "vial-actions");
+    const load = mk("button", "btn", "Charger");
+    load.type = "button";
+    load.addEventListener("click", () => {
+      apply({ v: x.v, w: x.w, d: x.d, vu: x.vu, du: x.du, s: x.s, h: x.h, n: x.n });
+      if (x.date) $("date").value = x.date;
+      calc();
+      toast("Flacon chargé");
+      $("calculateur").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" });
+    });
+    const del = mk("button", "btn", "Supprimer");
+    del.type = "button";
+    let timer = 0;
+    del.addEventListener("click", () => {
+      if (!del.classList.contains("is-confirm")) {
+        del.classList.add("is-confirm");
+        del.textContent = "Confirmer ?";
+        timer = setTimeout(() => { del.classList.remove("is-confirm"); del.textContent = "Supprimer"; }, 3000);
+        return;
+      }
+      clearTimeout(timer);
+      writeVials(readVials().filter((y) => y.id !== x.id));
+      renderVials();
+      toast("Flacon supprimé");
+    });
+    actions.append(load, del);
+    li.append(actions);
+    return li;
+  }));
+}
+$("saveVial").addEventListener("click", () => {
+  const v = parseNum($("vial").value), w = parseNum($("water").value), d = parseNum($("dose").value);
+  if (!(v > 0 && w > 0 && d > 0)) { toast("Complète d'abord les quantités du calculateur"); return; }
+  const date = /^\d{4}-\d{2}-\d{2}$/.test($("date").value) ? $("date").value : "";
+  const entry = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    n: $("labelName").value.trim().slice(0, 40), date,
+    v: $("vial").value.trim().slice(0, 12), vu: state.vialUnit, w: $("water").value.trim().slice(0, 12),
+    d: $("dose").value.trim().slice(0, 12), du: state.doseUnit, s: state.syringe, h: $("half").checked,
+  };
+  const list = [entry, ...readVials()].slice(0, 30);
+  if (!writeVials(list)) { toast("Enregistrement impossible : le stockage du navigateur est bloqué"); return; }
+  renderVials();
+  toast("Flacon enregistré");
+});
+renderVials();
+
 // La barre mobile n'apparaît qu'une fois l'accueil passé, et se cache quand le résultat complet est à l'écran
 if ("IntersectionObserver" in window) {
   const seen = { heroCta: true, resultat: false };
