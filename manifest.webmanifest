@@ -1,7 +1,7 @@
 {
   "name": "AURAPEPT · Calculateur de reconstitution",
   "short_name": "AURAPEPT",
-  "description": "Calculateur de reconstitution U-100 et atlas des peptides, au style japonais.",
+  "description": "Calculateur de reconstitution U-100 et liste des peptides, au style japonais.",
   "lang": "fr",
   "dir": "ltr",
   "start_url": "/",
@@ -15,7 +15,7 @@
     { "src": "/assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Atlas des peptides", "url": "/peptides/", "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Liste des peptides", "url": "/peptides/", "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }] },
     { "name": "Mes flacons", "url": "/#flacons", "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }] }
   ]
 }
