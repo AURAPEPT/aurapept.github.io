@@ -108,7 +108,9 @@ html[dir="rtl"] .stage-tag { right: auto; left: 18px; }
 .timeline input[type="range"] { width: 100%; margin: 0; accent-color: var(--shu); cursor: pointer; }
 .tl-label { grid-column: 1 / -1; margin: 0; font-size: .86rem; color: var(--sumi-2); font-variant-numeric: tabular-nums; }
 .tl-label b { color: var(--sumi); }
-.stage-foot { display: flex; justify-content: flex-end; padding: 0 16px 12px; }
+.stage-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 0 16px 12px; }
+.stage-foot #againBtn { min-height: 42px; padding: 0 16px; font-size: .88rem; }
+.stage-foot .link-btn { margin-inline-start: auto; }
 .link-btn.is-confirm { color: var(--shu); background: var(--shu-soft); }
 
 /* Panneau des prises */
@@ -154,3 +156,4 @@ html[dir="rtl"] .stage-tag { right: auto; left: 18px; }
 html[dir="rtl"] bdi { white-space: nowrap; }
 #vialSvg { direction: ltr; } /* graduations « 2 mL » dans le bon sens, comme la seringue du calculateur */
 html[lang="ar"] :is(.ro-k, .history h3) { font-size: .86rem; letter-spacing: 0; }
+.track-links { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 22px; }

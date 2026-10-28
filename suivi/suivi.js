@@ -295,6 +295,26 @@ function renderStage(instant) {
     `Vial: ${massTxt(s.left)} left of ${massTxt(v.total)}, that is ${fmt(s.frac * 100, 0)}%.`,
     `القارورة: يتبقى ${massTxt(s.left)} من ${massTxt(v.total)}، أي ${fmt(s.frac * 100, 0)}٪.`));
   $("stageFoot").hidden = false;
+  // Fiole vide : proposer d'en préparer une identique (mêmes réglages, date du jour)
+  let again = $("againBtn");
+  if (!again) {
+    again = document.createElement("button");
+    again.id = "againBtn";
+    again.type = "button";
+    again.className = "btn btn-primary";
+    again.textContent = t("Nouvelle fiole identique", "New identical vial", "قارورة جديدة مماثلة");
+    again.addEventListener("click", () => {
+      const c = current();
+      if (!c) return;
+      const mg = c.total >= 1000;
+      fillForm({ n: c.name, v: fmtIn(mg ? c.total / 1000 : c.total), vu: mg ? "mg" : "mcg", w: fmtIn(c.water),
+        d: c.dose ? fmtIn(c.doseUnit === "mg" ? c.dose / 1000 : c.dose) : "", du: c.doseUnit, date: toDT(Date.now()).slice(0, 10) });
+      showForm(true);
+      $("newVial").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    });
+    $("stageFoot").prepend(again);
+  }
+  again.hidden = status(v).left > 0;
   renderTimeline(v);
 }
 
