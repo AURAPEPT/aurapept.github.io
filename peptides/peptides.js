@@ -1,0 +1,202 @@
+import { createBody, ZONES } from "./body.js";
+import { CATEGORIES, PEPTIDES } from "./data.js";
+
+const $ = (id) => document.getElementById(id);
+const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const zoneLabel = (id) => ZONES[id]?.label ?? id;
+
+const state = { open: null, zone: null, query: "" };
+const peptides = PEPTIDES;
+const byId = new Map(peptides.map((p) => [p.id, p]));
+
+/* Corps 3D */
+function noBody() {
+  $("fallback").hidden = false;
+  $("stageTools").hidden = true;
+  $("hint").hidden = true;
+  $("loading").hidden = true;
+}
+const body = createBody($("body3d"), $("labels"), {
+  onPick: (zone) => setZone(zone && zone === state.zone ? null : zone),
+  onReady: (ok) => { $("loading").hidden = true; if (!ok) noBody(); },
+  onLoading: (text) => { $("loading").textContent = text || ""; $("loading").hidden = !text; },
+});
+if (!body) noBody();
+$("body3d").addEventListener("pointerdown", () => $("hint").classList.add("is-gone"), { once: true });
+$("zoomIn").addEventListener("click", () => body?.zoomBy(1.2));
+$("zoomOut").addEventListener("click", () => body?.zoomBy(1 / 1.2));
+$("resetView").addEventListener("click", () => body?.resetView());
+
+/* Explorer par zone : seulement les zones utilisées par la liste */
+const usedZones = new Set(peptides.flatMap((p) => p.zones));
+const zoneIds = Object.keys(ZONES).filter((id) => !peptides.length || usedZones.has(id));
+$("zoneChips").replaceChildren(...zoneIds.map((id) => {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "zchip" + (ZONES[id].tone === "fat" ? " zchip-fat" : "");
+  b.dataset.zone = id;
+  b.textContent = zoneLabel(id);
+  b.setAttribute("aria-pressed", "false");
+  b.addEventListener("click", () => setZone(state.zone === id ? null : id));
+  return b;
+}));
+
+/* Liste en accordéon, groupée par catégorie */
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+function itemFor(p) {
+  const li = el("li", "pep");
+  li.dataset.id = p.id;
+
+  const btn = el("button", "pep-btn");
+  btn.type = "button";
+  btn.id = `pep-${p.id}-btn`;
+  btn.setAttribute("aria-expanded", "false");
+  btn.setAttribute("aria-controls", `pep-${p.id}-body`);
+  const chev = el("span", "chev");
+  chev.setAttribute("aria-hidden", "true");
+  btn.append(el("span", "pep-name", p.nom), el("span", "pep-zones", p.zones.map(zoneLabel).join(" · ")), chev);
+  btn.addEventListener("click", () => toggle(p.id));
+
+  const panel = el("div", "pep-body");
+  panel.id = `pep-${p.id}-body`;
+  panel.setAttribute("role", "region");
+  panel.setAttribute("aria-labelledby", btn.id);
+  panel.hidden = true;
+
+  const line = (k, v) => { const e = el("p", "pep-line"); e.append(el("span", "pep-k", k), document.createTextNode(v)); return e; };
+  panel.append(line("Agit sur", p.action), line("But", p.but));
+  if (p.mix?.length) {
+    const mix = el("p", "pep-line pep-mix");
+    mix.append(el("span", "pep-k", "Contient"));
+    p.mix.forEach((id) => {
+      const c = byId.get(id);
+      if (!c) return;
+      const a = el("button", "pep-mixlink", c.nom);
+      a.type = "button";
+      a.title = `Ouvrir la fiche ${c.nom}`;
+      a.addEventListener("click", () => { setZone(null); toggle(id); items.get(id).scrollIntoView({ block: "nearest" }); });
+      mix.append(a);
+    });
+    panel.append(mix);
+  }
+  const chips = el("div", "pep-zchips");
+  chips.setAttribute("aria-label", "Zones ciblées");
+  p.zones.forEach((z) => {
+    const c = el("button", "pep-zchip" + (ZONES[z]?.tone === "fat" ? " is-fat" : ""), zoneLabel(z));
+    c.type = "button";
+    c.title = `Voir les peptides qui ciblent : ${zoneLabel(z)}`;
+    c.addEventListener("click", () => setZone(z));
+    chips.append(c);
+  });
+  panel.append(chips);
+  const meta = el("p", "pep-meta");
+  if (p.source?.url) {
+    const a = el("a", null, p.source.label || "Source");
+    a.href = p.source.url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    const src = el("span", "pep-src");
+    src.append("Source : ", a);
+    meta.append(src);
+  }
+  panel.append(meta);
+  li.append(btn, panel);
+  return li;
+}
+
+const items = new Map();
+const groups = [];
+const frag = document.createDocumentFragment();
+for (const cat of CATEGORIES) {
+  const list = peptides.filter((p) => p.cat === cat.id);
+  if (!list.length) continue;
+  const head = el("li", "pep-cat");
+  head.dataset.cat = cat.id;
+  head.append(el("span", "pep-cat-dot"), el("span", null, cat.label));
+  frag.append(head);
+  list.forEach((p) => {
+    const li = itemFor(p);
+    items.set(p.id, li);
+    frag.append(li);
+  });
+  groups.push({ head, list });
+}
+$("pepList").replaceChildren(frag);
+
+function toggle(id) {
+  state.open = state.open === id ? null : id;
+  render();
+  try { history.replaceState(null, "", state.open ? `#${id}` : location.pathname); } catch (e) {}
+}
+
+function setZone(zone) {
+  state.zone = zone;
+  if (zone && state.open && !byId.get(state.open)?.zones.includes(zone)) state.open = null;
+  render();
+}
+
+function render() {
+  const q = norm(state.query.trim());
+  let shown = 0;
+  for (const p of peptides) {
+    const li = items.get(p.id);
+    const match = (!q || norm([p.nom, ...(p.alias || [])].join(" ")).includes(q))
+      && (!state.zone || p.zones.includes(state.zone));
+    li.hidden = !match;
+    if (match) shown++;
+    const open = state.open === p.id;
+    li.classList.toggle("is-open", open);
+    li.querySelector(".pep-btn").setAttribute("aria-expanded", String(open));
+    li.querySelector(".pep-body").hidden = !open;
+  }
+  groups.forEach(({ head, list }) => { head.hidden = !list.some((p) => !items.get(p.id).hidden); });
+
+  const open = byId.get(state.open);
+  body?.highlight(open ? open.zones : state.zone ? [state.zone] : []);
+
+  document.querySelectorAll(".zchip").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.zone === state.zone)));
+  $("zoneFilter").hidden = !state.zone;
+  $("zoneFilterName").textContent = state.zone ? zoneLabel(state.zone) : "";
+  $("count").textContent = `${shown} / ${peptides.length}`;
+  const empty = $("emptyState");
+  empty.hidden = shown > 0;
+  empty.textContent = state.zone && !q
+    ? `Aucun peptide de la liste ne cible : ${zoneLabel(state.zone)}.`
+    : "Aucun peptide ne correspond à ta recherche.";
+}
+
+$("search").addEventListener("input", (e) => { state.query = e.target.value; render(); });
+$("clearZone").addEventListener("click", () => setZone(null));
+
+/* Ouverture directe via l'ancre (#nom-du-peptide) */
+const fromHash = decodeURIComponent(location.hash.slice(1));
+if (byId.has(fromHash)) state.open = fromHash;
+render();
+
+/* Thème clair / sombre (même réglage que le calculateur) */
+const THEMES = ["system", "light", "dark"];
+const THEME_UI = {
+  system: ["Thème : automatique", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>'],
+  light: ["Thème : clair", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'],
+  dark: ["Thème : sombre", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>'],
+};
+function setTheme(mode, save) {
+  const root = document.documentElement;
+  if (mode === "system") delete root.dataset.theme; else root.dataset.theme = mode;
+  const [label, icon] = THEME_UI[mode];
+  $("themeBtn").innerHTML = icon;
+  $("themeBtn").setAttribute("aria-label", `${label}. Cliquer pour changer.`);
+  $("themeBtn").title = label;
+  if (save) { try { localStorage.setItem("aurapept-theme", mode); } catch (e) {} }
+}
+$("themeBtn").addEventListener("click", () => {
+  const cur = document.documentElement.dataset.theme || "system";
+  setTheme(THEMES[(THEMES.indexOf(cur) + 1) % THEMES.length], true);
+});
+setTheme(document.documentElement.dataset.theme || "system", false);

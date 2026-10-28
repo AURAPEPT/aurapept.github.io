@@ -1,0 +1,10 @@
+Modèle 3D du corps (base.bin, os.bin, muscles.bin, tendons.bin, manifest.js)
+
+Source : BodyParts3D, © The Database Center for Life Science licensed under CC Attribution 4.0 International
+https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html
+Licence : https://creativecommons.org/licenses/by/4.0/
+
+Modifications : pièces regroupées par zone (peau, cerveau, hypophyse, thymus, poumons, cœur et aorte, foie,
+estomac, pancréas, intestins, reins, prostate, squelette, muscles, tendons et ligaments), maillages
+simplifiés avec gltfpack, coordonnées converties en mètres et positions quantifiées sur 16 bits.
+base.bin est chargé en premier ; os.bin, muscles.bin et tendons.bin sont chargés ensuite.

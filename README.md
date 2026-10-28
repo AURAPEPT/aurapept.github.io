@@ -4,6 +4,12 @@ Calculateur de reconstitution au thème japonais : concentration, graduation à 
 
 En ligne : https://aurapept.github.io/
 
+## Atlas des peptides (`peptides/`)
+Corps humain 3D interactif (peau, organes, squelette, muscles, tendons) et liste des peptides : un clic allume les zones ciblées et affiche le but du peptide.
+- `peptides/data.js` : la liste (catégories, texte « Agit sur » et « But », zones, source)
+- `peptides/body.js` : le rendu 3D (Three.js 0.160, licence MIT, dans `peptides/vendor/`)
+- `peptides/corps/` : le modèle 3D, issu de BodyParts3D, © The Database Center for Life Science, CC BY 4.0 (voir `LISEZMOI.txt`)
+
 ## Structure
 - `index.html` : la page
 - `assets/style.css`, `assets/app.js`, `assets/theme.js` : styles et scripts (aucun code en ligne, pour la politique de sécurité)

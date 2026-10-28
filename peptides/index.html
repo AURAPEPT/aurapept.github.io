@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AURAPEPT · Atlas des peptides</title>
+<meta name="description" content="Atlas AURAPEPT : un corps en 3D pour voir où agissent les peptides en expérimentation, avec une explication simple de leur but.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#f3eee4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://aurapept.github.io/peptides/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AURAPEPT">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="AURAPEPT · Atlas des peptides">
+<meta property="og:description" content="Un corps en 3D pour voir où agissent les peptides en expérimentation.">
+<meta property="og:url" content="https://aurapept.github.io/peptides/">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="preload" href="../assets/fonts/shippori-mincho-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/zen-kaku-gothic-new-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="modulepreload" href="vendor/three.module.min.js">
+<link rel="preload" href="corps/base.bin" as="fetch" type="application/octet-stream" crossorigin>
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="peptides.css">
+<script type="module" src="peptides.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../" aria-label="AURAPEPT, retour au calculateur">
+      <span class="seal" aria-hidden="true">オ</span>
+      <span><span class="brand-name">AURAPEPT</span><span class="brand-kana">オーラペプト</span></span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="../">Calculateur</a>
+      <a href="#atlas" aria-current="page">Atlas</a>
+    </nav>
+    <a class="tg-btn" href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer" aria-label="Rejoindre AURAPEPT sur Telegram (nouvel onglet)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10.5 13.5"/><path d="M21 3 14.5 21l-4-7.5L3 9.5 21 3Z"/></svg><span>Telegram</span>
+    </a>
+    <button class="icon-btn" id="themeBtn" type="button" aria-label="Thème"></button>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <noscript><p class="noscript">L'atlas a besoin de JavaScript. Active-le dans ton navigateur pour voir le corps en 3D et la liste.</p></noscript>
+
+  <section class="atlas-head">
+    <p class="eyebrow"><span class="jp">図鑑</span>Atlas des peptides</p>
+    <h1>Où agissent les peptides <em>en expérimentation</em></h1>
+    <p class="lead">Choisis un peptide : les zones qu'il cible s'allument sur le corps et son but s'affiche sous son nom. Tu peux aussi toucher un organe pour voir les peptides qui le ciblent.</p>
+    <p class="atlas-links"><a class="btn" href="../">Calculateur de reconstitution</a></p>
+    <p class="exp-banner" role="note"><b>Peptides expérimentaux.</b> Les peptides de cette liste sont encore étudiés et la plupart ne sont pas autorisés comme médicaments. Ce site est uniquement informatif : ce n'est pas un avis médical, ni une incitation à en utiliser.</p>
+  </section>
+
+  <section class="atlas" id="atlas" aria-label="Atlas">
+    <div class="stage panel">
+      <canvas id="body3d" role="img" aria-label="Corps humain en 3D. Les zones ciblées par le peptide choisi s'allument. Fais glisser pour tourner."></canvas>
+      <div class="labels" id="labels" aria-hidden="true"></div>
+      <span class="stage-tag" aria-hidden="true">人体</span>
+      <p class="stage-loading" id="loading" role="status">Chargement du corps…</p>
+      <p class="stage-hint" id="hint">Fais glisser pour tourner · touche un organe</p>
+      <div class="stage-tools" id="stageTools">
+        <button class="icon-btn" id="zoomIn" type="button" aria-label="Zoomer" title="Zoomer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <button class="icon-btn" id="zoomOut" type="button" aria-label="Dézoomer" title="Dézoomer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+        </button>
+        <button class="icon-btn" id="resetView" type="button" aria-label="Recentrer le corps" title="Recentrer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        </button>
+      </div>
+      <p class="stage-fallback" id="fallback" hidden>La vue 3D n'est pas disponible sur cet appareil. La liste et les explications restent utilisables.</p>
+    </div>
+
+    <div class="list-panel panel">
+      <div class="panel-head">
+        <h2 class="panel-title"><span class="jp">一覧</span>Peptides</h2>
+        <span class="count" id="count"></span>
+      </div>
+      <div class="list-tools">
+        <label class="sr-only" for="search">Rechercher un peptide</label>
+        <input class="text-field" id="search" type="search" placeholder="Rechercher un peptide" autocomplete="off">
+        <div class="zone-filter" id="zoneFilter" hidden>
+          <span>Zone : <b id="zoneFilterName"></b></span>
+          <button class="link-btn" id="clearZone" type="button">Tout afficher</button>
+        </div>
+      </div>
+      <ul class="pep-list" id="pepList"></ul>
+      <p class="empty" id="emptyState" hidden></p>
+      <div class="zones-explore">
+        <h3>Explorer par zone</h3>
+        <div class="zchips" id="zoneChips"></div>
+      </div>
+      <p class="credit">Modèle 3D : <a href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html" target="_blank" rel="noopener noreferrer">BodyParts3D</a>, © The Database Center for Life Science licensed under <a href="https://creativecommons.org/licenses/by/4.0/deed.fr" target="_blank" rel="noopener noreferrer">CC Attribution 4.0 International</a> (modèle allégé et regroupé par zones).</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="brand">
+      <span class="seal" aria-hidden="true">オ</span>
+      <span><span class="brand-name">AURAPEPT</span><span class="brand-kana">オーラペプト</span></span>
+    </div>
+    <p class="footer-note">Atlas informatif, aucun avis médical. Aucune donnée n'est envoyée. <a href="../">Calculateur</a> · <a href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer">Telegram</a> · <a href="../#mentions">Mentions légales</a></p>
+  </footer>
+</main>
+</body>
+</html>
