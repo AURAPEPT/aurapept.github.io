@@ -50,14 +50,27 @@ const dayLabel = (ms) => (new Date(ms).getFullYear() === new Date().getFullYear(
 /* Stockage */
 const KEY = "aurapept-suivi";
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+// Une fiole venant du stockage local ou d'un fichier importé : on ne garde que des champs connus et valides
+const num = (x, max) => (typeof x === "number" && Number.isFinite(x) && x > 0 && x <= max ? x : 0);
+function cleanVial(v) {
+  if (!v || typeof v !== "object") return null;
+  const total = num(v.total, 1e9), water = num(v.water, 100);
+  if (!total || !water || typeof v.date !== "string" || !Number.isFinite(parseDay(v.date)) || !Array.isArray(v.logs)) return null;
+  const logs = v.logs
+    .filter((l) => l && typeof l.t === "string" && Number.isFinite(parseDT(l.t)) && num(l.mcg, 1e9))
+    .slice(0, 1000)
+    .map((l) => ({ id: typeof l.id === "string" ? l.id.slice(0, 40) : uid(), t: l.t.slice(0, 16), mcg: l.mcg }))
+    .sort((a, b) => parseDT(a.t) - parseDT(b.t));
+  return {
+    id: typeof v.id === "string" && v.id ? v.id.slice(0, 40) : uid(),
+    name: typeof v.name === "string" ? v.name.slice(0, 40) : "",
+    total, water, date: v.date, dose: num(v.dose, 1e9), doseUnit: v.doseUnit === "mg" ? "mg" : "mcg", logs,
+  };
+}
 function load() {
   try {
     const s = JSON.parse(localStorage.getItem(KEY) || "null");
-    if (s && Array.isArray(s.vials)) {
-      s.vials = s.vials.filter((v) => v && typeof v === "object" && v.total > 0 && v.water > 0 && Number.isFinite(parseDay(v.date)) && Array.isArray(v.logs));
-      s.vials.forEach((v) => (v.logs = v.logs.filter((l) => l && l.mcg > 0 && Number.isFinite(parseDT(l.t)))));
-      return s;
-    }
+    if (s && Array.isArray(s.vials)) return { current: typeof s.current === "string" ? s.current : null, vials: s.vials.map(cleanVial).filter(Boolean).slice(0, 20) };
   } catch (e) {}
   return { current: null, vials: [] };
 }
@@ -102,7 +115,7 @@ const OUTER = "M96 74 H164 V92 C164 106 204 108 204 132 V350 Q204 374 180 374 H8
 const INNER = "M101 77 H159 V93 C159 109 198.5 112 198.5 134 V346 Q198.5 362 182 362 H78 Q61.5 362 61.5 346 V134 C61.5 112 101 109 101 93 Z";
 const Y_BOT = 362, Y_FULL = 172;
 const yAt = (f) => Y_BOT - Math.max(0, Math.min(1, f)) * (Y_BOT - Y_FULL);
-const vial = (() => {
+const svgVial = (() => {
   const svg = $("vialSvg");
   svg.innerHTML = `
     <defs>
@@ -124,9 +137,8 @@ const vial = (() => {
       <path class="v-crimp-lines" d="M97 50v22M108 50v22M119 50v22M130 50v22M141 50v22M152 50v22M163 50v22"/>
       <rect class="v-cap" x="90" y="20" width="80" height="28" rx="8"/>
       <text class="v-cap-mark" x="130" y="40">オ</text>
-      <text id="vFloat" class="v-float" x="130" y="150"></text>
     </g>`;
-  const tiltG = $("vTilt"), liqRot = $("vLiqRot"), liq = $("vLiqPath"), surf = $("vSurf"), floatEl = $("vFloat");
+  const tiltG = $("vTilt"), liqRot = $("vLiqRot"), liq = $("vLiqPath"), surf = $("vSurf");
   const NS = "http://www.w3.org/2000/svg";
   const bubbles = Array.from({ length: 6 }, (_, i) => {
     const c = document.createElementNS(NS, "circle");
@@ -208,15 +220,34 @@ const vial = (() => {
       }
       $("vTicks").innerHTML = out;
     },
-    float(text, f) {
-      floatEl.textContent = text;
-      floatEl.setAttribute("y", (yAt(f) - 12).toFixed(1));
-      floatEl.classList.remove("is-on");
-      void floatEl.getBBox();
-      floatEl.classList.add("is-on");
-    },
   };
 })();
+
+// Fiole réaliste en 3D (verre, reflets, liquide) : remplace le dessin si WebGL est disponible
+let vialImpl = svgVial;
+const vialLast = { f: 0, water: 0 };
+const vial = {
+  set(f, opts) { vialLast.f = f; vialImpl.set(f, opts); },
+  ticks(w) { vialLast.water = w; vialImpl.ticks(w); },
+  // « −250 mcg » qui s'envole au-dessus de la fiole après une prise
+  float(text) {
+    const el = $("vialFloat");
+    el.textContent = text;
+    el.classList.remove("is-on");
+    void el.offsetWidth;
+    el.classList.add("is-on");
+  },
+};
+import("/suivi/fiole3d.js").then(({ createVial3D }) => {
+  const canvas = $("vial3d");
+  canvas.hidden = false;
+  const v3 = createVial3D(canvas, { reduceMotion });
+  if (!v3) { canvas.hidden = true; return; }
+  $("vialSvg").setAttribute("hidden", ""); // (un <svg> n'a pas la propriété .hidden)
+  vialImpl = v3;
+  v3.set(vialLast.f, { instant: true });
+  document.querySelector(".vial-hint").textContent = t("Fais glisser pour tourner autour de la fiole", "Drag to turn around the vial", "اسحب للدوران حول القارورة");
+}).catch(() => { $("vial3d").hidden = true; });
 
 /* ── Affichage ── */
 let viewAt = Infinity; // moment affiché par la frise (Infinity = maintenant)
@@ -235,8 +266,8 @@ function renderTabs() {
 
 function renderStage(instant) {
   const v = current();
-  const svg = $("vialSvg");
-  svg.classList.toggle("is-empty", !v);
+  const svg = $("vialView");
+  $("vialSvg").classList.toggle("is-empty", !v);
   document.querySelector(".readout").classList.toggle("is-empty", !v);
   if (!v) {
     vial.ticks(0);
@@ -400,14 +431,13 @@ $("dsAdd").addEventListener("click", () => {
   if (when > Date.now() + 5 * 60000) return err(t("Cette date est dans le futur.", "This date is in the future.", "هذا التاريخ في المستقبل."));
   if (mcg > s.left + 1e-6) return err(t(`Il ne reste que ${massTxt(s.left)} dans la fiole.`, `Only ${massTxt(s.left)} is left in the vial.`, `لم يتبقَّ في القارورة سوى ${mass(s.left)}.`));
   if (v.logs.length >= 1000) return err(t("Limite de 1000 prises atteinte pour cette fiole.", "Limit of 1000 doses reached for this vial.", "تم بلوغ حد 1000 جرعة لهذه القارورة."));
-  const before = s.frac;
   v.logs.push({ id: uid(), t: toDT(when), mcg: Math.round(mcg * 1000) / 1000 });
   v.logs.sort((a, b) => parseDT(a.t) - parseDT(b.t));
   if (!save()) { v.logs = v.logs.filter((l) => l.t !== toDT(when) || l.mcg !== Math.round(mcg * 1000) / 1000); return; }
   $("dsError").hidden = true;
   viewAt = Infinity;
   stopPlay();
-  vial.float(`−${massTxt(mcg)}`, before);
+  vial.float(`−${massTxt(mcg)}`);
   renderStage();
   vial.set(status(v).frac, { splash: 1.2 });
   renderPanel();
@@ -571,6 +601,53 @@ $("delVial").addEventListener("click", () => {
   toast(t("Fiole supprimée", "Vial deleted", "تم حذف القارورة"));
 });
 function resetDel() { $("delVial").classList.remove("is-confirm"); $("delVial").lastChild.textContent = t(" Supprimer cette fiole", " Delete this vial", " حذف هذه القارورة"); }
+
+/* ── Sauvegarde : exporter les fioles dans un fichier, et l'importer sur un autre appareil ── */
+const vialsTxt = (n) => t(n > 1 ? `${n} fioles` : `${n} fiole`, n === 1 ? "1 vial" : `${n} vials`, arCount(n, ["قارورة واحدة", "قارورتان", "قوارير", "قارورة"]));
+$("exportBtn").addEventListener("click", () => {
+  if (!store.vials.length) { toast(t("Aucune fiole à exporter pour l'instant", "No vial to export yet", "لا توجد قارورة للتصدير بعد")); return; }
+  const data = { app: "aurapept-suivi", version: 1, exported: new Date().toISOString(), vials: store.vials };
+  const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `aurapept-fioles-${toDT(Date.now()).slice(0, 10)}.json`;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  toast(t(`${vialsTxt(store.vials.length)} exportée${store.vials.length > 1 ? "s" : ""}`, `${vialsTxt(store.vials.length)} exported`, `تم تصدير ${vialsTxt(store.vials.length)}`));
+});
+$("importBtn").addEventListener("click", () => $("importFile").click());
+$("importFile").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  const bad = () => toast(t("Ce fichier n'est pas une sauvegarde du suivi AURAPEPT", "This file is not an AURAPEPT tracker backup", "هذا الملف ليس نسخة احتياطية من متابعة AURAPEPT"));
+  if (file.size > 2e6) return bad();
+  let data;
+  try { data = JSON.parse(await file.text()); } catch (err) { return bad(); }
+  if (!data || data.app !== "aurapept-suivi" || !Array.isArray(data.vials)) return bad();
+  const list = data.vials.map(cleanVial).filter(Boolean);
+  if (!list.length) return bad();
+  const backup = JSON.stringify(store);
+  let added = 0, updated = 0, skipped = 0;
+  list.forEach((v) => {
+    const i = store.vials.findIndex((x) => x.id === v.id);
+    if (i >= 0) { store.vials[i] = v; updated++; }
+    else if (store.vials.length < 20) { store.vials.push(v); added++; }
+    else skipped++;
+  });
+  store.current = list.find((v) => store.vials.some((x) => x.id === v.id))?.id || store.current;
+  if (!save()) { Object.assign(store, JSON.parse(backup)); return; }
+  viewAt = Infinity;
+  showForm(false);
+  renderAll(true);
+  vial.set(status(current()).frac, { splash: 1.2 });
+  const n = added + updated;
+  toast(t(`${vialsTxt(n)} importée${n > 1 ? "s" : ""}${skipped ? ` (${skipped} ignorée${skipped > 1 ? "s" : ""} : limite de 20)` : ""}`,
+    `${vialsTxt(n)} imported${skipped ? ` (${skipped} skipped: limit of 20)` : ""}`,
+    `تم استيراد ${vialsTxt(n)}${skipped ? ` (تم تجاهل ${skipped}: الحد 20)` : ""}`));
+});
 
 function renderAll(instant) {
   if (!current() && store.vials.length) store.current = store.vials[0].id;

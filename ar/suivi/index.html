@@ -42,6 +42,8 @@
 <script src="../../assets/theme.js"></script>
 <link rel="stylesheet" href="../../assets/style.css">
 <link rel="stylesheet" href="../../suivi/suivi.css">
+<link rel="modulepreload" href="../../peptides/vendor/three.module.min.js">
+<link rel="modulepreload" href="../../suivi/fiole3d.js">
 <script src="../../suivi/suivi.js" defer></script>
 </head>
 <body>
@@ -91,7 +93,11 @@
       <div class="vial-tabs" id="vialTabs" role="group" aria-label="قواريري" hidden></div>
       <div class="vial-scene">
         <span class="stage-tag" aria-hidden="true">残量</span>
-        <svg id="vialSvg" viewBox="0 0 260 400" role="img" aria-label="القارورة"></svg>
+        <div class="vial-view" id="vialView" role="img" aria-label="القارورة">
+          <svg id="vialSvg" viewBox="0 0 260 400" aria-hidden="true"></svg>
+          <canvas id="vial3d" aria-hidden="true" hidden></canvas>
+          <span class="vial-float" id="vialFloat" aria-hidden="true"></span>
+        </div>
         <div class="readout">
           <p class="ro-name" id="roName"></p>
           <p class="ro-k">المتبقي</p>
@@ -187,6 +193,18 @@
           <h3>السجل</h3>
           <div id="history"></div>
           <p class="hist-empty" id="histEmpty">لم تُسجَّل أي جرعة بعد. أضف أول جرعة في الأعلى.</p>
+        </div>
+      </section>
+
+      <section class="panel" id="backupPanel" aria-labelledby="bkTitle">
+        <div class="panel-head"><h2 class="panel-title" id="bkTitle"><span class="jp">保存</span>النسخ الاحتياطي</h2></div>
+        <div class="form-body">
+          <p class="hint">تبقى قواريرك على هذا الجهاز. صدّرها إلى ملف لحفظها بأمان أو لنقلها إلى هاتف آخر، ثم استورد هذا الملف هناك.</p>
+          <div class="form-actions">
+            <button class="btn" id="exportBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>تصدير قواريري</button>
+            <button class="btn" id="importBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>استيراد ملف</button>
+            <input type="file" id="importFile" accept="application/json,.json" hidden>
+          </div>
         </div>
       </section>
     </div>

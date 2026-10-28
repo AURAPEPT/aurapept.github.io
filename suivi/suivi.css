@@ -48,7 +48,7 @@
 .vial-tabs { display: flex; gap: 8px; padding: 12px 24px 0; overflow-x: auto; scrollbar-width: none; }
 .vial-tabs::-webkit-scrollbar { display: none; }
 .vial-tabs .chip { flex: none; max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.vial-scene { position: relative; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: center; gap: 8px; padding: 8px 20px 4px; }
+.vial-scene { position: relative; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: center; gap: 8px; padding: 8px 20px 4px; }
 .stage-tag {
   position: absolute; top: 14px; right: 18px; writing-mode: vertical-rl;
   font: 700 1.05rem/1 var(--f-display); letter-spacing: .4em; color: var(--sumi-2); opacity: .7; pointer-events: none;
@@ -75,10 +75,22 @@ html[dir="rtl"] .stage-tag { right: auto; left: 18px; }
 #vialSvg .v-tick { stroke: var(--sumi); stroke-opacity: .45; stroke-width: 1.3; }
 #vialSvg .v-tick-major { stroke-opacity: .8; stroke-width: 1.7; }
 #vialSvg .v-tick-label { fill: var(--muted); font: 600 12px var(--f-body); font-variant-numeric: tabular-nums; }
-#vialSvg .v-float { fill: var(--shu); font: 700 15px var(--f-body); text-anchor: middle; opacity: 0; }
-#vialSvg .v-float.is-on { animation: v-float 1.6s ease-out; transform-box: fill-box; }
 #vialSvg.is-empty .v-glass { fill: transparent; }
-@keyframes v-float { 0% { opacity: 0; transform: translateY(6px); } 15% { opacity: 1; } 100% { opacity: 0; transform: translateY(-26px); } }
+/* Fiole 3D : canvas WebGL (verre, reflets, liquide) */
+.vial-view { position: relative; min-width: 0; }
+#vial3d { display: block; width: 100%; height: auto; aspect-ratio: 5 / 7; max-height: 480px; touch-action: pan-y; cursor: grab; outline: none; }
+@media (max-width: 560px) {
+  .vial-scene { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); padding-inline: 8px 14px; }
+}
+#vial3d:active { cursor: grabbing; }
+.vial-float {
+  position: absolute; left: 50%; top: 18%; transform: translateX(-50%); pointer-events: none; white-space: nowrap; opacity: 0;
+  padding: 4px 10px; border-radius: 999px; background: var(--paper); color: var(--shu); font: 700 .95rem var(--f-body);
+  box-shadow: 0 6px 18px -10px rgba(0, 0, 0, .4); font-variant-numeric: tabular-nums;
+}
+.vial-float.is-on { animation: v-float 1.8s ease-out; }
+@keyframes v-float { 0% { opacity: 0; transform: translate(-50%, 8px); } 15% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -28px); } }
+@media (prefers-reduced-motion: reduce) { .vial-float.is-on { animation-duration: .01s; } }
 
 .readout { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .readout p { margin: 0; }
