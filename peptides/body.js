@@ -130,6 +130,10 @@ function readColors() {
   return { skin: get("--skin", "#d9b39a"), hot: get("--shu", "#c23a22"), fat: get("--fat", "#e0952a"), muscle: get("--muscle", "#c0392b"), ring: get("--line-strong", "#cfc2ab"), skinAlpha: parseFloat(get("--skin-alpha", "0.55")) };
 }
 
+// Cadrage automatique : demi-hauteur de chaque zone autour de son étiquette, et zones qui couvrent tout le corps
+const EXT = { graisse: 0.3, intestins: 0.12, poumons: 0.12, cerveau: 0.1, coeur: 0.1 };
+const WIDE = new Set(["peau", "corps-entier", "muscles", "os", "articulations"]);
+
 const DETAIL = ["os", "muscles", "tendons"]; // pièces lourdes, chargées après la base
 const HIDDEN_PARTS = new Set(DETAIL);
 const PART_LABEL = { os: "du squelette", muscles: "des muscles", tendons: "des tendons" };
@@ -250,7 +254,26 @@ export function createBody(canvas, labelsEl, { onPick, onReady, onLoading } = {}
       target.yaw = want + Math.round((target.yaw - want) / (2 * Math.PI)) * 2 * Math.PI;
       autoRotate = false;
     }
+    frameZones();
     wake();
+  }
+
+  // La caméra cadre les zones allumées : zoom sur la tête pour le cerveau, sur le ventre pour les intestins…
+  function frameZones() {
+    const ids = [...active];
+    if (!ids.length || ids.some((id) => WIDE.has(id))) {
+      target.fy = H / 2;
+      target.zoom = 1;
+      return;
+    }
+    let lo = Infinity, hi = -Infinity;
+    for (const id of ids) {
+      const y = ZONES[id].anchor[1], e = EXT[id] ?? 0.08;
+      lo = Math.min(lo, y - e);
+      hi = Math.max(hi, y + e);
+    }
+    target.zoom = clamp((H + 0.2) / (hi - lo + 0.3), 1, 2.3);
+    target.fy = clamp((lo + hi) / 2, H / 2 - 0.55, H / 2 + 0.55);
   }
 
   /* Étiquettes HTML */
@@ -290,8 +313,8 @@ export function createBody(canvas, labelsEl, { onPick, onReady, onLoading } = {}
   }
 
   /* Caméra et contrôles */
-  const target = { yaw: 0, pitch: 0.04, zoom: 1 };
-  const cur = { yaw: 0.7, pitch: 0.04, zoom: 1 };
+  const target = { yaw: 0, pitch: 0.04, zoom: 1, fy: H / 2 };
+  const cur = { yaw: 0.7, pitch: 0.04, zoom: 1, fy: H / 2 };
   let autoRotate = !reduceMotion;
   let size = { w: 1, h: 1 };
   function resize() {
@@ -358,6 +381,7 @@ export function createBody(canvas, labelsEl, { onPick, onReady, onLoading } = {}
   function resetView() {
     target.pitch = 0.04;
     target.zoom = 1;
+    target.fy = H / 2;
     target.yaw = Math.round(target.yaw / (2 * Math.PI)) * 2 * Math.PI;
     wake();
   }
@@ -383,12 +407,13 @@ export function createBody(canvas, labelsEl, { onPick, onReady, onLoading } = {}
     cur.yaw += (target.yaw - cur.yaw) * k;
     cur.pitch += (target.pitch - cur.pitch) * k;
     cur.zoom += (target.zoom - cur.zoom) * k;
+    cur.fy += (target.fy - cur.fy) * k;
     pivot.rotation.set(cur.pitch, cur.yaw, 0);
     const fit = ((H / 2 + 0.1) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) * Math.max(1, 0.5 / camera.aspect);
-    camera.position.set(0, H / 2, fit / cur.zoom);
-    camera.lookAt(0, H / 2, 0);
+    camera.position.set(0, cur.fy, fit / cur.zoom);
+    camera.lookAt(0, cur.fy, 0);
 
-    let moving = autoRotate || Math.abs(target.yaw - cur.yaw) > 1e-3 || Math.abs(target.pitch - cur.pitch) > 1e-3 || Math.abs(target.zoom - cur.zoom) > 1e-3;
+    let moving = autoRotate || Math.abs(target.yaw - cur.yaw) > 1e-3 || Math.abs(target.pitch - cur.pitch) > 1e-3 || Math.abs(target.zoom - cur.zoom) > 1e-3 || Math.abs(target.fy - cur.fy) > 1e-4;
     if (ready) moving = updateMaterials(now, dt) || moving;
     renderer.render(scene, camera);
     placeLabels(size.w, size.h);

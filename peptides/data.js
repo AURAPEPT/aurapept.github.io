@@ -32,14 +32,14 @@ export const PEPTIDES = [
     action: "L'hypophyse, la glande qui produit l'hormone de croissance.",
     but: "Réduire la graisse profonde du ventre.",
     zones: ["hypophyse", "graisse"],
-    source: { label: "Autorisation FDA d'Egrifta (2010)", url: "https://www.fiercebiotech.com/biotech/fda-approves-egrifta%E2%84%A2-tesamorelin-for-injection-first-and-only-treatment-for-reduction-of" },
+    source: { label: "Falutz et al., NEJM, 2007", url: "https://doi.org/10.1056/NEJMoa072375" },
   },
   {
     id: "cagrilintide", nom: "Cagrilintide", alias: ["CagriSema"], cat: "graisse",
     action: "Le cerveau et l'estomac, en imitant l'amyline, une hormone du pancréas.",
     but: "Se sentir rassasié plus vite pour manger moins et perdre du poids.",
     zones: ["cerveau", "estomac", "graisse"],
-    source: { label: "Historique FDA de CagriSema", url: "https://www.drugs.com/history/cagrisema.html" },
+    source: { label: "Garvey et al., NEJM, 2025", url: "https://doi.org/10.1056/NEJMoa2502081" },
   },
   {
     id: "ghk-cu", nom: "GHK-Cu", alias: ["Peptide de cuivre", "Copper peptide"], cat: "peau",
@@ -60,7 +60,7 @@ export const PEPTIDES = [
     action: "Les cellules du foie et de la peau : c'est l'antioxydant naturel du corps.",
     but: "Protéger les cellules et éclaircir le teint.",
     zones: ["foie", "peau"],
-    source: { label: "Mise en garde de la FDA sur les injections éclaircissantes", url: "https://www.medestheticsmag.com/fda-warns-against-skin-lightening-injectables" },
+    source: { label: "Vairetti et al., Antioxidants, 2021", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC7997318/" },
   },
   {
     id: "melanotan-2", nom: "Melanotan 2", alias: ["Melanotan II", "MT-II", "MT2"], cat: "peau",
@@ -95,7 +95,7 @@ export const PEPTIDES = [
     action: "L'hypophyse, en imitant la ghréline.",
     but: "Faire libérer plus d'hormone de croissance, pour les muscles et la récupération.",
     zones: ["hypophyse", "muscles"],
-    source: { label: "Ipamorelin (Wikipédia, avec les études citées)", url: "https://en.wikipedia.org/wiki/Ipamorelin" },
+    source: { label: "Raun et al., Eur J Endocrinol, 1998", url: "https://pubmed.ncbi.nlm.nih.gov/9849822/" },
   },
   {
     id: "mots-c", nom: "MOTS-c", cat: "performance",
@@ -116,7 +116,7 @@ export const PEPTIDES = [
     action: "L'estomac, l'intestin, les tendons et les muscles.",
     but: "Accélérer la réparation des tissus abîmés.",
     zones: ["estomac", "intestins", "articulations", "muscles"],
-    source: { label: "Pharmacy Times, 2026", url: "https://pharmacytimes.com/view/heal-or-harm-body-protective-compound-157-in-the-gray-zone" },
+    source: { label: "Seiwerth et al., Frontiers in Pharmacology, 2021", url: "https://doi.org/10.3389/fphar.2021.627533" },
   },
   {
     id: "tb-500", nom: "TB-500", alias: ["Thymosine bêta-4", "Thymosin beta-4", "TB4"], cat: "regeneration",
