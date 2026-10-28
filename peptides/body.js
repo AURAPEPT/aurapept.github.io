@@ -136,7 +136,6 @@ const WIDE = new Set(["peau", "corps-entier", "muscles", "os", "articulations"])
 
 const DETAIL = ["os", "muscles", "tendons"]; // pièces lourdes, chargées après la base
 const HIDDEN_PARTS = new Set(DETAIL);
-const PART_LABEL = { os: "du squelette", muscles: "des muscles", tendons: "des tendons" };
 
 export function createBody(canvas, labelsEl, { onPick, onReady, onLoading } = {}) {
   let renderer;
@@ -223,7 +222,7 @@ export function createBody(canvas, labelsEl, { onPick, onReady, onLoading } = {}
     });
     const missing = [...need].filter((p) => !parts[p]);
     if (!missing.length) { onLoading?.(null); return; }
-    onLoading?.(`Chargement ${PART_LABEL[missing[0]] || "du modèle"}…`);
+    onLoading?.(missing[0]); // pièce en cours de chargement ; le texte affiché est choisi par la page
     Promise.all(missing.map((p) => loadFile(CORPS.zones[p].file)))
       .then(() => { if ([...need].every((p) => parts[p])) onLoading?.(null); })
       .catch(() => onLoading?.(null));

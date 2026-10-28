@@ -7,6 +7,7 @@
 
 .atlas-head { max-width: 46rem; padding-block: clamp(32px, 5vw, 64px) 28px; }
 .atlas-head h1 { font-size: clamp(2.1rem, 4.6vw, 3.3rem); }
+@media (max-width: 320px) { .atlas-head h1 { font-size: 1.85rem; } }
 .atlas-head .lead { margin-bottom: 18px; }
 .atlas-links { margin: 0 0 22px; }
 .exp-banner {

@@ -1,11 +1,14 @@
 const $ = (id) => document.getElementById(id);
+// Langue : la page anglaise (/en/) a lang="en" ; t("texte français", "English text")
+const EN = document.documentElement.lang === "en";
+const t = (fr, en) => (EN ? en : fr);
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const DEFAULTS = { v: "5", vu: "mg", w: "2", d: "250", du: "mcg", s: "1", h: false, n: "" };
 const state = { vialUnit: "mg", doseUnit: "mcg", syringe: "1" };
 const SYR = { x0: 70, w: 388 }; // zone graduée de la seringue, en unités du viewBox
 
 const fmt = (n, d = 2) => Number.isFinite(n)
-  ? n.toLocaleString("fr-FR", { maximumFractionDigits: d }) : "—";
+  ? n.toLocaleString(EN ? "en-US" : "fr-FR", { maximumFractionDigits: d }) : "—";
 const MAX_INPUT = 1e6;
 // Nombre décimal simple uniquement (virgule ou point) : refuse 0x10, 1e3, Infinity…
 // Renvoie NaN pour un champ vide et -1 pour une saisie invalide.
@@ -16,12 +19,14 @@ const parseNum = (s) => {
   const n = Number(t.replace(",", "."));
   return n <= MAX_INPUT ? n : -1;
 };
-const fmtU = (u) => (u > 0 && u < 0.01 ? "< 0,01" : fmt(u, 2));
+const fmtU = (u) => (u > 0 && u < 0.01 ? `< ${fmt(0.01)}` : fmt(u, 2));
 const toMcg = (v, u) => (u === "mg" ? v * 1000 : v);
 const mass = (mcg) => (mcg >= 1000 ? `${fmt(mcg / 1000, 3)} mg` : `${fmt(mcg, 2)} mcg`);
-const frDate = (iso) => {
+const fmtDate = (iso) => {
   const [y, m, d] = (iso || "").split("-");
-  return y && m && d ? `${d}/${m}/${y}` : "";
+  if (!(y && m && d)) return "";
+  // En anglais, mois en lettres (28 Oct 2026) : 10/28 et 28/10 se lisent différemment selon les pays
+  return EN ? new Date(Date.UTC(+y, m - 1, +d)).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }) : `${d}/${m}/${y}`;
 };
 
 function setGroup(key, value) {
@@ -121,20 +126,24 @@ function calc() {
   $("fillPct").textContent = !valid ? "—" : over ? "> 100 %" : `${fmt((units / total) * 100, 0)} %`;
 
   const status = $("status");
-  const [tone, label] = !valid ? ["idle", "En attente"]
-    : over ? ["alert", "Dépasse la seringue"]
-    : tooSmall ? ["alert", "Trop petit à mesurer"]
-    : !exact ? ["warn", "Entre deux traits"]
-    : ["ok", "Graduation exacte"];
+  const [tone, label] = !valid ? ["idle", t("En attente", "Waiting")]
+    : over ? ["alert", t("Dépasse la seringue", "Exceeds the syringe")]
+    : tooSmall ? ["alert", t("Trop petit à mesurer", "Too small to measure")]
+    : !exact ? ["warn", t("Entre deux traits", "Between two marks")]
+    : ["ok", t("Graduation exacte", "Exact mark")];
   status.dataset.tone = tone;
   status.textContent = label;
 
   const notes = [];
-  if (!valid) notes.push(["idle", "Renseigne les trois quantités avec des nombres positifs, par exemple 2,5. Les écritures comme 1e3 ne sont pas acceptées."]);
-  if (over) notes.push(["alert", `Il faut ${fmt(units, 2)} unités, mais cette seringue s'arrête à ${total}. Choisis une seringue plus grande ou répartis en plusieurs prélèvements.`]);
-  if (tooSmall) notes.push(["alert", `Il faut ${fmtU(units)} unité, moins que la moitié d'un trait de cette seringue : impossible à mesurer précisément.`]);
-  if (valid && !over && !tooSmall && !exact) notes.push(["warn", `Aucun trait exact à ${fmt(units, 2)} u. Le plus proche est ${fmt(nearest, 1)} u (graduations de ${half ? "0,5" : "1"} unité).`]);
-  if (valid && dose > vial) notes.push(["alert", "La quantité par prise dépasse le contenu total du flacon."]);
+  if (!valid) notes.push(["idle", t("Renseigne les trois quantités avec des nombres positifs, par exemple 2,5. Les écritures comme 1e3 ne sont pas acceptées.",
+    "Enter all three amounts as positive numbers, for example 2.5. Notations like 1e3 are not accepted.")]);
+  if (over) notes.push(["alert", t(`Il faut ${fmt(units, 2)} unités, mais cette seringue s'arrête à ${total}. Choisis une seringue plus grande ou répartis en plusieurs prélèvements.`,
+    `You need ${fmt(units, 2)} units, but this syringe stops at ${total}. Choose a bigger syringe or split it into several draws.`)]);
+  if (tooSmall) notes.push(["alert", t(`Il faut ${fmtU(units)} unité, moins que la moitié d'un trait de cette seringue : impossible à mesurer précisément.`,
+    `You need ${fmtU(units)} unit, less than half a mark on this syringe: impossible to measure accurately.`)]);
+  if (valid && !over && !tooSmall && !exact) notes.push(["warn", t(`Aucun trait exact à ${fmt(units, 2)} u. Le plus proche est ${fmt(nearest, 1)} u (graduations de ${fmt(step)} unité).`,
+    `No exact mark at ${fmt(units, 2)} u. The closest is ${fmt(nearest, 1)} u (${fmt(step)}-unit marks).`)]);
+  if (valid && dose > vial) notes.push(["alert", t("La quantité par prise dépasse le contenu total du flacon.", "The dose is larger than the whole vial.")]);
   const list = $("notes");
   list.replaceChildren(...notes.map(([t, msg]) => {
     const li = document.createElement("li");
@@ -157,12 +166,12 @@ function calc() {
   // Méthode détaillée avec les valeurs en cours
   if (valid) {
     const conv = (v, u, mcg) => (u === "mg" ? `${fmt(v, 3)} mg = ${fmt(mcg, 2)} mcg` : `${fmt(mcg, 2)} mcg`);
-    $("m1").innerHTML = `Flacon ${conv(raw.v, state.vialUnit, vial)} · prise ${conv(raw.d, state.doseUnit, dose)}`;
+    $("m1").innerHTML = `${t("Flacon", "Vial")} ${conv(raw.v, state.vialUnit, vial)} · ${t("prise", "dose")} ${conv(raw.d, state.doseUnit, dose)}`;
     $("m2").innerHTML = `${fmt(vial, 2)} mcg ÷ ${fmt(water, 3)} mL = <strong>${fmt(conc, 2)} mcg/mL</strong>`;
     $("m3").innerHTML = `${fmt(dose, 2)} mcg ÷ ${fmt(conc, 2)} mcg/mL = <strong>${fmt(ml, 4)} mL</strong>`;
-    $("m4").innerHTML = `${fmt(ml, 4)} mL × 100 = <strong>${fmtU(units)} unités</strong>`;
+    $("m4").innerHTML = `${fmt(ml, 4)} mL × 100 = <strong>${fmtU(units)} ${t("unités", "units")}</strong>`;
   } else {
-    ["m1", "m2", "m3", "m4"].forEach((id) => ($(id).textContent = "En attente de valeurs valides"));
+    ["m1", "m2", "m3", "m4"].forEach((id) => ($(id).textContent = t("En attente de valeurs valides", "Waiting for valid values")));
   }
 
   // Étiquette
@@ -173,7 +182,7 @@ function calc() {
   $("lWater").textContent = Number.isFinite(raw.w) ? `${fmt(raw.w, 3)} mL` : "—";
   $("lConc").textContent = $("conc").textContent;
   $("lDraw").textContent = valid ? `${fmt(raw.d, 3)} ${state.doseUnit} = ${fmtU(units)} u` : "—";
-  $("lDate").textContent = frDate($("date").value) || "__/__/____";
+  $("lDate").textContent = fmtDate($("date").value) || t("__/__/____", "__ ___ ____");
 
   // Barre mobile
   $("dockUnits").textContent = valid ? `${fmtU(units)} u` : "—";
@@ -182,27 +191,39 @@ function calc() {
   // Lecteurs d'écran : une seule annonce, une fois la saisie terminée
   if (booted) {
     clearTimeout(srTimer);
-    const msg = valid ? `Prélever ${fmtU(units)} unités, soit ${fmt(ml, 3)} mL. ${label}.` : `${label}.`;
+    const msg = valid ? t(`Prélever ${fmtU(units)} unités, soit ${fmt(ml, 3)} mL. ${label}.`, `Draw ${fmtU(units)} units, i.e. ${fmt(ml, 3)} mL. ${label}.`) : `${label}.`;
     srTimer = setTimeout(() => ($("srResult").textContent = msg), 700);
   }
 
   try { history.replaceState(null, "", "?" + params().toString() + location.hash); } catch (e) {}
+  if ($("langBtn")) $("langBtn").search = params().toString(); // l'autre langue garde les mêmes réglages
 }
 
 function summary() {
-  const date = frDate($("date").value);
+  const date = fmtDate($("date").value);
   const name = $("labelName").value.trim();
-  return [
+  const units = `${$("units").textContent} ${t("unités", "units")} (${$("ml").textContent})`;
+  return (EN ? [
+    "AURAPEPT · Reconstitution calculation",
+    name ? `Name: ${name}` : "",
+    `Vial: ${$("vial").value} ${state.vialUnit}`,
+    `Water added: ${$("water").value} mL`,
+    `Concentration: ${$("conc").textContent}`,
+    `Dose: ${$("dose").value} ${state.doseUnit}`,
+    `Draw: ${units} on a ${$("capText").textContent} U-100 syringe`,
+    `Doses per vial: ${$("count").textContent}`,
+    date ? `Reconstituted on: ${date}` : "",
+  ] : [
     "AURAPEPT · Calcul de reconstitution",
     name ? `Nom : ${name}` : "",
     `Flacon : ${$("vial").value} ${state.vialUnit}`,
     `Eau ajoutée : ${$("water").value} mL`,
     `Concentration : ${$("conc").textContent}`,
     `Quantité par prise : ${$("dose").value} ${state.doseUnit}`,
-    `Prélever : ${$("units").textContent} unités (${$("ml").textContent}) sur seringue U-100 de ${$("capText").textContent}`,
+    `Prélever : ${units} sur seringue U-100 de ${$("capText").textContent}`,
     `Prises par flacon : ${$("count").textContent}`,
     date ? `Reconstitué le : ${date}` : "",
-  ].filter(Boolean).join("\n");
+  ]).filter(Boolean).join("\n");
 }
 
 function params() {
@@ -256,7 +277,7 @@ function copy(text, done) {
     let ok = false;
     try { ok = document.execCommand("copy"); } catch (e) {}
     ta.remove();
-    toast(ok ? done : "Copie impossible sur ce navigateur");
+    toast(ok ? done : t("Copie impossible sur ce navigateur", "Copying isn't possible in this browser"));
   };
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(() => toast(done), fallback);
@@ -266,16 +287,16 @@ function copy(text, done) {
 /* Thème */
 const THEMES = ["system", "light", "dark"];
 const THEME_UI = {
-  system: ["Thème : automatique", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>'],
-  light: ["Thème : clair", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'],
-  dark: ["Thème : sombre", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>'],
+  system: [t("Thème : automatique", "Theme: automatic"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>'],
+  light: [t("Thème : clair", "Theme: light"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'],
+  dark: [t("Thème : sombre", "Theme: dark"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>'],
 };
 function setTheme(mode, save) {
   const root = document.documentElement;
   if (mode === "system") delete root.dataset.theme; else root.dataset.theme = mode;
   const [label, icon] = THEME_UI[mode];
   $("themeBtn").innerHTML = icon;
-  $("themeBtn").setAttribute("aria-label", `${label}. Cliquer pour changer.`);
+  $("themeBtn").setAttribute("aria-label", `${label}. ${t("Cliquer pour changer.", "Click to change.")}`);
   $("themeBtn").title = label;
   if (save) { try { localStorage.setItem("aurapept-theme", mode); } catch (e) {} }
 }
@@ -301,9 +322,9 @@ document.querySelectorAll("[data-preset]").forEach((c) =>
 ["vial", "water", "dose", "half", "date", "labelName"].forEach((id) => $(id).addEventListener("input", calc));
 ["vial", "water", "dose"].forEach((id) =>
   $(id).addEventListener("focus", (e) => setTimeout(() => e.target.select(), 0)));
-$("reset").addEventListener("click", () => { apply(DEFAULTS); calc(); toast("Valeurs réinitialisées"); });
-$("copyLink").addEventListener("click", () => copy(location.href.split("#")[0], "Lien copié"));
-$("copySum").addEventListener("click", () => copy(summary(), "Résumé copié"));
+$("reset").addEventListener("click", () => { apply(DEFAULTS); calc(); toast(t("Valeurs réinitialisées", "Values reset")); });
+$("copyLink").addEventListener("click", () => copy(location.href.split("#")[0], t("Lien copié", "Link copied")));
+$("copySum").addEventListener("click", () => copy(summary(), t("Résumé copié", "Summary copied")));
 $("print").addEventListener("click", () => window.print());
 
 /* Mes flacons : enregistrés dans le navigateur (stockage local), jamais envoyés */
@@ -328,10 +349,10 @@ function since(iso) {
   const [y, m, d] = iso.split("-").map(Number);
   const now = new Date();
   const days = Math.round((Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - Date.UTC(y, m - 1, d)) / 86400000);
-  if (days < 0) return "date à venir";
-  if (days === 0) return "aujourd'hui";
-  if (days === 1) return "hier";
-  return `il y a ${days} jours`;
+  if (days < 0) return t("date à venir", "future date");
+  if (days === 0) return t("aujourd'hui", "today");
+  if (days === 1) return t("hier", "yesterday");
+  return t(`il y a ${days} jours`, `${days} days ago`);
 }
 function renderVials() {
   const list = readVials();
@@ -341,34 +362,34 @@ function renderVials() {
     const vial = toMcg(parseNum(x.v), x.vu), water = parseNum(x.w);
     const conc = vial > 0 && water > 0 ? `${mass(vial / water)}/mL` : "—";
     li.append(
-      mk("p", "vial-name", x.n || "Flacon sans nom"),
-      mk("p", "vial-meta", `${x.v} ${x.vu} dans ${x.w} mL · ${conc} · prise de ${x.d} ${x.du}`),
-      mk("p", "vial-date", x.date ? `Reconstitué le ${frDate(x.date)} · ${since(x.date)}` : "Date de reconstitution non renseignée"),
+      mk("p", "vial-name", x.n || t("Flacon sans nom", "Unnamed vial")),
+      mk("p", "vial-meta", t(`${x.v} ${x.vu} dans ${x.w} mL · ${conc} · prise de ${x.d} ${x.du}`, `${x.v} ${x.vu} in ${x.w} mL · ${conc} · dose of ${x.d} ${x.du}`)),
+      mk("p", "vial-date", x.date ? `${t("Reconstitué le", "Reconstituted on")} ${fmtDate(x.date)} · ${since(x.date)}` : t("Date de reconstitution non renseignée", "No reconstitution date")),
     );
     const actions = mk("div", "vial-actions");
-    const load = mk("button", "btn", "Charger");
+    const load = mk("button", "btn", t("Charger", "Load"));
     load.type = "button";
     load.addEventListener("click", () => {
       apply({ v: x.v, w: x.w, d: x.d, vu: x.vu, du: x.du, s: x.s, h: x.h, n: x.n });
       if (x.date) $("date").value = x.date;
       calc();
-      toast("Flacon chargé");
+      toast(t("Flacon chargé", "Vial loaded"));
       $("calculateur").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" });
     });
-    const del = mk("button", "btn", "Supprimer");
+    const del = mk("button", "btn", t("Supprimer", "Delete"));
     del.type = "button";
     let timer = 0;
     del.addEventListener("click", () => {
       if (!del.classList.contains("is-confirm")) {
         del.classList.add("is-confirm");
-        del.textContent = "Confirmer ?";
-        timer = setTimeout(() => { del.classList.remove("is-confirm"); del.textContent = "Supprimer"; }, 3000);
+        del.textContent = t("Confirmer ?", "Confirm?");
+        timer = setTimeout(() => { del.classList.remove("is-confirm"); del.textContent = t("Supprimer", "Delete"); }, 3000);
         return;
       }
       clearTimeout(timer);
       writeVials(readVials().filter((y) => y.id !== x.id));
       renderVials();
-      toast("Flacon supprimé");
+      toast(t("Flacon supprimé", "Vial deleted"));
     });
     actions.append(load, del);
     li.append(actions);
@@ -377,7 +398,7 @@ function renderVials() {
 }
 $("saveVial").addEventListener("click", () => {
   const v = parseNum($("vial").value), w = parseNum($("water").value), d = parseNum($("dose").value);
-  if (!(v > 0 && w > 0 && d > 0)) { toast("Complète d'abord les quantités du calculateur"); return; }
+  if (!(v > 0 && w > 0 && d > 0)) { toast(t("Complète d'abord les quantités du calculateur", "Fill in the calculator amounts first")); return; }
   const date = /^\d{4}-\d{2}-\d{2}$/.test($("date").value) ? $("date").value : "";
   const entry = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
@@ -386,9 +407,9 @@ $("saveVial").addEventListener("click", () => {
     d: $("dose").value.trim().slice(0, 12), du: state.doseUnit, s: state.syringe, h: $("half").checked,
   };
   const list = [entry, ...readVials()].slice(0, 30);
-  if (!writeVials(list)) { toast("Enregistrement impossible : le stockage du navigateur est bloqué"); return; }
+  if (!writeVials(list)) { toast(t("Enregistrement impossible : le stockage du navigateur est bloqué", "Can't save: browser storage is blocked")); return; }
   renderVials();
-  toast("Flacon enregistré");
+  toast(t("Flacon enregistré", "Vial saved"));
 });
 renderVials();
 
@@ -397,7 +418,7 @@ let installPrompt = null;
 const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
 $("installBtn").hidden = standalone;
 addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installPrompt = e; });
-addEventListener("appinstalled", () => { $("installBtn").hidden = true; toast("Appli installée"); });
+addEventListener("appinstalled", () => { $("installBtn").hidden = true; toast(t("Appli installée", "App installed")); });
 $("installBtn").addEventListener("click", async () => {
   if (installPrompt) {
     installPrompt.prompt();
@@ -406,8 +427,8 @@ $("installBtn").addEventListener("click", async () => {
     return;
   }
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  toast(ios ? "Sur iPhone : touche le bouton Partager, puis « Sur l'écran d'accueil »"
-    : "Ouvre le menu du navigateur, puis « Installer l'application » ou « Ajouter à l'écran d'accueil »");
+  toast(ios ? t("Sur iPhone : touche le bouton Partager, puis « Sur l'écran d'accueil »", "On iPhone: tap the Share button, then “Add to Home Screen”")
+    : t("Ouvre le menu du navigateur, puis « Installer l'application » ou « Ajouter à l'écran d'accueil »", "Open the browser menu, then “Install app” or “Add to Home screen”"));
 });
 
 /* Appli installable : mise en mémoire hors connexion */

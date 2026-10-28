@@ -1,5 +1,13 @@
 import { createBody, ZONES } from "./body.js";
-import { CATEGORIES, PEPTIDES } from "./data.js";
+
+/* Langue : la page anglaise (/en/peptides/) a lang="en" et charge les textes de data-en.js */
+const EN = document.documentElement.lang === "en";
+const t = (fr, en) => (EN ? en : fr);
+const { CATEGORIES, PEPTIDES, ZONE_LABELS } = await import(EN ? "./data-en.js" : "./data.js");
+if (ZONE_LABELS) Object.entries(ZONE_LABELS).forEach(([id, label]) => { if (ZONES[id]) ZONES[id].label = label; });
+const LOADING = EN
+  ? { os: "Loading the skeleton…", muscles: "Loading the muscles…", tendons: "Loading the tendons…" }
+  : { os: "Chargement du squelette…", muscles: "Chargement des muscles…", tendons: "Chargement des tendons…" };
 
 const $ = (id) => document.getElementById(id);
 const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -19,7 +27,7 @@ function noBody() {
 const body = createBody($("body3d"), $("labels"), {
   onPick: (zone) => setZone(zone && zone === state.zone ? null : zone),
   onReady: (ok) => { $("loading").hidden = true; if (!ok) noBody(); },
-  onLoading: (text) => { $("loading").textContent = text || ""; $("loading").hidden = !text; },
+  onLoading: (part) => { $("loading").textContent = part ? LOADING[part] || t("Chargement du modèle…", "Loading the model…") : ""; $("loading").hidden = !part; },
 });
 if (!body) noBody();
 $("body3d").addEventListener("pointerdown", () => $("hint").classList.add("is-gone"), { once: true });
@@ -70,27 +78,27 @@ function itemFor(p) {
   panel.hidden = true;
 
   const line = (k, v) => { const e = el("p", "pep-line"); e.append(el("span", "pep-k", k), document.createTextNode(v)); return e; };
-  panel.append(line("Agit sur", p.action), line("But", p.but));
+  panel.append(line(t("Agit sur", "Acts on"), p.action), line(t("But", "Goal"), p.but));
   if (p.mix?.length) {
     const mix = el("p", "pep-line pep-mix");
-    mix.append(el("span", "pep-k", "Contient"));
+    mix.append(el("span", "pep-k", t("Contient", "Contains")));
     p.mix.forEach((id) => {
       const c = byId.get(id);
       if (!c) return;
       const a = el("button", "pep-mixlink", c.nom);
       a.type = "button";
-      a.title = `Ouvrir la fiche ${c.nom}`;
+      a.title = t(`Ouvrir la fiche ${c.nom}`, `Open the ${c.nom} entry`);
       a.addEventListener("click", () => { setZone(null); toggle(id); items.get(id).scrollIntoView({ block: "nearest" }); });
       mix.append(a);
     });
     panel.append(mix);
   }
   const chips = el("div", "pep-zchips");
-  chips.setAttribute("aria-label", "Zones ciblées");
+  chips.setAttribute("aria-label", t("Zones ciblées", "Target areas"));
   p.zones.forEach((z) => {
     const c = el("button", "pep-zchip" + (ZONES[z]?.tone === "fat" ? " is-fat" : ""), zoneLabel(z));
     c.type = "button";
-    c.title = `Voir les peptides qui ciblent : ${zoneLabel(z)}`;
+    c.title = t(`Voir les peptides qui ciblent : ${zoneLabel(z)}`, `See the peptides that target: ${zoneLabel(z)}`);
     c.addEventListener("click", () => setZone(z));
     chips.append(c);
   });
@@ -102,7 +110,7 @@ function itemFor(p) {
     a.target = "_blank";
     a.rel = "noopener noreferrer";
     const src = el("span", "pep-src");
-    src.append("Source : ", a);
+    src.append(t("Source : ", "Source: "), a);
     meta.append(src);
   }
   panel.append(meta);
@@ -122,7 +130,7 @@ function famChip(id, label, count) {
   return b;
 }
 $("famChips").replaceChildren(
-  famChip(null, "Tous", peptides.length),
+  famChip(null, t("Tous", "All"), peptides.length),
   ...CATEGORIES.filter((c) => peptides.some((p) => p.cat === c.id)).map((c) => famChip(c.id, c.short || c.label, peptides.filter((p) => p.cat === c.id).length)),
 );
 function setCat(cat) {
@@ -191,31 +199,32 @@ function render() {
   const empty = $("emptyState");
   empty.hidden = shown > 0;
   empty.textContent = state.zone && !q
-    ? `Aucun peptide de la liste ne cible : ${zoneLabel(state.zone)}.`
-    : "Aucun peptide ne correspond à ta recherche.";
+    ? t(`Aucun peptide de la liste ne cible : ${zoneLabel(state.zone)}.`, `No peptide in the list targets: ${zoneLabel(state.zone)}.`)
+    : t("Aucun peptide ne correspond à ta recherche.", "No peptide matches your search.");
 }
 
 $("search").addEventListener("input", (e) => { state.query = e.target.value; render(); });
 $("clearZone").addEventListener("click", () => setZone(null));
 
-/* Ouverture directe via l'ancre (#nom-du-peptide) */
+/* Ouverture directe via l'ancre (#nom-du-peptide), gardée quand on change de langue */
 const fromHash = decodeURIComponent(location.hash.slice(1));
 if (byId.has(fromHash)) state.open = fromHash;
 render();
+$("langBtn")?.addEventListener("click", (e) => { e.currentTarget.hash = location.hash; });
 
 /* Thème clair / sombre (même réglage que le calculateur) */
 const THEMES = ["system", "light", "dark"];
 const THEME_UI = {
-  system: ["Thème : automatique", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>'],
-  light: ["Thème : clair", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'],
-  dark: ["Thème : sombre", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>'],
+  system: [t("Thème : automatique", "Theme: automatic"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>'],
+  light: [t("Thème : clair", "Theme: light"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'],
+  dark: [t("Thème : sombre", "Theme: dark"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>'],
 };
 function setTheme(mode, save) {
   const root = document.documentElement;
   if (mode === "system") delete root.dataset.theme; else root.dataset.theme = mode;
   const [label, icon] = THEME_UI[mode];
   $("themeBtn").innerHTML = icon;
-  $("themeBtn").setAttribute("aria-label", `${label}. Cliquer pour changer.`);
+  $("themeBtn").setAttribute("aria-label", `${label}. ${t("Cliquer pour changer.", "Click to change.")}`);
   $("themeBtn").title = label;
   if (save) { try { localStorage.setItem("aurapept-theme", mode); } catch (e) {} }
 }

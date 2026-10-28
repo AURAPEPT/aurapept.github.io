@@ -10,9 +10,13 @@
 <meta name="theme-color" content="#f3eee4" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="https://aurapept.github.io/peptides/">
+<link rel="alternate" hreflang="fr" href="https://aurapept.github.io/peptides/">
+<link rel="alternate" hreflang="en" href="https://aurapept.github.io/en/peptides/">
+<link rel="alternate" hreflang="x-default" href="https://aurapept.github.io/peptides/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AURAPEPT">
 <meta property="og:locale" content="fr_FR">
+<meta property="og:locale:alternate" content="en_US">
 <meta property="og:title" content="AURAPEPT · Atlas des peptides">
 <meta property="og:description" content="Un corps en 3D pour voir où agissent les peptides en expérimentation.">
 <meta property="og:url" content="https://aurapept.github.io/peptides/">
@@ -32,6 +36,7 @@
 <link rel="preload" href="../assets/fonts/shippori-mincho-800.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../assets/fonts/zen-kaku-gothic-new-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="modulepreload" href="vendor/three.module.min.js">
+<link rel="modulepreload" href="data.js">
 <link rel="preload" href="corps/base.bin" as="fetch" type="application/octet-stream" crossorigin>
 <script src="../assets/theme.js"></script>
 <link rel="stylesheet" href="../assets/style.css">
@@ -53,6 +58,7 @@
     <a class="tg-btn" href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer" aria-label="Rejoindre AURAPEPT sur Telegram (nouvel onglet)">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10.5 13.5"/><path d="M21 3 14.5 21l-4-7.5L3 9.5 21 3Z"/></svg><span>Telegram</span>
     </a>
+    <a class="lang-btn" id="langBtn" href="../en/peptides/" hreflang="en" lang="en" aria-label="English version" title="English version">EN</a>
     <button class="icon-btn" id="themeBtn" type="button" aria-label="Thème"></button>
   </div>
 </header>
@@ -118,7 +124,7 @@
       <span class="seal" aria-hidden="true">オ</span>
       <span><span class="brand-name">AURAPEPT</span><span class="brand-kana">オーラペプト</span></span>
     </div>
-    <p class="footer-note">Atlas informatif, aucun avis médical. Aucune donnée n'est envoyée. <a href="../">Calculateur</a> · <a href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer">Telegram</a> · <a href="../#mentions">Mentions légales</a></p>
+    <p class="footer-note">Atlas informatif, aucun avis médical. Aucune donnée n'est envoyée. <a href="../">Calculateur</a> · <a href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer">Telegram</a> · <a href="../#mentions">Mentions légales</a> · <a href="../en/peptides/" hreflang="en" lang="en">English version</a></p>
   </footer>
 </main>
 </body>

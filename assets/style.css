@@ -12,7 +12,7 @@
     --sumi: #1c1a17; --sumi-2: #4a443c; --muted: #6d6559;
     --line: #e3dac9; --line-strong: #cfc2ab;
     --shu: #c23a22; --shu-hover: #a92f1a; --shu-ink: #ffffff; --shu-soft: #f6e3db;
-    --ai: #233f66; --kin: #8f6510; --kin-soft: #f4e9d0; --matcha: #46663a; --matcha-soft: #e3ebda;
+    --ai: #233f66; --kin: #835c0e; --kin-soft: #f4e9d0; --matcha: #46663a; --matcha-soft: #e3ebda;
     --ring: rgba(194, 58, 34, .18); --bar: rgba(243, 238, 228, .82);
     --sky-top: #eadcc6; --sky-bottom: #f7f0e4; --sun: #c23a22; --fuji: #233f66; --fuji-far: #a9b6c7;
     --snow: #fbf8f2; --sea: #d9e0ea; --wave: rgba(35, 63, 102, .22);
@@ -111,14 +111,29 @@
   }
   @media (hover: hover) { .tg-btn:hover { background: var(--field); } }
   .tg-btn svg { width: 18px; height: 18px; fill: none; stroke: var(--ai); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .lang-btn {
+    width: 42px; height: 42px; flex: none; display: grid; place-items: center;
+    border: 1px solid var(--line-strong); border-radius: 50%; color: var(--sumi); text-decoration: none;
+    font: 700 .76rem/1 var(--f-body); letter-spacing: .06em; transition: background .15s;
+  }
+  @media (hover: hover) { .lang-btn:hover { background: var(--field); } }
   @media (max-width: 1180px) { .nav a { padding: 8px 10px; font-size: .88rem; } }
   @media (max-width: 980px) { .nav { display: none; } .tg-btn { margin-left: auto; } .topbar .wrap { gap: 10px; } }
   @media (max-width: 440px) { .tg-btn { width: 42px; padding: 0; justify-content: center; } .tg-btn span { display: none; } }
   @media (max-width: 360px) {
     .brand { gap: 9px; }
     .brand-name { letter-spacing: .12em; }
-    .tg-btn, .icon-btn { width: 40px; height: 40px; }
+    .tg-btn, .icon-btn, .lang-btn { width: 40px; height: 40px; }
   }
+  /* Très petits écrans (320 px) : boutons un peu plus serrés pour que Telegram, langue et thème tiennent */
+  @media (max-width: 340px) {
+    .topbar .wrap { gap: 6px; }
+    .tg-btn, .icon-btn, .lang-btn { width: 38px; height: 38px; }
+    .seal { width: 32px; height: 32px; font-size: 17px; }
+    .brand-name { font-size: 1rem; letter-spacing: .08em; }
+  }
+  /* En dessous de 310 px, le changement de langue reste dans le pied de page */
+  @media (max-width: 309px) { .topbar .lang-btn { display: none; } }
   @media (max-width: 300px) {
     .seal { width: 32px; height: 32px; font-size: 17px; }
     .brand-name { font-size: 1rem; letter-spacing: .08em; }

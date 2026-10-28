@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AURAPEPT · Calculator</title>
+<meta name="description" content="AURAPEPT reconstitution calculator: concentration and the mark to draw on a U-100 syringe.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#f3eee4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://aurapept.github.io/en/">
+<link rel="alternate" hreflang="fr" href="https://aurapept.github.io/">
+<link rel="alternate" hreflang="en" href="https://aurapept.github.io/en/">
+<link rel="alternate" hreflang="x-default" href="https://aurapept.github.io/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AURAPEPT">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="fr_FR">
+<meta property="og:title" content="AURAPEPT · Reconstitution calculator">
+<meta property="og:description" content="The right U-100 mark in four settings: concentration, volume and units to draw.">
+<meta property="og:url" content="https://aurapept.github.io/en/">
+<meta property="og:image" content="https://aurapept.github.io/assets/og-share-en.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="AURAPEPT logo and Mount Fuji at sunrise, reconstitution calculator">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://aurapept.github.io/assets/og-share-en.png">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="manifest" href="/en/manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="AURAPEPT">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preload" href="../assets/fonts/shippori-mincho-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/zen-kaku-gothic-new-400.woff2" as="font" type="font/woff2" crossorigin>
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="AURAPEPT, back to top">
+      <span class="seal" aria-hidden="true">オ</span>
+      <span><span class="brand-name">AURAPEPT</span><span class="brand-kana">オーラペプト</span></span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#calculateur">Calculator</a>
+      <a href="#methode">Method</a>
+      <a href="#etiquette">Label</a>
+      <a href="#flacons">Vials</a>
+      <a href="#avertissements">Warnings</a>
+      <a href="peptides/">Atlas</a>
+    </nav>
+    <a class="tg-btn" href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer" aria-label="Join AURAPEPT on Telegram (new tab)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10.5 13.5"/><path d="M21 3 14.5 21l-4-7.5L3 9.5 21 3Z"/></svg><span>Telegram</span>
+    </a>
+    <a class="lang-btn" id="langBtn" href="../" hreflang="fr" lang="fr" aria-label="Version française" title="Version française">FR</a>
+    <button class="icon-btn" id="themeBtn" type="button" aria-label="Theme"></button>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <noscript><p class="noscript">The calculator needs JavaScript. Turn it on in your browser to see the results.</p></noscript>
+  <section class="hero">
+    <div>
+      <p class="eyebrow"><span class="jp">計算</span>Reconstitution calculator</p>
+      <h1>The right mark, in <em>four settings</em>.</h1>
+      <p class="lead">Enter what's in the vial, the water you add, the amount you want and your syringe. AURAPEPT works out the concentration and the U-100 mark to draw to, live.</p>
+      <div class="cta" id="heroCta">
+        <a class="btn btn-primary" href="#calculateur">Start calculating</a>
+        <a class="btn" href="#methode">See the method</a>
+        <a class="btn" href="peptides/">Peptide atlas</a>
+      </div>
+      <button class="install-btn" id="installBtn" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+        Install the app on your phone
+      </button>
+      <ul class="facts">
+        <li><b>U-100</b><span>1 mL = 100 units</span></li>
+        <li><b>mg ↔ mcg</b><span>Automatic conversion</span></li>
+        <li><b>0.3 · 0.5 · 1 mL</b><span>Three syringe sizes</span></li>
+      </ul>
+    </div>
+    <figure class="art" aria-hidden="true">
+      <svg viewBox="0 0 480 360" preserveAspectRatio="xMidYMax slice">
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" class="st-sky-top"/>
+            <stop offset="1" class="st-sky-bottom"/>
+          </linearGradient>
+          <linearGradient id="mist" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" class="st-mist-0"/>
+            <stop offset="1" class="st-mist-1"/>
+          </linearGradient>
+        </defs>
+        <rect width="480" height="360" fill="url(#sky)"/>
+        <circle class="sun" cx="338" cy="122" r="58"/>
+        <path d="M0 252 L70 226 L130 240 L196 212 L262 234 L332 216 L404 238 L480 220 L480 300 L0 300 Z" class="ar-far"/>
+        <path d="M30 300 C110 256 162 200 200 158 Q214 142 228 146 L240 152 Q252 144 264 150 C302 196 356 256 450 300 Z" class="ar-fuji"/>
+        <path d="M200 158 Q214 142 228 146 L240 152 Q252 144 264 150 C270 157 276 164 283 172 L274 170 L266 180 L256 170 L246 182 L236 171 L226 183 L216 172 L206 181 L196 172 L183 176 C189 170 194 164 200 158 Z" class="ar-snow"/>
+        <rect x="0" y="246" width="480" height="54" fill="url(#mist)"/>
+        <rect x="0" y="292" width="480" height="68" class="ar-sea"/>
+      </svg>
+      <div class="waves"></div>
+      <div class="art-tag"><span>精密計算</span><span class="seal">オ</span></div>
+    </figure>
+  </section>
+
+  <section class="calc" id="calculateur" aria-label="Calculator">
+    <div class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title"><span class="jp">設定</span>Settings</h2>
+        <button class="link-btn" id="reset" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+          Reset
+        </button>
+      </div>
+      <ol class="steps">
+        <li class="step">
+          <div class="step-top">
+            <span class="hanko" aria-hidden="true">一</span>
+            <div><h3 id="lblVial">Vial content</h3><p>The amount printed on the vial label.</p></div>
+          </div>
+          <div class="step-body">
+            <div class="field">
+              <input id="vial" type="text" inputmode="decimal" autocomplete="off" value="5" aria-labelledby="lblVial">
+              <div class="seg" data-group="vialUnit" role="group" aria-label="Vial unit">
+                <button type="button" data-v="mg" aria-pressed="true">mg</button>
+                <button type="button" data-v="mcg" aria-pressed="false">mcg</button>
+              </div>
+            </div>
+            <div class="chips">
+              <span class="k">Shortcuts</span>
+              <button type="button" class="chip" data-preset="vial" data-value="2" data-unit="mg">2 mg</button>
+              <button type="button" class="chip" data-preset="vial" data-value="5" data-unit="mg">5 mg</button>
+              <button type="button" class="chip" data-preset="vial" data-value="10" data-unit="mg">10 mg</button>
+            </div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-top">
+            <span class="hanko" aria-hidden="true">二</span>
+            <div><h3 id="lblWater">Water added</h3><p>The volume of water injected into the vial.</p></div>
+          </div>
+          <div class="step-body">
+            <div class="field">
+              <input id="water" type="text" inputmode="decimal" autocomplete="off" value="2" aria-labelledby="lblWater">
+              <span class="suffix">mL</span>
+            </div>
+            <div class="chips">
+              <span class="k">Shortcuts</span>
+              <button type="button" class="chip" data-preset="water" data-value="1">1 mL</button>
+              <button type="button" class="chip" data-preset="water" data-value="2">2 mL</button>
+              <button type="button" class="chip" data-preset="water" data-value="3">3 mL</button>
+            </div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-top">
+            <span class="hanko" aria-hidden="true">三</span>
+            <div><h3 id="lblDose">Amount per dose</h3><p>What you want to draw each time.</p></div>
+          </div>
+          <div class="step-body">
+            <div class="field">
+              <input id="dose" type="text" inputmode="decimal" autocomplete="off" value="250" aria-labelledby="lblDose">
+              <div class="seg" data-group="doseUnit" role="group" aria-label="Dose unit">
+                <button type="button" data-v="mg" aria-pressed="false">mg</button>
+                <button type="button" data-v="mcg" aria-pressed="true">mcg</button>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-top">
+            <span class="hanko" aria-hidden="true">四</span>
+            <div><h3>U-100 syringe</h3><p>Its total capacity, shown on the packaging.</p></div>
+          </div>
+          <div class="step-body">
+            <div class="syr-opts" data-group="syringe" role="group" aria-label="Syringe capacity">
+              <button type="button" class="syr-opt" data-v="0.3" aria-pressed="false">
+                <span class="mini"><i></i></span><b>0.3 mL</b><span>30 units</span>
+              </button>
+              <button type="button" class="syr-opt" data-v="0.5" aria-pressed="false">
+                <span class="mini"><i></i></span><b>0.5 mL</b><span>50 units</span>
+              </button>
+              <button type="button" class="syr-opt" data-v="1" aria-pressed="true">
+                <span class="mini"><i></i></span><b>1 mL</b><span>100 units</span>
+              </button>
+            </div>
+            <label class="switch"><input id="half" type="checkbox"> My syringe has half-unit marks</label>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <section class="panel result" id="resultat" aria-labelledby="resTitle">
+      <div class="panel-head">
+        <h2 class="panel-title" id="resTitle"><span class="jp">結果</span>Result</h2>
+        <span class="pill" id="status" data-tone="idle">Waiting</span>
+      </div>
+      <div class="result-body">
+        <div>
+          <p class="sr-only" id="srResult" aria-live="polite"></p>
+          <p class="draw-k">Draw up to</p>
+          <p class="big"><span id="units">—</span><small>units</small></p>
+          <p class="draw-sub">that is <b id="ml">—</b> on a <b id="capText">1 mL</b> syringe</p>
+        </div>
+        <svg id="syr" viewBox="0 0 560 126" role="img" aria-labelledby="syrTitle">
+          <title id="syrTitle">Syringe filled up to the calculated mark</title>
+          <defs><clipPath id="barrelClip"><rect x="70" y="44" width="404" height="46" rx="6"/></clipPath></defs>
+          <line x1="4" y1="67" x2="46" y2="67" class="needle"/>
+          <rect x="44" y="58" width="26" height="18" rx="3" class="hub"/>
+          <rect x="70" y="44" width="404" height="46" rx="6" class="barrel-bg"/>
+          <g clip-path="url(#barrelClip)"><rect id="liquid" x="70" y="44" width="388" height="46" class="liquid"/></g>
+          <g id="plunger">
+            <rect x="82" y="62" width="412" height="10" class="rod"/>
+            <rect x="494" y="40" width="8" height="54" rx="2" class="thumb"/>
+            <rect x="70" y="46" width="12" height="42" rx="2" class="stopper"/>
+          </g>
+          <g id="scale"></g>
+          <rect x="70" y="44" width="404" height="46" rx="6" class="barrel"/>
+          <rect x="474" y="34" width="7" height="66" rx="2" class="flange"/>
+          <g id="pointer"><path d="M70 41 l-7 -10 h14 z" class="marker-fill"/></g>
+          <g id="marker">
+            <rect id="markerBox" x="-26" y="4" width="52" height="27" rx="7" class="marker-fill"/>
+            <text id="markerText" x="0" y="23" class="marker-text">—</text>
+          </g>
+        </svg>
+        <dl class="stats">
+          <div><dt>Concentration</dt><dd id="conc">—</dd></div>
+          <div><dt>Per unit</dt><dd id="perUnit">—</dd></div>
+          <div><dt>Doses per vial</dt><dd id="count">—</dd></div>
+          <div><dt>Fill level</dt><dd id="fillPct">—</dd></div>
+        </dl>
+        <ul class="notes" id="notes" hidden></ul>
+        <div class="actions">
+          <button class="btn btn-primary" id="copyLink" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+            Copy link
+          </button>
+          <button class="btn" id="copySum" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
+            Copy summary
+          </button>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section class="section" id="methode">
+    <div>
+      <p class="eyebrow"><span class="jp">方法</span>Method</p>
+      <h2>The calculation, step by step</h2>
+      <p class="intro">The same steps you would do by hand, updated with your values. A U-100 syringe holds 100 units per mL.</p>
+    </div>
+    <ol class="method">
+      <li><div class="lbl"><b>Conversion</b><span>everything in mcg (1 mg = 1000 mcg)</span></div><div class="eq" id="m1">—</div></li>
+      <li><div class="lbl"><b>Concentration</b><span>vial ÷ water</span></div><div class="eq" id="m2">—</div></li>
+      <li><div class="lbl"><b>Volume</b><span>dose ÷ concentration</span></div><div class="eq" id="m3">—</div></li>
+      <li><div class="lbl"><b>Units</b><span>volume × 100</span></div><div class="eq" id="m4">—</div></li>
+    </ol>
+  </section>
+
+  <section class="section" id="etiquette">
+    <div>
+      <p class="eyebrow"><span class="jp">ラベル</span>Label</p>
+      <h2>A label for your vial</h2>
+      <p class="intro">It uses your current values. Add a name and the reconstitution date, then print it at 7 cm wide.</p>
+    </div>
+    <div class="label-grid">
+      <div class="label-tools">
+        <div>
+          <label for="labelName">Name on the label (optional)</label>
+          <input class="text-field" id="labelName" type="text" maxlength="40" placeholder="E.g. Vial A" autocomplete="off">
+        </div>
+        <div>
+          <label for="date">Reconstitution date</label>
+          <input class="text-field" id="date" type="date">
+        </div>
+        <button class="btn btn-primary" id="print" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg>
+          Print the label
+        </button>
+        <p class="hint">Only the label is printed.</p>
+      </div>
+      <div class="label-stage">
+        <div class="label-card" id="labelCard">
+          <div class="label-brand">
+            <span class="seal" aria-hidden="true">オ</span>
+            <div><b>AURAPEPT</b><span>オーラペプト</span></div>
+          </div>
+          <p class="label-name" id="lName" hidden></p>
+          <dl>
+            <dt>Vial</dt><dd id="lVial">—</dd>
+            <dt>Water added</dt><dd id="lWater">—</dd>
+            <dt>Concentration</dt><dd id="lConc">—</dd>
+            <dt>Dose</dt><dd id="lDraw">—</dd>
+          </dl>
+          <div class="label-date"><span>Reconstituted on</span><b id="lDate">__ ___ ____</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="flacons">
+    <div>
+      <p class="eyebrow"><span class="jp">記録</span>My vials</p>
+      <h2>Keep your vials on file</h2>
+      <p class="intro">Save a vial's settings to find them again later. They stay in your browser: nothing is sent.</p>
+      <button class="btn btn-primary" id="saveVial" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+        Save this vial
+      </button>
+    </div>
+    <div class="vials">
+      <ul class="vial-list" id="vialList"></ul>
+      <p class="vial-empty" id="vialEmpty">No saved vials yet. Set up the calculator, add a name and a date on the label, then click “Save this vial”.</p>
+    </div>
+  </section>
+
+  <section class="section" id="avertissements">
+    <div>
+      <p class="eyebrow"><span class="jp">注意</span>Warnings</p>
+      <h2>Read before use</h2>
+    </div>
+    <ul class="warn-list">
+      <li>For information only. This is not medical advice and no amount is recommended.</li>
+      <li>Always double-check what you enter and the U-100 marking on your syringe. Results are provided as is, with no guarantee.</li>
+      <li>Follow the hygiene and storage rules given for your product.</li>
+      <li>You are responsible for complying with the laws of your country.</li>
+    </ul>
+  </section>
+
+  <section class="section" id="mentions">
+    <div>
+      <p class="eyebrow"><span class="jp">法律</span>Legal notice</p>
+      <h2>Who publishes this site</h2>
+    </div>
+    <dl class="legal">
+      <div><dt>Publisher</dt><dd>A private individual acting in a non-professional capacity, who has chosen to remain anonymous as allowed by article 1-1, II of French law no. 2004-575 of 21 June 2004 on confidence in the digital economy (LCEN).</dd></div>
+      <div><dt>Host</dt><dd>GitHub, Inc.<br>88 Colin P. Kelly Jr. St.<br>San Francisco, CA 94107, United States<br><a href="https://github.com/">github.com</a></dd></div>
+      <div><dt>Contact</dt><dd><a href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer">AURAPEPT on Telegram</a></dd></div>
+      <div><dt>Right of reply</dt><dd>Requests go through the host, who passes them on to the publisher.</dd></div>
+      <div><dt>Personal data</dt><dd>No data is collected or sent: no account, no cookies, no analytics. Calculations run in your browser, which only keeps your theme choice and the vials you save (local storage, on your device only).</dd></div>
+      <div><dt>Fonts</dt><dd>Shippori Mincho and Zen Kaku Gothic New, under the SIL Open Font License 1.1, hosted on this site.</dd></div>
+    </dl>
+  </section>
+
+  <footer class="footer">
+    <div class="brand">
+      <span class="seal" aria-hidden="true">オ</span>
+      <span><span class="brand-name">AURAPEPT</span><span class="brand-kana">オーラペプト</span></span>
+    </div>
+    <p class="footer-note">For information only, not medical advice. No data is sent: calculations run in your browser, which only remembers your theme choice and your saved vials. <a href="peptides/">Peptide atlas</a> · <a href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer">Telegram</a> · <a href="#mentions">Legal notice</a> · <a href="../" hreflang="fr" lang="fr">Version française</a></p>
+  </footer>
+</main>
+
+<section class="dock is-hidden" id="dock" aria-label="Quick result">
+  <div><span class="k">Draw</span><b id="dockUnits">—</b><span class="ml" id="dockMl"></span></div>
+  <a href="#resultat">See details</a>
+</section>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="../assets/app.js"></script>
+</body>
+</html>
