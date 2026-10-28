@@ -23,3 +23,8 @@ $("themeBtn").addEventListener("click", () => {
   toast(THEME_UI[next][0]);
 });
 setTheme(document.documentElement.dataset.theme || "system", false);
+
+/* Appli installable : mise en mémoire hors connexion */
+if ("serviceWorker" in navigator) {
+  addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+}

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>AURAPEPT · Calculateur</title>
 <meta name="description" content="Calculateur de reconstitution AURAPEPT : concentration et graduation à prélever sur seringue U-100.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#f3eee4" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)">
@@ -25,6 +25,10 @@
 <meta name="twitter:image" content="https://aurapept.github.io/assets/og-share.png">
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="AURAPEPT">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="preload" href="assets/fonts/shippori-mincho-800.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/zen-kaku-gothic-new-400.woff2" as="font" type="font/woff2" crossorigin>
 <script src="assets/theme.js"></script>
@@ -65,6 +69,10 @@
         <a class="btn" href="#methode">Voir la méthode</a>
         <a class="btn" href="peptides/">Atlas des peptides</a>
       </div>
+      <button class="install-btn" id="installBtn" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+        Installer l'appli sur ton téléphone
+      </button>
       <ul class="facts">
         <li><b>U-100</b><span>1 mL = 100 unités</span></li>
         <li><b>mg ↔ mcg</b><span>Conversion automatique</span></li>

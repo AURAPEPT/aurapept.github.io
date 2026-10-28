@@ -243,7 +243,7 @@ function toast(msg) {
   t.textContent = msg;
   t.classList.add("show");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
+  toastTimer = setTimeout(() => t.classList.remove("show"), msg.length > 45 ? 5000 : 1800);
 }
 function copy(text, done) {
   const fallback = () => {
@@ -391,6 +391,29 @@ $("saveVial").addEventListener("click", () => {
   toast("Flacon enregistré");
 });
 renderVials();
+
+/* Bouton « Installer l'appli » : invite du navigateur si elle existe, sinon la marche à suivre */
+let installPrompt = null;
+const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+$("installBtn").hidden = standalone;
+addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installPrompt = e; });
+addEventListener("appinstalled", () => { $("installBtn").hidden = true; toast("Appli installée"); });
+$("installBtn").addEventListener("click", async () => {
+  if (installPrompt) {
+    installPrompt.prompt();
+    try { await installPrompt.userChoice; } catch (e) {}
+    installPrompt = null;
+    return;
+  }
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  toast(ios ? "Sur iPhone : touche le bouton Partager, puis « Sur l'écran d'accueil »"
+    : "Ouvre le menu du navigateur, puis « Installer l'application » ou « Ajouter à l'écran d'accueil »");
+});
+
+/* Appli installable : mise en mémoire hors connexion */
+if ("serviceWorker" in navigator) {
+  addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+}
 
 // La barre mobile n'apparaît qu'une fois l'accueil passé, et se cache quand le résultat complet est à l'écran
 if ("IntersectionObserver" in window) {
