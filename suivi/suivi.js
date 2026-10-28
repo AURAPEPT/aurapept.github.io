@@ -374,6 +374,7 @@ function renderPanel() {
   $("dosePanel").hidden = !v || !$("newVial").hidden;
   if (!v) return;
   const s = status(v);
+  $("dosePanel").dataset.printTitle = `${v.name || t("Fiole sans nom", "Unnamed vial", "قارورة بلا اسم")} · ${massTxt(v.total)} / ${fmt(v.water)} mL · ${dayLabel(parseDay(v.date))}`;
   const pill = $("vialStatus");
   const [tone, label] = s.left <= 0 ? ["alert", t("Fiole vide", "Vial empty", "القارورة فارغة")]
     : s.frac < 0.2 ? ["warn", t("Bientôt vide", "Almost empty", "على وشك النفاد")]
@@ -469,6 +470,17 @@ $("dsAdd").addEventListener("click", () => {
 /* Historique, regroupé par semaine depuis la reconstitution */
 function renderHistory(v) {
   const box = $("history");
+  // Bouton « Imprimer » à côté du titre : l'historique sort seul (voir @media print dans suivi.css)
+  if (!$("printHist")) {
+    const b = document.createElement("button");
+    b.id = "printHist";
+    b.type = "button";
+    b.className = "link-btn";
+    b.textContent = t("Imprimer", "Print", "طباعة");
+    b.addEventListener("click", () => window.print());
+    document.querySelector(".history h3").append(b);
+  }
+  $("printHist").hidden = !v.logs.length;
   $("histEmpty").hidden = v.logs.length > 0;
   const start = parseDay(v.date);
   const weeks = new Map();

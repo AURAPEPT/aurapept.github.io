@@ -157,3 +157,17 @@ html[dir="rtl"] bdi { white-space: nowrap; }
 #vialSvg { direction: ltr; } /* graduations « 2 mL » dans le bon sens, comme la seringue du calculateur */
 html[lang="ar"] :is(.ro-k, .history h3) { font-size: .86rem; letter-spacing: 0; }
 .track-links { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 22px; }
+.history h3 { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.history h3 .link-btn { text-transform: none; letter-spacing: 0; font-size: .85rem; }
+
+/* Impression : seulement le nom de la fiole, les chiffres clés et l'historique */
+@media print {
+  @page { margin: 1.4cm; }
+  body { background: #fff; padding: 0; }
+  body::after, .skip, .topbar, .footer, .toast, .track-head, .vial-stage, #newVial, #backupPanel, .form-body, .hist-item .link-btn, #printHist, .noscript { display: none !important; }
+  .track { display: block; padding: 0; }
+  .panel { box-shadow: none; border: 0; background: #fff; }
+  #dosePanel::before { content: attr(data-print-title); display: block; font: 800 1.4rem/1.3 var(--f-display); margin-bottom: 8px; }
+  .track-stats { margin: 0; }
+  .history { padding: 16px 0 0; }
+}
