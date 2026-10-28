@@ -91,12 +91,29 @@
   }
   .brand-name { display: block; font: 800 1.12rem/1.1 var(--f-display); letter-spacing: .2em; }
   .brand-kana { display: block; font: 500 .7rem/1.4 var(--f-display); letter-spacing: .32em; color: var(--shu); }
-  .nav { margin-inline-start: auto; display: flex; gap: 2px; }
+  /* Menu des 3 sites : boutons avec icône, le site affiché est en noir */
+  .nav { margin-inline-start: auto; display: flex; gap: 6px; }
   .nav a {
-    color: var(--sumi-2); text-decoration: none; font-size: .92rem; font-weight: 500;
-    padding: 8px 14px; border-radius: 999px; transition: background .15s, color .15s;
+    display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+    color: var(--sumi-2); text-decoration: none; font-size: .92rem; font-weight: 700;
+    padding: 9px 15px; border: 1px solid var(--line-strong); border-radius: 999px; transition: background .15s, color .15s, border-color .15s;
   }
   .nav a:hover { background: var(--field); color: var(--sumi); }
+  .nav a[aria-current="page"] { background: var(--sumi); border-color: var(--sumi); color: var(--paper); }
+  .nav svg, .sites svg { width: 17px; height: 17px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .nav svg circle, .sites svg circle { fill: currentColor; stroke: none; }
+  /* Mobile : le menu passe dans une barre de 3 boutons juste sous l'en-tête */
+  .sites { display: none; }
+  @media (max-width: 980px) {
+    .sites { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding-top: 12px; }
+    .sites a {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-height: 58px; padding: 8px 4px;
+      border: 1px solid var(--line-strong); border-radius: 14px; background: var(--paper); color: var(--sumi-2);
+      text-decoration: none; text-align: center; font: 700 .8rem/1.15 var(--f-body);
+    }
+    .sites a[aria-current="page"] { background: var(--sumi); border-color: var(--sumi); color: var(--paper); }
+    .sites svg { width: 20px; height: 20px; }
+  }
   .icon-btn {
     width: 42px; height: 42px; flex: none; display: grid; place-items: center; cursor: pointer;
     border: 1px solid var(--line-strong); border-radius: 50%; background: transparent; color: var(--sumi);
@@ -132,14 +149,7 @@
   .lang-list a:hover { background: var(--field); }
   .lang-list a[aria-current] { color: var(--shu-hover); font-weight: 700; }
   .lang-list a[aria-current]::after { content: "✓"; }
-  @media (max-width: 1180px) { .nav a { padding: 8px 10px; font-size: .88rem; } }
-  /* Tablettes : 7 liens dans le menu, Telegram passe en icône seule pour laisser la place */
-  @media (min-width: 981px) and (max-width: 1180px) {
-    .topbar .wrap { gap: 14px; }
-    .nav a { padding: 8px 7px; }
-    .tg-btn { width: 42px; padding: 0; justify-content: center; }
-    .tg-btn span { display: none; }
-  }
+  @media (max-width: 1180px) { .nav a { padding: 8px 12px; font-size: .88rem; } .topbar .wrap { gap: 16px; } }
   @media (max-width: 980px) { .nav { display: none; } .tg-btn { margin-inline-start: auto; } .topbar .wrap { gap: 10px; } }
   @media (max-width: 440px) { .tg-btn { width: 42px; padding: 0; justify-content: center; } .tg-btn span { display: none; } }
   @media (max-width: 360px) {

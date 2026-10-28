@@ -156,7 +156,6 @@ html[dir="rtl"] .stage-tag { right: auto; left: 18px; }
 html[dir="rtl"] bdi { white-space: nowrap; }
 #vialSvg { direction: ltr; } /* graduations « 2 mL » dans le bon sens, comme la seringue du calculateur */
 html[lang="ar"] :is(.ro-k, .history h3) { font-size: .86rem; letter-spacing: 0; }
-.track-links { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 22px; }
 .history h3 { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .history h3 .link-btn { text-transform: none; letter-spacing: 0; font-size: .85rem; }
 

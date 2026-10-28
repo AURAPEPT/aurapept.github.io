@@ -9,7 +9,6 @@
 .atlas-head h1 { font-size: clamp(2.1rem, 4.6vw, 3.3rem); }
 @media (max-width: 320px) { .atlas-head h1 { font-size: 1.85rem; } }
 .atlas-head .lead { margin-bottom: 18px; }
-.atlas-links { margin: 0 0 22px; }
 .exp-banner {
   margin: 0; padding: 14px 18px; border-radius: 12px;
   border-inline-start: 4px solid var(--shu); background: var(--shu-soft); color: var(--sumi);
