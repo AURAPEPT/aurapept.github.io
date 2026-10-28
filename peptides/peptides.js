@@ -5,7 +5,7 @@ const $ = (id) => document.getElementById(id);
 const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 const zoneLabel = (id) => ZONES[id]?.label ?? id;
 
-const state = { open: null, zone: null, query: "" };
+const state = { open: null, zone: null, query: "", cat: null };
 const peptides = PEPTIDES;
 const byId = new Map(peptides.map((p) => [p.id, p]));
 
@@ -110,6 +110,28 @@ function itemFor(p) {
   return li;
 }
 
+/* Familles : « Tous » par défaut, puis une famille à la fois */
+function famChip(id, label, count) {
+  const b = el("button", "fchip");
+  b.type = "button";
+  b.dataset.cat = id || "all";
+  b.setAttribute("aria-pressed", "false");
+  if (id) b.append(el("span", "fdot"));
+  b.append(el("span", null, label), el("span", "fcount", String(count)));
+  b.addEventListener("click", () => setCat(id));
+  return b;
+}
+$("famChips").replaceChildren(
+  famChip(null, "Tous", peptides.length),
+  ...CATEGORIES.filter((c) => peptides.some((p) => p.cat === c.id)).map((c) => famChip(c.id, c.short || c.label, peptides.filter((p) => p.cat === c.id).length)),
+);
+function setCat(cat) {
+  state.cat = cat;
+  if (cat && state.open && byId.get(state.open)?.cat !== cat) state.open = null;
+  render();
+  $("famChips").querySelector(`[data-cat="${cat || "all"}"]`)?.scrollIntoView({ block: "nearest", inline: "nearest" });
+}
+
 const items = new Map();
 const groups = [];
 const frag = document.createDocumentFragment();
@@ -147,7 +169,8 @@ function render() {
   for (const p of peptides) {
     const li = items.get(p.id);
     const match = (!q || norm([p.nom, ...(p.alias || [])].join(" ")).includes(q))
-      && (!state.zone || p.zones.includes(state.zone));
+      && (!state.zone || p.zones.includes(state.zone))
+      && (!state.cat || p.cat === state.cat);
     li.hidden = !match;
     if (match) shown++;
     const open = state.open === p.id;
@@ -161,6 +184,7 @@ function render() {
   body?.highlight(open ? open.zones : state.zone ? [state.zone] : []);
 
   document.querySelectorAll(".zchip").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.zone === state.zone)));
+  document.querySelectorAll(".fchip").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.cat === (state.cat || "all"))));
   $("zoneFilter").hidden = !state.zone;
   $("zoneFilterName").textContent = state.zone ? zoneLabel(state.zone) : "";
   $("count").textContent = `${shown} / ${peptides.length}`;

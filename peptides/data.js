@@ -10,13 +10,13 @@
 //   mix    : pour un mélange, les peptides qu'il contient (ids)
 
 export const CATEGORIES = [
-  { id: "graisse", label: "GLP-1 · Perte de graisse" },
-  { id: "peau", label: "Beauté · Peau" },
-  { id: "libido", label: "Libido" },
-  { id: "performance", label: "Performance · Hormone de croissance" },
-  { id: "regeneration", label: "Régénération · Réparation" },
-  { id: "cerveau", label: "Nootropiques" },
-  { id: "longevite", label: "Longévité · Anti-âge" },
+  { id: "graisse", label: "GLP-1 · Perte de graisse", short: "Perte de graisse" },
+  { id: "peau", label: "Beauté · Peau", short: "Peau & beauté" },
+  { id: "libido", label: "Libido", short: "Libido" },
+  { id: "performance", label: "Performance · Hormone de croissance", short: "Muscles & performance" },
+  { id: "regeneration", label: "Régénération · Réparation", short: "Réparation" },
+  { id: "cerveau", label: "Nootropiques", short: "Cerveau" },
+  { id: "longevite", label: "Longévité · Anti-âge", short: "Anti-âge" },
 ];
 
 export const PEPTIDES = [
