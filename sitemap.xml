@@ -5,6 +5,7 @@
     <lastmod>2026-10-28</lastmod>
     <xhtml:link rel="alternate" hreflang="fr" href="https://aurapept.github.io/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://aurapept.github.io/en/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://aurapept.github.io/ar/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://aurapept.github.io/"/>
   </url>
   <url>
@@ -12,6 +13,15 @@
     <lastmod>2026-10-28</lastmod>
     <xhtml:link rel="alternate" hreflang="fr" href="https://aurapept.github.io/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://aurapept.github.io/en/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://aurapept.github.io/ar/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://aurapept.github.io/"/>
+  </url>
+  <url>
+    <loc>https://aurapept.github.io/ar/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://aurapept.github.io/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://aurapept.github.io/en/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://aurapept.github.io/ar/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://aurapept.github.io/"/>
   </url>
   <url>
@@ -19,6 +29,7 @@
     <lastmod>2026-10-28</lastmod>
     <xhtml:link rel="alternate" hreflang="fr" href="https://aurapept.github.io/peptides/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://aurapept.github.io/en/peptides/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://aurapept.github.io/ar/peptides/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://aurapept.github.io/peptides/"/>
   </url>
   <url>
@@ -26,6 +37,15 @@
     <lastmod>2026-10-28</lastmod>
     <xhtml:link rel="alternate" hreflang="fr" href="https://aurapept.github.io/peptides/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://aurapept.github.io/en/peptides/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://aurapept.github.io/ar/peptides/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://aurapept.github.io/peptides/"/>
+  </url>
+  <url>
+    <loc>https://aurapept.github.io/ar/peptides/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://aurapept.github.io/peptides/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://aurapept.github.io/en/peptides/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://aurapept.github.io/ar/peptides/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://aurapept.github.io/peptides/"/>
   </url>
 </urlset>

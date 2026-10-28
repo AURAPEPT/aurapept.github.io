@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AURAPEPT · الحاسبة</title>
+<meta name="description" content="حاسبة AURAPEPT لإعادة تكوين الببتيدات: التركيز والعلامة التي يجب السحب إليها على حقنة U-100.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#f3eee4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://aurapept.github.io/ar/">
+<link rel="alternate" hreflang="fr" href="https://aurapept.github.io/">
+<link rel="alternate" hreflang="en" href="https://aurapept.github.io/en/">
+<link rel="alternate" hreflang="ar" href="https://aurapept.github.io/ar/">
+<link rel="alternate" hreflang="x-default" href="https://aurapept.github.io/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AURAPEPT">
+<meta property="og:locale" content="ar_AR">
+<meta property="og:locale:alternate" content="fr_FR">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:title" content="AURAPEPT · حاسبة إعادة التكوين">
+<meta property="og:description" content="العلامة الصحيحة على حقنة U-100 في أربع خطوات: التركيز والحجم والوحدات التي تسحبها.">
+<meta property="og:url" content="https://aurapept.github.io/ar/">
+<meta property="og:image" content="https://aurapept.github.io/assets/og-share-ar.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="شعار AURAPEPT وجبل فوجي عند شروق الشمس، حاسبة إعادة التكوين">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://aurapept.github.io/assets/og-share-ar.png">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="manifest" href="/ar/manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="AURAPEPT">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preload" href="../assets/fonts/ibm-plex-sans-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/amiri-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/shippori-mincho-800.woff2" as="font" type="font/woff2" crossorigin>
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="AURAPEPT، العودة إلى الأعلى">
+      <span class="seal" aria-hidden="true">オ</span>
+      <span><span class="brand-name">AURAPEPT</span><span class="brand-kana">オーラペプト</span></span>
+    </a>
+    <nav class="nav" aria-label="الأقسام">
+      <a href="#calculateur">الحاسبة</a>
+      <a href="#methode">الطريقة</a>
+      <a href="#etiquette">الملصق</a>
+      <a href="#flacons">القوارير</a>
+      <a href="#avertissements">تحذيرات</a>
+      <a href="peptides/">القائمة</a>
+    </nav>
+    <a class="tg-btn" href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer" aria-label="انضم إلى AURAPEPT على تيليغرام (علامة تبويب جديدة)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10.5 13.5"/><path d="M21 3 14.5 21l-4-7.5L3 9.5 21 3Z"/></svg><span>تيليغرام</span>
+    </a>
+    <details class="lang" id="langMenu">
+      <summary class="lang-btn" aria-label="اللغة: العربية. تغيير اللغة" title="تغيير اللغة">ع</summary>
+      <ul class="lang-list">
+        <li><a href="../" hreflang="fr" lang="fr">Français</a></li>
+        <li><a href="../en/" hreflang="en" lang="en">English</a></li>
+        <li><a href="./" hreflang="ar" lang="ar" dir="rtl" aria-current="page">العربية</a></li>
+      </ul>
+    </details>
+    <button class="icon-btn" id="themeBtn" type="button" aria-label="المظهر"></button>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <noscript><p class="noscript">تحتاج الحاسبة إلى JavaScript. فعّله في متصفحك لرؤية النتائج.</p></noscript>
+  <section class="hero">
+    <div>
+      <p class="eyebrow"><span class="jp">計算</span>حاسبة إعادة التكوين</p>
+      <h1>العلامة الصحيحة، في <em>أربع خطوات</em>.</h1>
+      <p class="lead">أدخل محتوى القارورة، والماء المضاف، والكمية التي تريدها، ونوع حقنتك. يحسب AURAPEPT التركيز والعلامة التي تسحب إليها بوحدات <bdi dir="ltr">U-100</bdi>، مباشرةً.</p>
+      <div class="cta" id="heroCta">
+        <a class="btn btn-primary" href="#calculateur">ابدأ الحساب</a>
+        <a class="btn" href="#methode">شاهد الطريقة</a>
+        <a class="btn" href="peptides/">قائمة الببتيدات</a>
+      </div>
+      <button class="install-btn" id="installBtn" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+        ثبّت التطبيق على هاتفك
+      </button>
+      <ul class="facts">
+        <li><b>U-100</b><span><bdi dir="ltr">1 mL</bdi> = 100 وحدة</span></li>
+        <li><b>mg ↔ mcg</b><span>تحويل تلقائي</span></li>
+        <li><b><bdi dir="ltr">0.3 · 0.5 · 1 mL</bdi></b><span>ثلاثة أحجام للحقن</span></li>
+      </ul>
+    </div>
+    <figure class="art" aria-hidden="true">
+      <svg viewBox="0 0 480 360" preserveAspectRatio="xMidYMax slice">
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" class="st-sky-top"/>
+            <stop offset="1" class="st-sky-bottom"/>
+          </linearGradient>
+          <linearGradient id="mist" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" class="st-mist-0"/>
+            <stop offset="1" class="st-mist-1"/>
+          </linearGradient>
+        </defs>
+        <rect width="480" height="360" fill="url(#sky)"/>
+        <circle class="sun" cx="338" cy="122" r="58"/>
+        <path d="M0 252 L70 226 L130 240 L196 212 L262 234 L332 216 L404 238 L480 220 L480 300 L0 300 Z" class="ar-far"/>
+        <path d="M30 300 C110 256 162 200 200 158 Q214 142 228 146 L240 152 Q252 144 264 150 C302 196 356 256 450 300 Z" class="ar-fuji"/>
+        <path d="M200 158 Q214 142 228 146 L240 152 Q252 144 264 150 C270 157 276 164 283 172 L274 170 L266 180 L256 170 L246 182 L236 171 L226 183 L216 172 L206 181 L196 172 L183 176 C189 170 194 164 200 158 Z" class="ar-snow"/>
+        <rect x="0" y="246" width="480" height="54" fill="url(#mist)"/>
+        <rect x="0" y="292" width="480" height="68" class="ar-sea"/>
+      </svg>
+      <div class="waves"></div>
+      <div class="art-tag"><span>精密計算</span><span class="seal">オ</span></div>
+    </figure>
+  </section>
+
+  <section class="calc" id="calculateur" aria-label="الحاسبة">
+    <div class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title"><span class="jp">設定</span>الإعدادات</h2>
+        <button class="link-btn" id="reset" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+          إعادة الضبط
+        </button>
+      </div>
+      <ol class="steps">
+        <li class="step">
+          <div class="step-top">
+            <span class="hanko" aria-hidden="true">一</span>
+            <div><h3 id="lblVial">محتوى القارورة</h3><p>الكمية المكتوبة على ملصق القارورة.</p></div>
+          </div>
+          <div class="step-body">
+            <div class="field">
+              <input id="vial" type="text" inputmode="decimal" autocomplete="off" value="5" aria-labelledby="lblVial">
+              <div class="seg" data-group="vialUnit" role="group" aria-label="وحدة القارورة">
+                <button type="button" data-v="mg" aria-pressed="true">mg</button>
+                <button type="button" data-v="mcg" aria-pressed="false">mcg</button>
+              </div>
+            </div>
+            <div class="chips">
+              <span class="k">اختصارات</span>
+              <button type="button" class="chip" data-preset="vial" data-value="2" data-unit="mg"><bdi dir="ltr">2 mg</bdi></button>
+              <button type="button" class="chip" data-preset="vial" data-value="5" data-unit="mg"><bdi dir="ltr">5 mg</bdi></button>
+              <button type="button" class="chip" data-preset="vial" data-value="10" data-unit="mg"><bdi dir="ltr">10 mg</bdi></button>
+            </div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-top">
+            <span class="hanko" aria-hidden="true">二</span>
+            <div><h3 id="lblWater">الماء المضاف</h3><p>حجم الماء الذي تحقنه في القارورة.</p></div>
+          </div>
+          <div class="step-body">
+            <div class="field">
+              <input id="water" type="text" inputmode="decimal" autocomplete="off" value="2" aria-labelledby="lblWater">
+              <span class="suffix">mL</span>
+            </div>
+            <div class="chips">
+              <span class="k">اختصارات</span>
+              <button type="button" class="chip" data-preset="water" data-value="1"><bdi dir="ltr">1 mL</bdi></button>
+              <button type="button" class="chip" data-preset="water" data-value="2"><bdi dir="ltr">2 mL</bdi></button>
+              <button type="button" class="chip" data-preset="water" data-value="3"><bdi dir="ltr">3 mL</bdi></button>
+            </div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-top">
+            <span class="hanko" aria-hidden="true">三</span>
+            <div><h3 id="lblDose">الكمية لكل جرعة</h3><p>ما تريد سحبه في كل مرة.</p></div>
+          </div>
+          <div class="step-body">
+            <div class="field">
+              <input id="dose" type="text" inputmode="decimal" autocomplete="off" value="250" aria-labelledby="lblDose">
+              <div class="seg" data-group="doseUnit" role="group" aria-label="وحدة الجرعة">
+                <button type="button" data-v="mg" aria-pressed="false">mg</button>
+                <button type="button" data-v="mcg" aria-pressed="true">mcg</button>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-top">
+            <span class="hanko" aria-hidden="true">四</span>
+            <div><h3>حقنة U-100</h3><p>سعتها الكاملة، المكتوبة على العبوة.</p></div>
+          </div>
+          <div class="step-body">
+            <div class="syr-opts" data-group="syringe" role="group" aria-label="سعة الحقنة">
+              <button type="button" class="syr-opt" data-v="0.3" aria-pressed="false">
+                <span class="mini"><i></i></span><b><bdi dir="ltr">0.3 mL</bdi></b><span>30 وحدة</span>
+              </button>
+              <button type="button" class="syr-opt" data-v="0.5" aria-pressed="false">
+                <span class="mini"><i></i></span><b><bdi dir="ltr">0.5 mL</bdi></b><span>50 وحدة</span>
+              </button>
+              <button type="button" class="syr-opt" data-v="1" aria-pressed="true">
+                <span class="mini"><i></i></span><b><bdi dir="ltr">1 mL</bdi></b><span>100 وحدة</span>
+              </button>
+            </div>
+            <label class="switch"><input id="half" type="checkbox"> حقنتي فيها علامات كل نصف وحدة</label>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <section class="panel result" id="resultat" aria-labelledby="resTitle">
+      <div class="panel-head">
+        <h2 class="panel-title" id="resTitle"><span class="jp">結果</span>النتيجة</h2>
+        <span class="pill" id="status" data-tone="idle">في الانتظار</span>
+      </div>
+      <div class="result-body">
+        <div>
+          <p class="sr-only" id="srResult" aria-live="polite"></p>
+          <p class="draw-k">اسحب حتى</p>
+          <p class="big"><span id="units">—</span><small>وحدة</small></p>
+          <p class="draw-sub">أي <b id="ml">—</b> على حقنة سعتها <b id="capText">1 mL</b></p>
+        </div>
+        <svg id="syr" viewBox="0 0 560 126" role="img" aria-labelledby="syrTitle">
+          <title id="syrTitle">حقنة مملوءة حتى العلامة المحسوبة</title>
+          <defs><clipPath id="barrelClip"><rect x="70" y="44" width="404" height="46" rx="6"/></clipPath></defs>
+          <line x1="4" y1="67" x2="46" y2="67" class="needle"/>
+          <rect x="44" y="58" width="26" height="18" rx="3" class="hub"/>
+          <rect x="70" y="44" width="404" height="46" rx="6" class="barrel-bg"/>
+          <g clip-path="url(#barrelClip)"><rect id="liquid" x="70" y="44" width="388" height="46" class="liquid"/></g>
+          <g id="plunger">
+            <rect x="82" y="62" width="412" height="10" class="rod"/>
+            <rect x="494" y="40" width="8" height="54" rx="2" class="thumb"/>
+            <rect x="70" y="46" width="12" height="42" rx="2" class="stopper"/>
+          </g>
+          <g id="scale"></g>
+          <rect x="70" y="44" width="404" height="46" rx="6" class="barrel"/>
+          <rect x="474" y="34" width="7" height="66" rx="2" class="flange"/>
+          <g id="pointer"><path d="M70 41 l-7 -10 h14 z" class="marker-fill"/></g>
+          <g id="marker">
+            <rect id="markerBox" x="-26" y="4" width="52" height="27" rx="7" class="marker-fill"/>
+            <text id="markerText" x="0" y="23" class="marker-text">—</text>
+          </g>
+        </svg>
+        <dl class="stats">
+          <div><dt>التركيز</dt><dd id="conc">—</dd></div>
+          <div><dt>لكل وحدة</dt><dd id="perUnit">—</dd></div>
+          <div><dt>عدد الجرعات في القارورة</dt><dd id="count">—</dd></div>
+          <div><dt>نسبة الامتلاء</dt><dd id="fillPct">—</dd></div>
+        </dl>
+        <ul class="notes" id="notes" hidden></ul>
+        <div class="actions">
+          <button class="btn btn-primary" id="copyLink" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+            نسخ الرابط
+          </button>
+          <button class="btn" id="copySum" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
+            نسخ الملخص
+          </button>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section class="section" id="methode">
+    <div>
+      <p class="eyebrow"><span class="jp">方法</span>الطريقة</p>
+      <h2>الحساب خطوة بخطوة</h2>
+      <p class="intro">نفس العمليات التي ستقوم بها يدويًا، محدّثة بقيمك. تحتوي حقنة <bdi dir="ltr">U-100</bdi> على 100 وحدة في كل mL.</p>
+    </div>
+    <ol class="method">
+      <li><div class="lbl"><b>التحويل</b><span>كل شيء بالـ mcg (<bdi dir="ltr">1 mg = 1000 mcg</bdi>)</span></div><div class="eq" id="m1">—</div></li>
+      <li><div class="lbl"><b>التركيز</b><span>القارورة ÷ الماء</span></div><div class="eq" id="m2">—</div></li>
+      <li><div class="lbl"><b>الحجم</b><span>الجرعة ÷ التركيز</span></div><div class="eq" id="m3">—</div></li>
+      <li><div class="lbl"><b>الوحدات</b><span>الحجم × 100</span></div><div class="eq" id="m4">—</div></li>
+    </ol>
+  </section>
+
+  <section class="section" id="etiquette">
+    <div>
+      <p class="eyebrow"><span class="jp">ラベル</span>الملصق</p>
+      <h2>ملصق لقارورتك</h2>
+      <p class="intro">يستخدم قيمك الحالية. أضف اسمًا وتاريخ إعادة التكوين، ثم اطبعه بعرض 7 سم.</p>
+    </div>
+    <div class="label-grid">
+      <div class="label-tools">
+        <div>
+          <label for="labelName">الاسم على الملصق (اختياري)</label>
+          <input class="text-field" id="labelName" type="text" maxlength="40" placeholder="مثال: القارورة A" autocomplete="off">
+        </div>
+        <div>
+          <label for="date">تاريخ إعادة التكوين</label>
+          <input class="text-field" id="date" type="date">
+        </div>
+        <button class="btn btn-primary" id="print" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg>
+          اطبع الملصق
+        </button>
+        <p class="hint">يُطبع الملصق وحده.</p>
+      </div>
+      <div class="label-stage">
+        <div class="label-card" id="labelCard">
+          <div class="label-brand">
+            <span class="seal" aria-hidden="true">オ</span>
+            <div><b>AURAPEPT</b><span>オーラペプト</span></div>
+          </div>
+          <p class="label-name" id="lName" hidden></p>
+          <dl>
+            <dt>القارورة</dt><dd id="lVial">—</dd>
+            <dt>الماء المضاف</dt><dd id="lWater">—</dd>
+            <dt>التركيز</dt><dd id="lConc">—</dd>
+            <dt>الجرعة</dt><dd id="lDraw">—</dd>
+          </dl>
+          <div class="label-date"><span>حُضّرت في</span><b id="lDate">__/__/____</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="flacons">
+    <div>
+      <p class="eyebrow"><span class="jp">記録</span>قواريري</p>
+      <h2>احفظ قواريرك</h2>
+      <p class="intro">احفظ إعدادات قارورة لتجدها لاحقًا. تبقى في متصفحك: لا يُرسل أي شيء.</p>
+      <button class="btn btn-primary" id="saveVial" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+        احفظ هذه القارورة
+      </button>
+    </div>
+    <div class="vials">
+      <ul class="vial-list" id="vialList"></ul>
+      <p class="vial-empty" id="vialEmpty">لا توجد قوارير محفوظة بعد. اضبط الحاسبة، وأضف اسمًا وتاريخًا في الملصق، ثم اضغط «احفظ هذه القارورة».</p>
+    </div>
+  </section>
+
+  <section class="section" id="avertissements">
+    <div>
+      <p class="eyebrow"><span class="jp">注意</span>تحذيرات</p>
+      <h2>اقرأ قبل الاستخدام</h2>
+    </div>
+    <ul class="warn-list">
+      <li>أداة حساب للمعلومات فقط. ليست نصيحة طبية ولا توصي بأي كمية.</li>
+      <li>تحقق دائمًا من القيم التي تدخلها ومن علامة <bdi dir="ltr">U-100</bdi> على حقنتك. النتائج مقدّمة كما هي، دون أي ضمان.</li>
+      <li>اتبع قواعد النظافة والحفظ الخاصة بمنتجك.</li>
+      <li>أنت مسؤول عن احترام قوانين بلدك.</li>
+    </ul>
+  </section>
+
+  <section class="section" id="mentions">
+    <div>
+      <p class="eyebrow"><span class="jp">法律</span>إشعار قانوني</p>
+      <h2>من ينشر هذا الموقع</h2>
+    </div>
+    <dl class="legal">
+      <div><dt>الناشر</dt><dd>فرد يعمل بصفة غير مهنية، اختار عدم الكشف عن هويته كما تسمح بذلك المادة 1-1، الفقرة II من القانون الفرنسي رقم 2004-575 المؤرخ 21 يونيو 2004 بشأن الثقة في الاقتصاد الرقمي (LCEN).</dd></div>
+      <div><dt>المستضيف</dt><dd><span dir="ltr">GitHub, Inc.<br>88 Colin P. Kelly Jr. St.<br>San Francisco, CA 94107</span><br>الولايات المتحدة<br><a href="https://github.com/">github.com</a></dd></div>
+      <div><dt>التواصل</dt><dd><a href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer">AURAPEPT على تيليغرام</a></dd></div>
+      <div><dt>حق الرد</dt><dd>يُمارَس عبر المستضيف، الذي ينقل الطلب إلى الناشر.</dd></div>
+      <div><dt>البيانات الشخصية</dt><dd>لا تُجمع أي بيانات ولا تُرسل: لا حساب، ولا ملفات تعريف الارتباط (كوكيز)، ولا قياس للزيارات. تتم الحسابات في متصفحك، الذي يحتفظ فقط باختيارك للمظهر وبالقوارير التي تحفظها (تخزين محلي، على جهازك فقط).</dd></div>
+      <div><dt>الخطوط</dt><dd>Shippori Mincho وZen Kaku Gothic New وAmiri وIBM Plex Sans Arabic، بموجب ترخيص SIL Open Font License 1.1، ومستضافة على هذا الموقع.</dd></div>
+    </dl>
+  </section>
+
+  <footer class="footer">
+    <div class="brand">
+      <span class="seal" aria-hidden="true">オ</span>
+      <span><span class="brand-name">AURAPEPT</span><span class="brand-kana">オーラペプト</span></span>
+    </div>
+    <p class="footer-note">أداة للمعلومات فقط، وليست نصيحة طبية. لا تُرسل أي بيانات: تتم الحسابات في متصفحك، الذي يتذكر فقط اختيارك للمظهر وقواريرك المحفوظة. <a href="peptides/">قائمة الببتيدات</a> · <a href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer">تيليغرام</a> · <a href="#mentions">إشعار قانوني</a> · <a href="../" hreflang="fr" lang="fr">Français</a> · <a href="../en/" hreflang="en" lang="en">English</a></p>
+  </footer>
+</main>
+
+<section class="dock is-hidden" id="dock" aria-label="نتيجة سريعة">
+  <div><span class="k">اسحب</span><b id="dockUnits">—</b><span class="ml" id="dockMl"></span></div>
+  <a href="#resultat">عرض التفاصيل</a>
+</section>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="../assets/app.js"></script>
+</body>
+</html>

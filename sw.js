@@ -1,7 +1,7 @@
 // Service worker AURAPEPT : garde le site en mémoire pour qu'il fonctionne hors connexion.
 // Pages : réseau d'abord (contenu à jour), mémoire si pas de connexion.
 // Fichiers (styles, scripts, polices, modèle 3D) : mémoire d'abord, mise à jour en arrière-plan.
-const VERSION = "aurapept-2026-10-28b";
+const VERSION = "aurapept-2026-10-28c";
 const CORE = [
   "/", "/404.html", "/manifest.webmanifest",
   "/assets/style.css", "/assets/app.js", "/assets/theme.js",

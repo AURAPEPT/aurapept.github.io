@@ -1,13 +1,16 @@
 import { createBody, ZONES } from "./body.js";
 
-/* Langue : la page anglaise (/en/peptides/) a lang="en" et charge les textes de data-en.js */
-const EN = document.documentElement.lang === "en";
-const t = (fr, en) => (EN ? en : fr);
-const { CATEGORIES, PEPTIDES, ZONE_LABELS } = await import(EN ? "./data-en.js" : "./data.js");
+/* Langue : les pages /en/peptides/ et /ar/peptides/ ont lang="en" ou lang="ar" et chargent data-en.js ou data-ar.js */
+const LANG = document.documentElement.lang;
+const EN = LANG === "en", AR = LANG === "ar";
+const t = (fr, en, ar) => (AR ? ar : EN ? en : fr);
+const { CATEGORIES, PEPTIDES, ZONE_LABELS } = await import(AR ? "./data-ar.js" : EN ? "./data-en.js" : "./data.js");
 if (ZONE_LABELS) Object.entries(ZONE_LABELS).forEach(([id, label]) => { if (ZONES[id]) ZONES[id].label = label; });
-const LOADING = EN
-  ? { os: "Loading the skeleton…", muscles: "Loading the muscles…", tendons: "Loading the tendons…" }
-  : { os: "Chargement du squelette…", muscles: "Chargement des muscles…", tendons: "Chargement des tendons…" };
+const LOADING = {
+  fr: { os: "Chargement du squelette…", muscles: "Chargement des muscles…", tendons: "Chargement des tendons…" },
+  en: { os: "Loading the skeleton…", muscles: "Loading the muscles…", tendons: "Loading the tendons…" },
+  ar: { os: "جارٍ تحميل الهيكل العظمي…", muscles: "جارٍ تحميل العضلات…", tendons: "جارٍ تحميل الأوتار…" },
+}[LANG] || {};
 
 const $ = (id) => document.getElementById(id);
 const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -27,7 +30,7 @@ function noBody() {
 const body = createBody($("body3d"), $("labels"), {
   onPick: (zone) => setZone(zone && zone === state.zone ? null : zone),
   onReady: (ok) => { $("loading").hidden = true; if (!ok) noBody(); },
-  onLoading: (part) => { $("loading").textContent = part ? LOADING[part] || t("Chargement du modèle…", "Loading the model…") : ""; $("loading").hidden = !part; },
+  onLoading: (part) => { $("loading").textContent = part ? LOADING[part] || t("Chargement du modèle…", "Loading the model…", "جارٍ تحميل النموذج…") : ""; $("loading").hidden = !part; },
 });
 if (!body) noBody();
 $("body3d").addEventListener("pointerdown", () => $("hint").classList.add("is-gone"), { once: true });
@@ -78,27 +81,27 @@ function itemFor(p) {
   panel.hidden = true;
 
   const line = (k, v) => { const e = el("p", "pep-line"); e.append(el("span", "pep-k", k), document.createTextNode(v)); return e; };
-  panel.append(line(t("Agit sur", "Acts on"), p.action), line(t("But", "Goal"), p.but));
+  panel.append(line(t("Agit sur", "Acts on", "يعمل على"), p.action), line(t("But", "Goal", "الهدف"), p.but));
   if (p.mix?.length) {
     const mix = el("p", "pep-line pep-mix");
-    mix.append(el("span", "pep-k", t("Contient", "Contains")));
+    mix.append(el("span", "pep-k", t("Contient", "Contains", "يحتوي على")));
     p.mix.forEach((id) => {
       const c = byId.get(id);
       if (!c) return;
       const a = el("button", "pep-mixlink", c.nom);
       a.type = "button";
-      a.title = t(`Ouvrir la fiche ${c.nom}`, `Open the ${c.nom} entry`);
+      a.title = t(`Ouvrir la fiche ${c.nom}`, `Open the ${c.nom} entry`, `فتح بطاقة ${c.nom}`);
       a.addEventListener("click", () => { setZone(null); toggle(id); items.get(id).scrollIntoView({ block: "nearest" }); });
       mix.append(a);
     });
     panel.append(mix);
   }
   const chips = el("div", "pep-zchips");
-  chips.setAttribute("aria-label", t("Zones ciblées", "Target areas"));
+  chips.setAttribute("aria-label", t("Zones ciblées", "Target areas", "المناطق المستهدفة"));
   p.zones.forEach((z) => {
     const c = el("button", "pep-zchip" + (ZONES[z]?.tone === "fat" ? " is-fat" : ""), zoneLabel(z));
     c.type = "button";
-    c.title = t(`Voir les peptides qui ciblent : ${zoneLabel(z)}`, `See the peptides that target: ${zoneLabel(z)}`);
+    c.title = t(`Voir les peptides qui ciblent : ${zoneLabel(z)}`, `See the peptides that target: ${zoneLabel(z)}`, `عرض الببتيدات التي تستهدف: ${zoneLabel(z)}`);
     c.addEventListener("click", () => setZone(z));
     chips.append(c);
   });
@@ -110,7 +113,7 @@ function itemFor(p) {
     a.target = "_blank";
     a.rel = "noopener noreferrer";
     const src = el("span", "pep-src");
-    src.append(t("Source : ", "Source: "), a);
+    src.append(t("Source : ", "Source: ", "المصدر: "), a);
     meta.append(src);
   }
   panel.append(meta);
@@ -130,7 +133,7 @@ function famChip(id, label, count) {
   return b;
 }
 $("famChips").replaceChildren(
-  famChip(null, t("Tous", "All"), peptides.length),
+  famChip(null, t("Tous", "All", "الكل"), peptides.length),
   ...CATEGORIES.filter((c) => peptides.some((p) => p.cat === c.id)).map((c) => famChip(c.id, c.short || c.label, peptides.filter((p) => p.cat === c.id).length)),
 );
 function setCat(cat) {
@@ -199,8 +202,8 @@ function render() {
   const empty = $("emptyState");
   empty.hidden = shown > 0;
   empty.textContent = state.zone && !q
-    ? t(`Aucun peptide de la liste ne cible : ${zoneLabel(state.zone)}.`, `No peptide in the list targets: ${zoneLabel(state.zone)}.`)
-    : t("Aucun peptide ne correspond à ta recherche.", "No peptide matches your search.");
+    ? t(`Aucun peptide de la liste ne cible : ${zoneLabel(state.zone)}.`, `No peptide in the list targets: ${zoneLabel(state.zone)}.`, `لا يوجد ببتيد في القائمة يستهدف: ${zoneLabel(state.zone)}.`)
+    : t("Aucun peptide ne correspond à ta recherche.", "No peptide matches your search.", "لا يوجد ببتيد يطابق بحثك.");
 }
 
 $("search").addEventListener("input", (e) => { state.query = e.target.value; render(); });
@@ -210,21 +213,27 @@ $("clearZone").addEventListener("click", () => setZone(null));
 const fromHash = decodeURIComponent(location.hash.slice(1));
 if (byId.has(fromHash)) state.open = fromHash;
 render();
-$("langBtn")?.addEventListener("click", (e) => { e.currentTarget.hash = location.hash; });
+/* Menu des langues : garde la fiche ouverte, se ferme en touchant ailleurs ou avec Échap */
+const langMenu = $("langMenu");
+if (langMenu) {
+  langMenu.querySelectorAll(".lang-list a").forEach((a) => a.addEventListener("click", () => { a.hash = location.hash; }));
+  document.addEventListener("click", (e) => { if (!langMenu.contains(e.target)) langMenu.open = false; });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && langMenu.open) { langMenu.open = false; langMenu.querySelector("summary").focus(); } });
+}
 
 /* Thème clair / sombre (même réglage que le calculateur) */
 const THEMES = ["system", "light", "dark"];
 const THEME_UI = {
-  system: [t("Thème : automatique", "Theme: automatic"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>'],
-  light: [t("Thème : clair", "Theme: light"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'],
-  dark: [t("Thème : sombre", "Theme: dark"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>'],
+  system: [t("Thème : automatique", "Theme: automatic", "المظهر: تلقائي"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>'],
+  light: [t("Thème : clair", "Theme: light", "المظهر: فاتح"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'],
+  dark: [t("Thème : sombre", "Theme: dark", "المظهر: داكن"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>'],
 };
 function setTheme(mode, save) {
   const root = document.documentElement;
   if (mode === "system") delete root.dataset.theme; else root.dataset.theme = mode;
   const [label, icon] = THEME_UI[mode];
   $("themeBtn").innerHTML = icon;
-  $("themeBtn").setAttribute("aria-label", `${label}. ${t("Cliquer pour changer.", "Click to change.")}`);
+  $("themeBtn").setAttribute("aria-label", `${label}. ${t("Cliquer pour changer.", "Click to change.", "اضغط للتغيير.")}`);
   $("themeBtn").title = label;
   if (save) { try { localStorage.setItem("aurapept-theme", mode); } catch (e) {} }
 }

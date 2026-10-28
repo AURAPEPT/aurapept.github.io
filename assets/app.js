@@ -1,14 +1,21 @@
 const $ = (id) => document.getElementById(id);
-// Langue : la page anglaise (/en/) a lang="en" ; t("texte français", "English text")
-const EN = document.documentElement.lang === "en";
-const t = (fr, en) => (EN ? en : fr);
+// Langue de la page (fr, en ou ar) : t("texte français", "English text", "النص العربي")
+const LANG = document.documentElement.lang;
+const EN = LANG === "en", AR = LANG === "ar";
+const t = (fr, en, ar) => (AR ? ar : EN ? en : fr);
+// En arabe, chiffres occidentaux : ce sont ceux imprimés sur les seringues et les flacons
+const LOCALE = AR ? "ar-u-nu-latn" : EN ? "en-US" : "fr-FR";
+// En arabe, « 5 mg » doit rester dans cet ordre au milieu du texte de droite à gauche (isolat Unicode LRI…PDI),
+// et un mot arabe au milieu d'un calcul écrit de gauche à droite est isolé de la même façon (RLI…PDI)
+const ltr = (s) => (AR ? `\u2066${s}\u2069` : s);
+const rtl = (s) => (AR ? `\u2067${s}\u2069` : s);
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const DEFAULTS = { v: "5", vu: "mg", w: "2", d: "250", du: "mcg", s: "1", h: false, n: "" };
 const state = { vialUnit: "mg", doseUnit: "mcg", syringe: "1" };
 const SYR = { x0: 70, w: 388 }; // zone graduée de la seringue, en unités du viewBox
 
 const fmt = (n, d = 2) => Number.isFinite(n)
-  ? n.toLocaleString(EN ? "en-US" : "fr-FR", { maximumFractionDigits: d }) : "—";
+  ? n.toLocaleString(LOCALE, { maximumFractionDigits: d }) : "—";
 const MAX_INPUT = 1e6;
 // Nombre décimal simple uniquement (virgule ou point) : refuse 0x10, 1e3, Infinity…
 // Renvoie NaN pour un champ vide et -1 pour une saisie invalide.
@@ -25,8 +32,9 @@ const mass = (mcg) => (mcg >= 1000 ? `${fmt(mcg / 1000, 3)} mg` : `${fmt(mcg, 2)
 const fmtDate = (iso) => {
   const [y, m, d] = (iso || "").split("-");
   if (!(y && m && d)) return "";
-  // En anglais, mois en lettres (28 Oct 2026) : 10/28 et 28/10 se lisent différemment selon les pays
-  return EN ? new Date(Date.UTC(+y, m - 1, +d)).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }) : `${d}/${m}/${y}`;
+  // En anglais et en arabe, mois en lettres (28 Oct 2026) : 10/28 et 28/10 se lisent différemment selon les pays
+  const opts = { day: "numeric", month: AR ? "long" : "short", year: "numeric", timeZone: "UTC" };
+  return EN || AR ? new Date(Date.UTC(+y, m - 1, +d)).toLocaleDateString(AR ? LOCALE : "en-GB", opts) : `${d}/${m}/${y}`;
 };
 
 function setGroup(key, value) {
@@ -118,32 +126,36 @@ function calc() {
   const exact = valid && !tooSmall && Math.abs(units - nearest) < 1e-6;
 
   showUnits(valid ? units : NaN);
-  $("ml").textContent = valid ? `${fmt(ml, 3)} mL` : "—";
-  $("capText").textContent = `${fmt(cap)} mL`;
-  $("conc").textContent = valid ? `${mass(conc)}/mL` : "—";
-  $("perUnit").textContent = valid ? mass(conc / 100) : "—";
+  $("ml").textContent = valid ? ltr(`${fmt(ml, 3)} mL`) : "—";
+  $("capText").textContent = ltr(`${fmt(cap)} mL`);
+  $("conc").textContent = valid ? ltr(`${mass(conc)}/mL`) : "—";
+  $("perUnit").textContent = valid ? ltr(mass(conc / 100)) : "—";
   $("count").textContent = valid ? fmt(Math.floor(vial / dose + 1e-9), 0) : "—";
-  $("fillPct").textContent = !valid ? "—" : over ? "> 100 %" : `${fmt((units / total) * 100, 0)} %`;
+  $("fillPct").textContent = !valid ? "—" : ltr(over ? "> 100 %" : `${fmt((units / total) * 100, 0)} %`);
 
   const status = $("status");
-  const [tone, label] = !valid ? ["idle", t("En attente", "Waiting")]
-    : over ? ["alert", t("Dépasse la seringue", "Exceeds the syringe")]
-    : tooSmall ? ["alert", t("Trop petit à mesurer", "Too small to measure")]
-    : !exact ? ["warn", t("Entre deux traits", "Between two marks")]
-    : ["ok", t("Graduation exacte", "Exact mark")];
+  const [tone, label] = !valid ? ["idle", t("En attente", "Waiting", "في الانتظار")]
+    : over ? ["alert", t("Dépasse la seringue", "Exceeds the syringe", "تتجاوز الحقنة")]
+    : tooSmall ? ["alert", t("Trop petit à mesurer", "Too small to measure", "صغيرة جدًا للقياس")]
+    : !exact ? ["warn", t("Entre deux traits", "Between two marks", "بين علامتين")]
+    : ["ok", t("Graduation exacte", "Exact mark", "علامة دقيقة")];
   status.dataset.tone = tone;
   status.textContent = label;
 
   const notes = [];
   if (!valid) notes.push(["idle", t("Renseigne les trois quantités avec des nombres positifs, par exemple 2,5. Les écritures comme 1e3 ne sont pas acceptées.",
-    "Enter all three amounts as positive numbers, for example 2.5. Notations like 1e3 are not accepted.")]);
+    "Enter all three amounts as positive numbers, for example 2.5. Notations like 1e3 are not accepted.",
+    "أدخل الكميات الثلاث بأرقام موجبة، مثل 2.5. الكتابات مثل 1e3 غير مقبولة.")]);
   if (over) notes.push(["alert", t(`Il faut ${fmt(units, 2)} unités, mais cette seringue s'arrête à ${total}. Choisis une seringue plus grande ou répartis en plusieurs prélèvements.`,
-    `You need ${fmt(units, 2)} units, but this syringe stops at ${total}. Choose a bigger syringe or split it into several draws.`)]);
+    `You need ${fmt(units, 2)} units, but this syringe stops at ${total}. Choose a bigger syringe or split it into several draws.`,
+    `تحتاج إلى ${fmt(units, 2)} وحدة، لكن هذه الحقنة تتوقف عند ${total}. اختر حقنة أكبر أو قسّم الكمية على عدة سحبات.`)]);
   if (tooSmall) notes.push(["alert", t(`Il faut ${fmtU(units)} unité, moins que la moitié d'un trait de cette seringue : impossible à mesurer précisément.`,
-    `You need ${fmtU(units)} unit, less than half a mark on this syringe: impossible to measure accurately.`)]);
+    `You need ${fmtU(units)} unit, less than half a mark on this syringe: impossible to measure accurately.`,
+    `تحتاج إلى ${fmtU(units)} وحدة، أي أقل من نصف علامة في هذه الحقنة: لا يمكن قياسها بدقة.`)]);
   if (valid && !over && !tooSmall && !exact) notes.push(["warn", t(`Aucun trait exact à ${fmt(units, 2)} u. Le plus proche est ${fmt(nearest, 1)} u (graduations de ${fmt(step)} unité).`,
-    `No exact mark at ${fmt(units, 2)} u. The closest is ${fmt(nearest, 1)} u (${fmt(step)}-unit marks).`)]);
-  if (valid && dose > vial) notes.push(["alert", t("La quantité par prise dépasse le contenu total du flacon.", "The dose is larger than the whole vial.")]);
+    `No exact mark at ${fmt(units, 2)} u. The closest is ${fmt(nearest, 1)} u (${fmt(step)}-unit marks).`,
+    `لا توجد علامة دقيقة عند ${fmt(units, 2)} وحدة. الأقرب هي ${fmt(nearest, 1)} وحدة (علامات كل ${fmt(step)} وحدة).`)]);
+  if (valid && dose > vial) notes.push(["alert", t("La quantité par prise dépasse le contenu total du flacon.", "The dose is larger than the whole vial.", "الكمية لكل جرعة أكبر من محتوى القارورة كله.")]);
   const list = $("notes");
   list.replaceChildren(...notes.map(([t, msg]) => {
     const li = document.createElement("li");
@@ -166,44 +178,54 @@ function calc() {
   // Méthode détaillée avec les valeurs en cours
   if (valid) {
     const conv = (v, u, mcg) => (u === "mg" ? `${fmt(v, 3)} mg = ${fmt(mcg, 2)} mcg` : `${fmt(mcg, 2)} mcg`);
-    $("m1").innerHTML = `${t("Flacon", "Vial")} ${conv(raw.v, state.vialUnit, vial)} · ${t("prise", "dose")} ${conv(raw.d, state.doseUnit, dose)}`;
+    $("m1").innerHTML = `${rtl(t("Flacon", "Vial", "القارورة"))} ${conv(raw.v, state.vialUnit, vial)} · ${rtl(t("prise", "dose", "الجرعة"))} ${conv(raw.d, state.doseUnit, dose)}`;
     $("m2").innerHTML = `${fmt(vial, 2)} mcg ÷ ${fmt(water, 3)} mL = <strong>${fmt(conc, 2)} mcg/mL</strong>`;
     $("m3").innerHTML = `${fmt(dose, 2)} mcg ÷ ${fmt(conc, 2)} mcg/mL = <strong>${fmt(ml, 4)} mL</strong>`;
-    $("m4").innerHTML = `${fmt(ml, 4)} mL × 100 = <strong>${fmtU(units)} ${t("unités", "units")}</strong>`;
+    $("m4").innerHTML = `${fmt(ml, 4)} mL × 100 = <strong>${fmtU(units)} ${rtl(t("unités", "units", "وحدة"))}</strong>`;
   } else {
-    ["m1", "m2", "m3", "m4"].forEach((id) => ($(id).textContent = t("En attente de valeurs valides", "Waiting for valid values")));
+    ["m1", "m2", "m3", "m4"].forEach((id) => ($(id).textContent = t("En attente de valeurs valides", "Waiting for valid values", "في انتظار قيم صحيحة")));
   }
 
   // Étiquette
   const name = $("labelName").value.trim();
   $("lName").textContent = name;
   $("lName").hidden = !name;
-  $("lVial").textContent = Number.isFinite(raw.v) ? `${fmt(raw.v, 3)} ${state.vialUnit}` : "—";
-  $("lWater").textContent = Number.isFinite(raw.w) ? `${fmt(raw.w, 3)} mL` : "—";
+  $("lVial").textContent = Number.isFinite(raw.v) ? ltr(`${fmt(raw.v, 3)} ${state.vialUnit}`) : "—";
+  $("lWater").textContent = Number.isFinite(raw.w) ? ltr(`${fmt(raw.w, 3)} mL`) : "—";
   $("lConc").textContent = $("conc").textContent;
-  $("lDraw").textContent = valid ? `${fmt(raw.d, 3)} ${state.doseUnit} = ${fmtU(units)} u` : "—";
-  $("lDate").textContent = fmtDate($("date").value) || t("__/__/____", "__ ___ ____");
+  $("lDraw").textContent = valid ? ltr(`${fmt(raw.d, 3)} ${state.doseUnit} = ${fmtU(units)} u`) : "—";
+  $("lDate").textContent = fmtDate($("date").value) || t("__/__/____", "__ ___ ____", "__/__/____");
 
   // Barre mobile
-  $("dockUnits").textContent = valid ? `${fmtU(units)} u` : "—";
-  $("dockMl").textContent = valid ? `${fmt(ml, 3)} mL` : "";
+  $("dockUnits").textContent = valid ? ltr(`${fmtU(units)} u`) : "—";
+  $("dockMl").textContent = valid ? ltr(`${fmt(ml, 3)} mL`) : "";
 
   // Lecteurs d'écran : une seule annonce, une fois la saisie terminée
   if (booted) {
     clearTimeout(srTimer);
-    const msg = valid ? t(`Prélever ${fmtU(units)} unités, soit ${fmt(ml, 3)} mL. ${label}.`, `Draw ${fmtU(units)} units, i.e. ${fmt(ml, 3)} mL. ${label}.`) : `${label}.`;
+    const msg = valid ? t(`Prélever ${fmtU(units)} unités, soit ${fmt(ml, 3)} mL. ${label}.`, `Draw ${fmtU(units)} units, i.e. ${fmt(ml, 3)} mL. ${label}.`, `اسحب ${fmtU(units)} وحدة، أي ${ltr(`${fmt(ml, 3)} mL`)}. ${label}.`) : `${label}.`;
     srTimer = setTimeout(() => ($("srResult").textContent = msg), 700);
   }
 
   try { history.replaceState(null, "", "?" + params().toString() + location.hash); } catch (e) {}
-  if ($("langBtn")) $("langBtn").search = params().toString(); // l'autre langue garde les mêmes réglages
+  document.querySelectorAll(".lang-list a").forEach((a) => (a.search = params().toString())); // les autres langues gardent les mêmes réglages
 }
 
 function summary() {
   const date = fmtDate($("date").value);
   const name = $("labelName").value.trim();
-  const units = `${$("units").textContent} ${t("unités", "units")} (${$("ml").textContent})`;
-  return (EN ? [
+  const units = `${$("units").textContent} ${t("unités", "units", "وحدة")} (${$("ml").textContent})`;
+  return (AR ? [
+    "AURAPEPT · حساب إعادة التكوين",
+    name ? `الاسم: ${name}` : "",
+    `القارورة: ${ltr(`${$("vial").value} ${state.vialUnit}`)}`,
+    `الماء المضاف: ${ltr(`${$("water").value} mL`)}`,
+    `التركيز: ${$("conc").textContent}`,
+    `الكمية لكل جرعة: ${ltr(`${$("dose").value} ${state.doseUnit}`)}`,
+    `اسحب: ${units} على حقنة U-100 سعتها ${$("capText").textContent}`,
+    `عدد الجرعات في القارورة: ${$("count").textContent}`,
+    date ? `تاريخ التحضير: ${date}` : "",
+  ] : EN ? [
     "AURAPEPT · Reconstitution calculation",
     name ? `Name: ${name}` : "",
     `Vial: ${$("vial").value} ${state.vialUnit}`,
@@ -277,7 +299,7 @@ function copy(text, done) {
     let ok = false;
     try { ok = document.execCommand("copy"); } catch (e) {}
     ta.remove();
-    toast(ok ? done : t("Copie impossible sur ce navigateur", "Copying isn't possible in this browser"));
+    toast(ok ? done : t("Copie impossible sur ce navigateur", "Copying isn't possible in this browser", "النسخ غير ممكن في هذا المتصفح"));
   };
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(() => toast(done), fallback);
@@ -287,16 +309,16 @@ function copy(text, done) {
 /* Thème */
 const THEMES = ["system", "light", "dark"];
 const THEME_UI = {
-  system: [t("Thème : automatique", "Theme: automatic"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>'],
-  light: [t("Thème : clair", "Theme: light"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'],
-  dark: [t("Thème : sombre", "Theme: dark"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>'],
+  system: [t("Thème : automatique", "Theme: automatic", "المظهر: تلقائي"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>'],
+  light: [t("Thème : clair", "Theme: light", "المظهر: فاتح"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'],
+  dark: [t("Thème : sombre", "Theme: dark", "المظهر: داكن"), '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>'],
 };
 function setTheme(mode, save) {
   const root = document.documentElement;
   if (mode === "system") delete root.dataset.theme; else root.dataset.theme = mode;
   const [label, icon] = THEME_UI[mode];
   $("themeBtn").innerHTML = icon;
-  $("themeBtn").setAttribute("aria-label", `${label}. ${t("Cliquer pour changer.", "Click to change.")}`);
+  $("themeBtn").setAttribute("aria-label", `${label}. ${t("Cliquer pour changer.", "Click to change.", "اضغط للتغيير.")}`);
   $("themeBtn").title = label;
   if (save) { try { localStorage.setItem("aurapept-theme", mode); } catch (e) {} }
 }
@@ -322,9 +344,9 @@ document.querySelectorAll("[data-preset]").forEach((c) =>
 ["vial", "water", "dose", "half", "date", "labelName"].forEach((id) => $(id).addEventListener("input", calc));
 ["vial", "water", "dose"].forEach((id) =>
   $(id).addEventListener("focus", (e) => setTimeout(() => e.target.select(), 0)));
-$("reset").addEventListener("click", () => { apply(DEFAULTS); calc(); toast(t("Valeurs réinitialisées", "Values reset")); });
-$("copyLink").addEventListener("click", () => copy(location.href.split("#")[0], t("Lien copié", "Link copied")));
-$("copySum").addEventListener("click", () => copy(summary(), t("Résumé copié", "Summary copied")));
+$("reset").addEventListener("click", () => { apply(DEFAULTS); calc(); toast(t("Valeurs réinitialisées", "Values reset", "تمت إعادة ضبط القيم")); });
+$("copyLink").addEventListener("click", () => copy(location.href.split("#")[0], t("Lien copié", "Link copied", "تم نسخ الرابط")));
+$("copySum").addEventListener("click", () => copy(summary(), t("Résumé copié", "Summary copied", "تم نسخ الملخص")));
 $("print").addEventListener("click", () => window.print());
 
 /* Mes flacons : enregistrés dans le navigateur (stockage local), jamais envoyés */
@@ -349,9 +371,10 @@ function since(iso) {
   const [y, m, d] = iso.split("-").map(Number);
   const now = new Date();
   const days = Math.round((Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - Date.UTC(y, m - 1, d)) / 86400000);
-  if (days < 0) return t("date à venir", "future date");
-  if (days === 0) return t("aujourd'hui", "today");
-  if (days === 1) return t("hier", "yesterday");
+  if (days < 0) return t("date à venir", "future date", "تاريخ لاحق");
+  if (days === 0) return t("aujourd'hui", "today", "اليوم");
+  if (days === 1) return t("hier", "yesterday", "أمس");
+  if (AR) return days === 2 ? "منذ يومين" : days <= 10 ? `منذ ${days} أيام` : `منذ ${days} يومًا`;
   return t(`il y a ${days} jours`, `${days} days ago`);
 }
 function renderVials() {
@@ -360,36 +383,36 @@ function renderVials() {
   $("vialList").replaceChildren(...list.map((x) => {
     const li = mk("li", "vial");
     const vial = toMcg(parseNum(x.v), x.vu), water = parseNum(x.w);
-    const conc = vial > 0 && water > 0 ? `${mass(vial / water)}/mL` : "—";
+    const conc = vial > 0 && water > 0 ? ltr(`${mass(vial / water)}/mL`) : "—";
     li.append(
-      mk("p", "vial-name", x.n || t("Flacon sans nom", "Unnamed vial")),
-      mk("p", "vial-meta", t(`${x.v} ${x.vu} dans ${x.w} mL · ${conc} · prise de ${x.d} ${x.du}`, `${x.v} ${x.vu} in ${x.w} mL · ${conc} · dose of ${x.d} ${x.du}`)),
-      mk("p", "vial-date", x.date ? `${t("Reconstitué le", "Reconstituted on")} ${fmtDate(x.date)} · ${since(x.date)}` : t("Date de reconstitution non renseignée", "No reconstitution date")),
+      mk("p", "vial-name", x.n || t("Flacon sans nom", "Unnamed vial", "قارورة بلا اسم")),
+      mk("p", "vial-meta", t(`${x.v} ${x.vu} dans ${x.w} mL · ${conc} · prise de ${x.d} ${x.du}`, `${x.v} ${x.vu} in ${x.w} mL · ${conc} · dose of ${x.d} ${x.du}`, `${ltr(`${x.v} ${x.vu}`)} في ${ltr(`${x.w} mL`)} · ${conc} · جرعة ${ltr(`${x.d} ${x.du}`)}`)),
+      mk("p", "vial-date", x.date ? `${t("Reconstitué le", "Reconstituted on", "حُضّرت في")} ${fmtDate(x.date)} · ${since(x.date)}` : t("Date de reconstitution non renseignée", "No reconstitution date", "لم يُحدَّد تاريخ التحضير")),
     );
     const actions = mk("div", "vial-actions");
-    const load = mk("button", "btn", t("Charger", "Load"));
+    const load = mk("button", "btn", t("Charger", "Load", "تحميل"));
     load.type = "button";
     load.addEventListener("click", () => {
       apply({ v: x.v, w: x.w, d: x.d, vu: x.vu, du: x.du, s: x.s, h: x.h, n: x.n });
       if (x.date) $("date").value = x.date;
       calc();
-      toast(t("Flacon chargé", "Vial loaded"));
+      toast(t("Flacon chargé", "Vial loaded", "تم تحميل القارورة"));
       $("calculateur").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" });
     });
-    const del = mk("button", "btn", t("Supprimer", "Delete"));
+    const del = mk("button", "btn", t("Supprimer", "Delete", "حذف"));
     del.type = "button";
     let timer = 0;
     del.addEventListener("click", () => {
       if (!del.classList.contains("is-confirm")) {
         del.classList.add("is-confirm");
-        del.textContent = t("Confirmer ?", "Confirm?");
-        timer = setTimeout(() => { del.classList.remove("is-confirm"); del.textContent = t("Supprimer", "Delete"); }, 3000);
+        del.textContent = t("Confirmer ?", "Confirm?", "تأكيد؟");
+        timer = setTimeout(() => { del.classList.remove("is-confirm"); del.textContent = t("Supprimer", "Delete", "حذف"); }, 3000);
         return;
       }
       clearTimeout(timer);
       writeVials(readVials().filter((y) => y.id !== x.id));
       renderVials();
-      toast(t("Flacon supprimé", "Vial deleted"));
+      toast(t("Flacon supprimé", "Vial deleted", "تم حذف القارورة"));
     });
     actions.append(load, del);
     li.append(actions);
@@ -398,7 +421,7 @@ function renderVials() {
 }
 $("saveVial").addEventListener("click", () => {
   const v = parseNum($("vial").value), w = parseNum($("water").value), d = parseNum($("dose").value);
-  if (!(v > 0 && w > 0 && d > 0)) { toast(t("Complète d'abord les quantités du calculateur", "Fill in the calculator amounts first")); return; }
+  if (!(v > 0 && w > 0 && d > 0)) { toast(t("Complète d'abord les quantités du calculateur", "Fill in the calculator amounts first", "أكمل كميات الحاسبة أولًا")); return; }
   const date = /^\d{4}-\d{2}-\d{2}$/.test($("date").value) ? $("date").value : "";
   const entry = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
@@ -407,9 +430,9 @@ $("saveVial").addEventListener("click", () => {
     d: $("dose").value.trim().slice(0, 12), du: state.doseUnit, s: state.syringe, h: $("half").checked,
   };
   const list = [entry, ...readVials()].slice(0, 30);
-  if (!writeVials(list)) { toast(t("Enregistrement impossible : le stockage du navigateur est bloqué", "Can't save: browser storage is blocked")); return; }
+  if (!writeVials(list)) { toast(t("Enregistrement impossible : le stockage du navigateur est bloqué", "Can't save: browser storage is blocked", "تعذّر الحفظ: تخزين المتصفح محظور")); return; }
   renderVials();
-  toast(t("Flacon enregistré", "Vial saved"));
+  toast(t("Flacon enregistré", "Vial saved", "تم حفظ القارورة"));
 });
 renderVials();
 
@@ -418,7 +441,7 @@ let installPrompt = null;
 const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
 $("installBtn").hidden = standalone;
 addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installPrompt = e; });
-addEventListener("appinstalled", () => { $("installBtn").hidden = true; toast(t("Appli installée", "App installed")); });
+addEventListener("appinstalled", () => { $("installBtn").hidden = true; toast(t("Appli installée", "App installed", "تم تثبيت التطبيق")); });
 $("installBtn").addEventListener("click", async () => {
   if (installPrompt) {
     installPrompt.prompt();
@@ -427,9 +450,16 @@ $("installBtn").addEventListener("click", async () => {
     return;
   }
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  toast(ios ? t("Sur iPhone : touche le bouton Partager, puis « Sur l'écran d'accueil »", "On iPhone: tap the Share button, then “Add to Home Screen”")
-    : t("Ouvre le menu du navigateur, puis « Installer l'application » ou « Ajouter à l'écran d'accueil »", "Open the browser menu, then “Install app” or “Add to Home screen”"));
+  toast(ios ? t("Sur iPhone : touche le bouton Partager, puis « Sur l'écran d'accueil »", "On iPhone: tap the Share button, then “Add to Home Screen”", "على iPhone: اضغط زر المشاركة، ثم «إضافة إلى الشاشة الرئيسية»")
+    : t("Ouvre le menu du navigateur, puis « Installer l'application » ou « Ajouter à l'écran d'accueil »", "Open the browser menu, then “Install app” or “Add to Home screen”", "افتح قائمة المتصفح، ثم «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية»"));
 });
+
+/* Menu des langues : se ferme en touchant ailleurs ou avec Échap */
+const langMenu = $("langMenu");
+if (langMenu) {
+  document.addEventListener("click", (e) => { if (!langMenu.contains(e.target)) langMenu.open = false; });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && langMenu.open) { langMenu.open = false; langMenu.querySelector("summary").focus(); } });
+}
 
 /* Appli installable : mise en mémoire hors connexion */
 if ("serviceWorker" in navigator) {
