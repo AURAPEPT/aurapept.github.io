@@ -10,12 +10,53 @@
   "background_color": "#f3eee4",
   "theme_color": "#f3eee4",
   "icons": [
-    { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "Liste des peptides", "url": "/peptides/", "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Mes flacons", "url": "/#flacons", "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }] }
+    {
+      "name": "Liste des peptides",
+      "url": "/peptides/",
+      "icons": [
+        {
+          "src": "/assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Suivi de fiole",
+      "url": "/suivi/",
+      "icons": [
+        {
+          "src": "/assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Mes flacons",
+      "url": "/#flacons",
+      "icons": [
+        {
+          "src": "/assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }

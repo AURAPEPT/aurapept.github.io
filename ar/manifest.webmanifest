@@ -40,6 +40,16 @@
       ]
     },
     {
+      "name": "متابعة القارورة",
+      "url": "/ar/suivi/",
+      "icons": [
+        {
+          "src": "/assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
       "name": "قواريري",
       "url": "/ar/#flacons",
       "icons": [

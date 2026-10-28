@@ -414,7 +414,11 @@ function renderVials() {
       renderVials();
       toast(t("Flacon supprimé", "Vial deleted", "تم حذف القارورة"));
     });
-    actions.append(load, del);
+    // Ouvre le suivi de fiole pré-rempli avec ce flacon (page suivi/ de la même langue)
+    const track = mk("a", "btn", t("Suivre", "Track", "متابعة"));
+    const q = new URLSearchParams({ n: x.n || "", v: x.v, vu: x.vu, w: x.w, d: x.d, du: x.du, date: x.date || "" });
+    track.href = `suivi/?${q}`;
+    actions.append(load, track, del);
     li.append(actions);
     return li;
   }));

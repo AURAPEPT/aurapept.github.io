@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AURAPEPT · متابعة القارورة</title>
+<meta name="description" content="متابعة القارورة من AURAPEPT: سجّل كل جرعة وشاهد القارورة تفرغ، مع ما تبقى بالـ mg والـ mL وعدد الجرعات.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#f3eee4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://aurapept.github.io/ar/suivi/">
+<link rel="alternate" hreflang="fr" href="https://aurapept.github.io/suivi/">
+<link rel="alternate" hreflang="en" href="https://aurapept.github.io/en/suivi/">
+<link rel="alternate" hreflang="ar" href="https://aurapept.github.io/ar/suivi/">
+<link rel="alternate" hreflang="x-default" href="https://aurapept.github.io/suivi/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AURAPEPT">
+<meta property="og:locale" content="ar_AR">
+<meta property="og:locale:alternate" content="fr_FR">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:title" content="AURAPEPT · متابعة القارورة">
+<meta property="og:description" content="قارورة تفاعلية تفرغ جرعة بعد جرعة، أسبوعًا بعد أسبوع.">
+<meta property="og:url" content="https://aurapept.github.io/ar/suivi/">
+<meta property="og:image" content="https://aurapept.github.io/assets/og-suivi-ar.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="قارورة AURAPEPT نصف ممتلئة، مع المتبقي بالـ mg والـ mL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://aurapept.github.io/assets/og-suivi-ar.png">
+<link rel="icon" href="../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../assets/apple-touch-icon.png">
+<link rel="manifest" href="/ar/manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="AURAPEPT">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preload" href="../../assets/fonts/ibm-plex-sans-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/amiri-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/shippori-mincho-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/zen-kaku-gothic-new-400.woff2" as="font" type="font/woff2" crossorigin>
+<script src="../../assets/theme.js"></script>
+<link rel="stylesheet" href="../../assets/style.css">
+<link rel="stylesheet" href="../../suivi/suivi.css">
+<script src="../../suivi/suivi.js" defer></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../" aria-label="AURAPEPT، العودة إلى الحاسبة">
+      <span class="seal" aria-hidden="true">オ</span>
+      <span><span class="brand-name">AURAPEPT</span><span class="brand-kana">オーラペプト</span></span>
+    </a>
+    <nav class="nav" aria-label="الأقسام">
+      <a href="../">الحاسبة</a>
+      <a href="../peptides/">القائمة</a>
+      <a href="#suivi" aria-current="page">المتابعة</a>
+    </nav>
+    <a class="tg-btn" href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer" aria-label="انضم إلى AURAPEPT على تيليغرام (علامة تبويب جديدة)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10.5 13.5"/><path d="M21 3 14.5 21l-4-7.5L3 9.5 21 3Z"/></svg><span>تيليغرام</span>
+    </a>
+    <details class="lang" id="langMenu">
+      <summary class="lang-btn" aria-label="اللغة: العربية. تغيير اللغة" title="تغيير اللغة">ع</summary>
+      <ul class="lang-list">
+        <li><a href="../../suivi/" hreflang="fr" lang="fr">Français</a></li>
+        <li><a href="../../en/suivi/" hreflang="en" lang="en">English</a></li>
+        <li><a href="./" hreflang="ar" lang="ar" dir="rtl" aria-current="page">العربية</a></li>
+      </ul>
+    </details>
+    <button class="icon-btn" id="themeBtn" type="button" aria-label="المظهر"></button>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <noscript><p class="noscript">تحتاج المتابعة إلى JavaScript. فعّله في متصفحك لرؤية قارورتك.</p></noscript>
+
+  <section class="track-head">
+    <p class="eyebrow"><span class="jp">記録</span>متابعة القارورة</p>
+    <h1>قارورتك، <em>جرعة بعد جرعة</em></h1>
+    <p class="lead">أدخل قارورتك ثم كل جرعة: ينخفض السائل أمام عينيك، مع ما تبقى بالـ mg والـ mL وعدد الجرعات. اسحب الشريط الزمني لمراجعة الأسابيع الماضية.</p>
+    <p class="exp-banner" role="note"><b>تجريبي وتعليمي.</b> هذه الأداة لمتابعة قارورة في إطار بحثي: تحسب فقط ما تسجّله. ليست نصيحة طبية ولا توصي بأي كمية. تبقى بياناتك على جهازك، ولا يُرسل أي شيء.</p>
+  </section>
+
+  <section class="track" id="suivi" aria-label="متابعة القارورة">
+    <div class="panel vial-stage" id="vialStage">
+      <div class="panel-head">
+        <h2 class="panel-title"><span class="jp">小瓶</span>قارورتي</h2>
+        <button class="link-btn" id="newVialBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>قارورة جديدة</button>
+      </div>
+      <div class="vial-tabs" id="vialTabs" role="group" aria-label="قواريري" hidden></div>
+      <div class="vial-scene">
+        <span class="stage-tag" aria-hidden="true">残量</span>
+        <svg id="vialSvg" viewBox="0 0 260 400" role="img" aria-label="القارورة"></svg>
+        <div class="readout">
+          <p class="ro-name" id="roName"></p>
+          <p class="ro-k">المتبقي</p>
+          <p class="ro-big"><span id="roPct">—</span><small>%</small></p>
+          <p class="ro-line" id="roMass"></p>
+          <p class="ro-line" id="roMl"></p>
+          <p class="ro-conc" id="roConc"></p>
+        </div>
+      </div>
+      <p class="vial-hint">اسحب القارورة لإمالتها</p>
+      <div class="timeline" id="timeline" hidden>
+        <button class="icon-btn" id="tlPlay" type="button" aria-pressed="false" aria-label="إعادة عرض الأسابيع" title="إعادة العرض">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+        </button>
+        <input type="range" id="tlRange" min="0" max="1000" step="1" value="1000" aria-label="مراجعة القارورة عبر الزمن">
+        <p class="tl-label" id="tlLabel"></p>
+      </div>
+      <div class="stage-foot" id="stageFoot" hidden>
+        <button class="link-btn" id="delVial" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg> حذف هذه القارورة</button>
+      </div>
+    </div>
+
+    <div class="track-side">
+      <section class="panel" id="newVial" aria-labelledby="nvTitle" hidden>
+        <div class="panel-head"><h2 class="panel-title" id="nvTitle"><span class="jp">新規</span>قارورة جديدة</h2></div>
+        <div class="form-body">
+          <div id="nvImportBox" hidden>
+            <label for="nvImport">استخدم قارورة محفوظة في الحاسبة</label>
+            <select class="text-field" id="nvImport"><option value="">— اختر —</option></select>
+          </div>
+          <div>
+            <label for="nvName">الاسم (اختياري)</label>
+            <input class="text-field" id="nvName" type="text" maxlength="40" placeholder="مثال: BPC-157" autocomplete="off">
+          </div>
+          <div class="form-row">
+            <div>
+              <span class="form-label" id="lblNvTotal">محتوى القارورة</span>
+              <div class="field"><input id="nvTotal" type="text" inputmode="decimal" autocomplete="off" aria-labelledby="lblNvTotal"><div class="seg" id="nvTotalUnit" role="group" aria-label="وحدة المحتوى"><button type="button" data-v="mg" aria-pressed="true">mg</button><button type="button" data-v="mcg" aria-pressed="false">mcg</button></div></div>
+            </div>
+            <div>
+              <span class="form-label" id="lblNvWater">الماء المضاف</span>
+              <div class="field"><input id="nvWater" type="text" inputmode="decimal" autocomplete="off" aria-labelledby="lblNvWater"><span class="suffix">mL</span></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label for="nvDate">تاريخ التحضير</label>
+              <input class="text-field" id="nvDate" type="date">
+            </div>
+            <div>
+              <span class="form-label" id="lblNvDose">الجرعة المعتادة (اختياري)</span>
+              <div class="field"><input id="nvDose" type="text" inputmode="decimal" autocomplete="off" aria-labelledby="lblNvDose"><div class="seg" id="nvDoseUnit" role="group" aria-label="وحدة الجرعة"><button type="button" data-v="mcg" aria-pressed="true">mcg</button><button type="button" data-v="mg" aria-pressed="false">mg</button></div></div>
+            </div>
+          </div>
+          <p class="hint">تملأ الجرعة المعتادة جرعاتك مسبقًا، وتُستخدم لحساب عدد الجرعات المتبقية.</p>
+          <p class="form-error" id="nvError" role="alert" hidden></p>
+          <div class="form-actions">
+            <button class="btn btn-primary" id="nvCreate" type="button">إنشاء القارورة</button>
+            <button class="btn" id="nvCancel" type="button">إلغاء</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="dosePanel" aria-labelledby="dsTitle" hidden>
+        <div class="panel-head">
+          <h2 class="panel-title" id="dsTitle"><span class="jp">記録</span>الجرعات</h2>
+          <span class="pill" id="vialStatus" data-tone="ok"></span>
+        </div>
+        <div class="form-body">
+          <div>
+            <span class="form-label" id="lblDs">الكمية المسحوبة</span>
+            <div class="field"><input id="dsAmount" type="text" inputmode="decimal" autocomplete="off" aria-labelledby="lblDs"><div class="seg" id="dsUnit" role="group" aria-label="وحدة الكمية"><button type="button" data-v="mcg" aria-pressed="true">mcg</button><button type="button" data-v="mg" aria-pressed="false">mg</button><button type="button" data-v="u" aria-pressed="false">وحدة</button></div></div>
+          </div>
+          <div>
+            <label for="dsTime">التاريخ والوقت</label>
+            <input class="text-field" id="dsTime" type="datetime-local">
+          </div>
+          <p class="preview" id="dsPreview" aria-live="polite"></p>
+          <p class="form-error" id="dsError" role="alert" hidden></p>
+          <div class="form-actions">
+            <button class="btn btn-primary" id="dsAdd" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>أضف الجرعة</button>
+          </div>
+        </div>
+        <dl class="stats track-stats">
+          <div><dt>المتبقي في القارورة</dt><dd id="stLeft">—</dd></div>
+          <div><dt>الحجم المتبقي</dt><dd id="stMl">—</dd></div>
+          <div><dt>الجرعات المسجّلة</dt><dd id="stCount">—</dd></div>
+          <div><dt>الجرعات المتبقية</dt><dd id="stDosesLeft">—</dd></div>
+          <div><dt>منذ التحضير</dt><dd id="stSince">—</dd></div>
+          <div><dt>تفرغ تقريبًا في</dt><dd id="stEmpty">—</dd></div>
+        </dl>
+        <div class="history">
+          <h3>السجل</h3>
+          <div id="history"></div>
+          <p class="hist-empty" id="histEmpty">لم تُسجَّل أي جرعة بعد. أضف أول جرعة في الأعلى.</p>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="brand">
+      <span class="seal" aria-hidden="true">オ</span>
+      <span><span class="brand-name">AURAPEPT</span><span class="brand-kana">オーラペプト</span></span>
+    </div>
+    <p class="footer-note">أداة تجريبية وتعليمية، وليست نصيحة طبية. لا تُرسل أي بيانات: تبقى قواريرك في متصفحك. <a href="../">حاسبة إعادة التكوين</a> · <a href="../peptides/">قائمة الببتيدات</a> · <a href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer">تيليغرام</a> · <a href="../#mentions">إشعار قانوني</a> · <a href="../../suivi/" hreflang="fr" lang="fr">Français</a> · <a href="../../en/suivi/" hreflang="en" lang="en">English</a></p>
+  </footer>
+</main>
+<p class="sr-only" id="srLive" aria-live="polite"></p>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

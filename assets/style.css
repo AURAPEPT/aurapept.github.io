@@ -133,6 +133,13 @@
   .lang-list a[aria-current] { color: var(--shu-hover); font-weight: 700; }
   .lang-list a[aria-current]::after { content: "✓"; }
   @media (max-width: 1180px) { .nav a { padding: 8px 10px; font-size: .88rem; } }
+  /* Tablettes : 7 liens dans le menu, Telegram passe en icône seule pour laisser la place */
+  @media (min-width: 981px) and (max-width: 1180px) {
+    .topbar .wrap { gap: 14px; }
+    .nav a { padding: 8px 7px; }
+    .tg-btn { width: 42px; padding: 0; justify-content: center; }
+    .tg-btn span { display: none; }
+  }
   @media (max-width: 980px) { .nav { display: none; } .tg-btn { margin-inline-start: auto; } .topbar .wrap { gap: 10px; } }
   @media (max-width: 440px) { .tg-btn { width: 42px; padding: 0; justify-content: center; } .tg-btn span { display: none; } }
   @media (max-width: 360px) {

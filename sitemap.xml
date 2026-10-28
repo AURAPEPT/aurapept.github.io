@@ -48,4 +48,28 @@
     <xhtml:link rel="alternate" hreflang="ar" href="https://aurapept.github.io/ar/peptides/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://aurapept.github.io/peptides/"/>
   </url>
+  <url>
+    <loc>https://aurapept.github.io/suivi/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://aurapept.github.io/suivi/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://aurapept.github.io/en/suivi/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://aurapept.github.io/ar/suivi/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://aurapept.github.io/suivi/"/>
+  </url>
+  <url>
+    <loc>https://aurapept.github.io/en/suivi/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://aurapept.github.io/suivi/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://aurapept.github.io/en/suivi/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://aurapept.github.io/ar/suivi/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://aurapept.github.io/suivi/"/>
+  </url>
+  <url>
+    <loc>https://aurapept.github.io/ar/suivi/</loc>
+    <lastmod>2026-10-28</lastmod>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://aurapept.github.io/suivi/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://aurapept.github.io/en/suivi/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://aurapept.github.io/ar/suivi/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://aurapept.github.io/suivi/"/>
+  </url>
 </urlset>

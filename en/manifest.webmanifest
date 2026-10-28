@@ -11,12 +11,53 @@
   "background_color": "#f3eee4",
   "theme_color": "#f3eee4",
   "icons": [
-    { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "Peptide list", "url": "/en/peptides/", "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }] },
-    { "name": "My vials", "url": "/en/#flacons", "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192" }] }
+    {
+      "name": "Peptide list",
+      "url": "/en/peptides/",
+      "icons": [
+        {
+          "src": "/assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Vial tracker",
+      "url": "/en/suivi/",
+      "icons": [
+        {
+          "src": "/assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "My vials",
+      "url": "/en/#flacons",
+      "icons": [
+        {
+          "src": "/assets/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }

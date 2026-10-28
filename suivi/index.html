@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AURAPEPT · Suivi de fiole</title>
+<meta name="description" content="Suivi de fiole AURAPEPT : note chaque prise et regarde la fiole se vider, avec ce qu'il reste en mg, en mL et en nombre de prises.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#f3eee4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://aurapept.github.io/suivi/">
+<link rel="alternate" hreflang="fr" href="https://aurapept.github.io/suivi/">
+<link rel="alternate" hreflang="en" href="https://aurapept.github.io/en/suivi/">
+<link rel="alternate" hreflang="ar" href="https://aurapept.github.io/ar/suivi/">
+<link rel="alternate" hreflang="x-default" href="https://aurapept.github.io/suivi/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AURAPEPT">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:locale:alternate" content="ar_AR">
+<meta property="og:title" content="AURAPEPT · Suivi de fiole">
+<meta property="og:description" content="Une fiole interactive qui se vide prise après prise, semaine après semaine.">
+<meta property="og:url" content="https://aurapept.github.io/suivi/">
+<meta property="og:image" content="https://aurapept.github.io/assets/og-suivi.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Fiole AURAPEPT à moitié pleine, avec le reste en mg et en mL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://aurapept.github.io/assets/og-suivi.png">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="AURAPEPT">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preload" href="../assets/fonts/shippori-mincho-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/zen-kaku-gothic-new-400.woff2" as="font" type="font/woff2" crossorigin>
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="suivi.css">
+<script src="suivi.js" defer></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="../" aria-label="AURAPEPT, retour au calculateur">
+      <span class="seal" aria-hidden="true">オ</span>
+      <span><span class="brand-name">AURAPEPT</span><span class="brand-kana">オーラペプト</span></span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="../">Calculateur</a>
+      <a href="../peptides/">Liste</a>
+      <a href="#suivi" aria-current="page">Suivi</a>
+    </nav>
+    <a class="tg-btn" href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer" aria-label="Rejoindre AURAPEPT sur Telegram (nouvel onglet)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10.5 13.5"/><path d="M21 3 14.5 21l-4-7.5L3 9.5 21 3Z"/></svg><span>Telegram</span>
+    </a>
+    <details class="lang" id="langMenu">
+      <summary class="lang-btn" aria-label="Langue : français. Changer de langue" title="Changer de langue">FR</summary>
+      <ul class="lang-list">
+        <li><a href="./" hreflang="fr" lang="fr" aria-current="page">Français</a></li>
+        <li><a href="../en/suivi/" hreflang="en" lang="en">English</a></li>
+        <li><a href="../ar/suivi/" hreflang="ar" lang="ar" dir="rtl">العربية</a></li>
+      </ul>
+    </details>
+    <button class="icon-btn" id="themeBtn" type="button" aria-label="Thème"></button>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <noscript><p class="noscript">Le suivi a besoin de JavaScript. Active-le dans ton navigateur pour voir ta fiole.</p></noscript>
+
+  <section class="track-head">
+    <p class="eyebrow"><span class="jp">記録</span>Suivi de fiole</p>
+    <h1>Ta fiole, <em>prise après prise</em></h1>
+    <p class="lead">Renseigne ta fiole puis chaque prise : le liquide baisse sous tes yeux, avec ce qu'il reste en mg, en mL et en nombre de prises. Fais glisser la frise pour revoir les semaines passées.</p>
+    <p class="exp-banner" role="note"><b>Expérimental et éducatif.</b> Cet outil sert à suivre une fiole dans un cadre de recherche : il compte seulement ce que tu notes. Ce n'est pas un avis médical et aucune quantité n'est recommandée. Tes données restent sur ton appareil, rien n'est envoyé.</p>
+  </section>
+
+  <section class="track" id="suivi" aria-label="Suivi de fiole">
+    <div class="panel vial-stage" id="vialStage">
+      <div class="panel-head">
+        <h2 class="panel-title"><span class="jp">小瓶</span>Ma fiole</h2>
+        <button class="link-btn" id="newVialBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Nouvelle fiole</button>
+      </div>
+      <div class="vial-tabs" id="vialTabs" role="group" aria-label="Mes fioles" hidden></div>
+      <div class="vial-scene">
+        <span class="stage-tag" aria-hidden="true">残量</span>
+        <svg id="vialSvg" viewBox="0 0 260 400" role="img" aria-label="Fiole"></svg>
+        <div class="readout">
+          <p class="ro-name" id="roName"></p>
+          <p class="ro-k">Reste</p>
+          <p class="ro-big"><span id="roPct">—</span><small>%</small></p>
+          <p class="ro-line" id="roMass"></p>
+          <p class="ro-line" id="roMl"></p>
+          <p class="ro-conc" id="roConc"></p>
+        </div>
+      </div>
+      <p class="vial-hint">Fais glisser la fiole pour la pencher</p>
+      <div class="timeline" id="timeline" hidden>
+        <button class="icon-btn" id="tlPlay" type="button" aria-pressed="false" aria-label="Rejouer les semaines" title="Rejouer">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+        </button>
+        <input type="range" id="tlRange" min="0" max="1000" step="1" value="1000" aria-label="Revoir la fiole dans le temps">
+        <p class="tl-label" id="tlLabel"></p>
+      </div>
+      <div class="stage-foot" id="stageFoot" hidden>
+        <button class="link-btn" id="delVial" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg> Supprimer cette fiole</button>
+      </div>
+    </div>
+
+    <div class="track-side">
+      <section class="panel" id="newVial" aria-labelledby="nvTitle" hidden>
+        <div class="panel-head"><h2 class="panel-title" id="nvTitle"><span class="jp">新規</span>Nouvelle fiole</h2></div>
+        <div class="form-body">
+          <div id="nvImportBox" hidden>
+            <label for="nvImport">Reprendre un flacon enregistré dans le calculateur</label>
+            <select class="text-field" id="nvImport"><option value="">— Choisir —</option></select>
+          </div>
+          <div>
+            <label for="nvName">Nom (facultatif)</label>
+            <input class="text-field" id="nvName" type="text" maxlength="40" placeholder="Ex. : BPC-157" autocomplete="off">
+          </div>
+          <div class="form-row">
+            <div>
+              <span class="form-label" id="lblNvTotal">Contenu de la fiole</span>
+              <div class="field"><input id="nvTotal" type="text" inputmode="decimal" autocomplete="off" aria-labelledby="lblNvTotal"><div class="seg" id="nvTotalUnit" role="group" aria-label="Unité du contenu"><button type="button" data-v="mg" aria-pressed="true">mg</button><button type="button" data-v="mcg" aria-pressed="false">mcg</button></div></div>
+            </div>
+            <div>
+              <span class="form-label" id="lblNvWater">Eau ajoutée</span>
+              <div class="field"><input id="nvWater" type="text" inputmode="decimal" autocomplete="off" aria-labelledby="lblNvWater"><span class="suffix">mL</span></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div>
+              <label for="nvDate">Date de reconstitution</label>
+              <input class="text-field" id="nvDate" type="date">
+            </div>
+            <div>
+              <span class="form-label" id="lblNvDose">Prise habituelle (facultatif)</span>
+              <div class="field"><input id="nvDose" type="text" inputmode="decimal" autocomplete="off" aria-labelledby="lblNvDose"><div class="seg" id="nvDoseUnit" role="group" aria-label="Unité de la prise"><button type="button" data-v="mcg" aria-pressed="true">mcg</button><button type="button" data-v="mg" aria-pressed="false">mg</button></div></div>
+            </div>
+          </div>
+          <p class="hint">La prise habituelle pré-remplit tes prises et sert à compter celles qui restent.</p>
+          <p class="form-error" id="nvError" role="alert" hidden></p>
+          <div class="form-actions">
+            <button class="btn btn-primary" id="nvCreate" type="button">Créer la fiole</button>
+            <button class="btn" id="nvCancel" type="button">Annuler</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="dosePanel" aria-labelledby="dsTitle" hidden>
+        <div class="panel-head">
+          <h2 class="panel-title" id="dsTitle"><span class="jp">記録</span>Prises</h2>
+          <span class="pill" id="vialStatus" data-tone="ok"></span>
+        </div>
+        <div class="form-body">
+          <div>
+            <span class="form-label" id="lblDs">Quantité prélevée</span>
+            <div class="field"><input id="dsAmount" type="text" inputmode="decimal" autocomplete="off" aria-labelledby="lblDs"><div class="seg" id="dsUnit" role="group" aria-label="Unité de la quantité"><button type="button" data-v="mcg" aria-pressed="true">mcg</button><button type="button" data-v="mg" aria-pressed="false">mg</button><button type="button" data-v="u" aria-pressed="false">unités</button></div></div>
+          </div>
+          <div>
+            <label for="dsTime">Date et heure</label>
+            <input class="text-field" id="dsTime" type="datetime-local">
+          </div>
+          <p class="preview" id="dsPreview" aria-live="polite"></p>
+          <p class="form-error" id="dsError" role="alert" hidden></p>
+          <div class="form-actions">
+            <button class="btn btn-primary" id="dsAdd" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Ajouter la prise</button>
+          </div>
+        </div>
+        <dl class="stats track-stats">
+          <div><dt>Reste dans la fiole</dt><dd id="stLeft">—</dd></div>
+          <div><dt>Volume restant</dt><dd id="stMl">—</dd></div>
+          <div><dt>Prises notées</dt><dd id="stCount">—</dd></div>
+          <div><dt>Prises restantes</dt><dd id="stDosesLeft">—</dd></div>
+          <div><dt>Depuis la reconstitution</dt><dd id="stSince">—</dd></div>
+          <div><dt>Vide vers</dt><dd id="stEmpty">—</dd></div>
+        </dl>
+        <div class="history">
+          <h3>Historique</h3>
+          <div id="history"></div>
+          <p class="hist-empty" id="histEmpty">Aucune prise notée pour l'instant. Ajoute la première juste au-dessus.</p>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="brand">
+      <span class="seal" aria-hidden="true">オ</span>
+      <span><span class="brand-name">AURAPEPT</span><span class="brand-kana">オーラペプト</span></span>
+    </div>
+    <p class="footer-note">Outil expérimental et éducatif, aucun avis médical. Aucune donnée n'est envoyée : tes fioles restent dans ton navigateur. <a href="../">Calculateur de reconstitution</a> · <a href="../peptides/">Liste des peptides</a> · <a href="https://t.me/+9vQsCb7qMOgwNDRk" target="_blank" rel="noopener noreferrer">Telegram</a> · <a href="../#mentions">Mentions légales</a> · <a href="../en/suivi/" hreflang="en" lang="en">English</a> · <a href="../ar/suivi/" hreflang="ar" lang="ar" dir="rtl">العربية</a></p>
+  </footer>
+</main>
+<p class="sr-only" id="srLive" aria-live="polite"></p>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
