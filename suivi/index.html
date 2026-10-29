@@ -162,9 +162,14 @@
             <label for="nvImport">Reprendre un flacon enregistré dans le calculateur</label>
             <select class="text-field" id="nvImport"><option value="">— Choisir —</option></select>
           </div>
-          <div>
+          <div id="nvPepBox" hidden>
+            <label for="nvPep">Peptide</label>
+            <select class="text-field" id="nvPep" aria-describedby="nvPepHint"><option value="">— Choisir dans la liste —</option><option value="other">Autre (écrire le nom)</option></select>
+            <p class="hint pep-hint" id="nvPepHint">Les peptides de la Liste AURAPEPT. Ensuite, indique ce qui est écrit sur ta fiole. <a class="pep-link" id="nvPepLink" href="../peptides/" hidden>Voir sa fiche dans la liste</a></p>
+          </div>
+          <div id="nvNameBox">
             <label for="nvName">Nom (facultatif)</label>
-            <input class="text-field" id="nvName" type="text" maxlength="40" placeholder="Ex. : BPC-157" autocomplete="off">
+            <input class="text-field" id="nvName" type="text" maxlength="40" placeholder="Ex. : le nom sur l'étiquette" autocomplete="off">
           </div>
           <div class="form-row">
             <div>

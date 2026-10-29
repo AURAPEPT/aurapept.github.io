@@ -162,9 +162,14 @@
             <label for="nvImport">Use a vial saved in the calculator</label>
             <select class="text-field" id="nvImport"><option value="">— Choose —</option></select>
           </div>
-          <div>
+          <div id="nvPepBox" hidden>
+            <label for="nvPep">Peptide</label>
+            <select class="text-field" id="nvPep" aria-describedby="nvPepHint"><option value="">— Choose from the list —</option><option value="other">Other (type the name)</option></select>
+            <p class="hint pep-hint" id="nvPepHint">The peptides of the AURAPEPT List. Then enter what is written on your vial. <a class="pep-link" id="nvPepLink" href="../peptides/" hidden>See its page in the list</a></p>
+          </div>
+          <div id="nvNameBox">
             <label for="nvName">Name (optional)</label>
-            <input class="text-field" id="nvName" type="text" maxlength="40" placeholder="E.g. BPC-157" autocomplete="off">
+            <input class="text-field" id="nvName" type="text" maxlength="40" placeholder="E.g. the name on the label" autocomplete="off">
           </div>
           <div class="form-row">
             <div>

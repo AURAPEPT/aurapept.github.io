@@ -314,3 +314,7 @@ html[lang="ar"] .list-k, html[lang="ar"] .inv-k { letter-spacing: 0; font-size: 
 .vc-pct { flex: none; font: 800 1.15rem/1 var(--f-display); color: var(--sumi); font-variant-numeric: tabular-nums; }
 .vc-chev { flex: none; width: 9px; height: 9px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); margin-inline: 2px 4px; }
 html[dir="rtl"] .vc-chev { transform: rotate(135deg); }
+
+/* Nouvelle fiole : menu des peptides de la Liste et lien vers la fiche */
+.pep-hint { margin-top: 6px; }
+.pep-link { color: var(--ai); font-weight: 700; text-underline-offset: 3px; }

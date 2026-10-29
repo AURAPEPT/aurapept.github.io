@@ -92,6 +92,7 @@ function cleanVial(v) {
   return {
     id: typeof v.id === "string" && v.id ? v.id.slice(0, 40) : uid(),
     name: typeof v.name === "string" ? v.name.slice(0, 40) : "",
+    pep: typeof v.pep === "string" && /^[a-z0-9+-]{1,40}$/.test(v.pep) ? v.pep : "",
     total, water, date: v.date, dose: num(v.dose, 1e9), doseUnit: v.doseUnit === "mg" ? "mg" : "mcg", logs,
     color: PALETTE.some((c) => c[0] === v.color) ? v.color : "sumi",
     bud: typeof v.bud === "string" && Number.isFinite(parseDay(v.bud)) ? v.bud : "",
@@ -450,7 +451,7 @@ function renderStage(instant) {
       const c = current();
       if (!c) return;
       const mg = c.total >= 1000;
-      fillForm({ n: c.name, v: fmtIn(mg ? c.total / 1000 : c.total), vu: mg ? "mg" : "mcg", w: fmtIn(c.water),
+      fillForm({ n: c.name, p: c.pep, v: fmtIn(mg ? c.total / 1000 : c.total), vu: mg ? "mg" : "mcg", w: fmtIn(c.water),
         d: c.dose ? fmtIn(c.doseUnit === "mg" ? c.dose / 1000 : c.dose) : "", du: c.doseUnit, date: toDT(Date.now()).slice(0, 10) });
       showForm(true);
       $("newVial").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
@@ -885,8 +886,56 @@ function showForm(show) {
     renderSwatches();
   }
 }
-$("newVialBtn").addEventListener("click", () => { editingVial = null; setFormMode(false); $("nvBud").value = ""; showForm(true); $("newVial").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); $("nvName").focus({ preventScroll: true }); });
+$("newVialBtn").addEventListener("click", () => { editingVial = null; setFormMode(false); $("nvBud").value = ""; showForm(true); $("newVial").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); focusName(); });
 $("nvCancel").addEventListener("click", () => showForm(false));
+
+// Menu des peptides de la Liste (mêmes données que /peptides/). Tant qu'il n'est pas chargé, le champ Nom reste seul.
+let PEPS = [], formPep = "";
+const pepOf = (id) => PEPS.find((p) => p.id === id);
+const pepByName = (n) => {
+  const k = (n || "").trim().toLowerCase();
+  return k ? PEPS.find((p) => [p.nom, ...(p.alias || [])].some((a) => a.toLowerCase() === k)) : undefined;
+};
+function showPep() {
+  const v = $("nvPep").value, p = pepOf(v);
+  $("nvNameBox").hidden = PEPS.length > 0 && v !== "other";
+  $("nvPepLink").hidden = !p;
+  if (p) $("nvPepLink").href = `../peptides/#${encodeURIComponent(p.id)}`;
+}
+// Choisit l'option qui correspond à une fiole : par identifiant, sinon par nom, sinon « Autre »
+function syncPep(id, name) {
+  formPep = id || "";
+  if (!PEPS.length) return;
+  const p = pepOf(id) || pepByName(name);
+  $("nvPep").value = p ? p.id : name ? "other" : "";
+  showPep();
+}
+const focusName = () => ($("nvPepBox").hidden ? $("nvName") : $("nvPep")).focus({ preventScroll: true });
+$("nvPep").addEventListener("change", () => {
+  const v = $("nvPep").value, p = pepOf(v);
+  if (p) $("nvName").value = p.nom.slice(0, 40);
+  else if (v === "" || pepByName($("nvName").value)) $("nvName").value = "";
+  showPep();
+  if (v === "other") $("nvName").focus();
+});
+import(`/peptides/${{ en: "data-en.js", ar: "data-ar.js" }[LANG] || "data.js"}`).then(({ CATEGORIES, PEPTIDES }) => {
+  if (!Array.isArray(PEPTIDES) || !PEPTIDES.length) return;
+  PEPS = PEPTIDES;
+  const other = $("nvPep").lastElementChild;
+  CATEGORIES.forEach((c) => {
+    const g = document.createElement("optgroup");
+    g.label = c.label;
+    PEPTIDES.filter((p) => p.cat === c.id).forEach((p) => {
+      const o = document.createElement("option");
+      o.value = p.id;
+      o.textContent = p.nom;
+      g.append(o);
+    });
+    if (g.children.length) $("nvPep").insertBefore(g, other);
+  });
+  $("nvPepBox").hidden = false;
+  syncPep(formPep, $("nvName").value);
+}).catch(() => {});
 
 // Reprendre un flacon enregistré dans « Mes flacons » du calculateur
 function readSaved() {
@@ -894,6 +943,7 @@ function readSaved() {
 }
 function fillForm(x) {
   $("nvName").value = (x.n || "").slice(0, 40);
+  syncPep(x.p, $("nvName").value);
   $("nvTotal").value = x.v || "";
   setSeg("nvTotalUnit", x.vu === "mcg" ? "mcg" : "mg");
   $("nvWater").value = x.w || "";
@@ -916,14 +966,14 @@ $("editVial").addEventListener("click", () => {
   if (!v) return;
   editingVial = v.id;
   const mg = v.total >= 1000;
-  fillForm({ n: v.name, v: fmtIn(mg ? v.total / 1000 : v.total), vu: mg ? "mg" : "mcg", w: fmtIn(v.water),
+  fillForm({ n: v.name, p: v.pep, v: fmtIn(mg ? v.total / 1000 : v.total), vu: mg ? "mg" : "mcg", w: fmtIn(v.water),
     d: v.dose ? fmtIn(v.doseUnit === "mg" ? v.dose / 1000 : v.dose) : "", du: v.doseUnit, date: v.date });
   $("nvBud").value = v.bud || "";
   nvColor = v.color;
   setFormMode(true);
   showForm(true);
   $("newVial").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
-  $("nvName").focus({ preventScroll: true });
+  focusName();
 });
 
 $("nvCreate").addEventListener("click", () => {
@@ -944,6 +994,7 @@ $("nvCreate").addEventListener("click", () => {
     dose: doseRaw > 0 ? toMcg(doseRaw, segValue("nvDoseUnit")) : 0, doseUnit: segValue("nvDoseUnit"),
   };
   const ed = editingVial ? store.vials.find((x) => x.id === editingVial) : null;
+  fields.pep = PEPS.length ? (pepOf($("nvPep").value) ? $("nvPep").value : "") : ed ? ed.pep : formPep;
   if (ed) {
     // Modification : les prises déjà notées doivent rester possibles avec les nouveaux réglages
     const used = ed.logs.reduce((n, l) => n + l.mcg, 0);
@@ -953,6 +1004,7 @@ $("nvCreate").addEventListener("click", () => {
     Object.assign(ed, fields);
     if (!save()) { Object.assign(ed, JSON.parse(backup)); return; }
     ["nvName", "nvTotal", "nvWater", "nvDose", "nvBud"].forEach((id) => ($(id).value = ""));
+    syncPep("", "");
     editingVial = null;
     setFormMode(false);
     showForm(false);
@@ -967,6 +1019,7 @@ $("nvCreate").addEventListener("click", () => {
   store.current = v.id;
   if (!save()) { store.vials.pop(); return; }
   ["nvName", "nvTotal", "nvWater", "nvDose", "nvBud"].forEach((id) => ($(id).value = ""));
+  syncPep("", "");
   $("nvImport").value = "";
   delete $("dsAmount").dataset.touched;
   viewAt = Infinity;

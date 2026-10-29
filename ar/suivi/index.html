@@ -164,9 +164,14 @@
             <label for="nvImport">استخدم قارورة محفوظة في الحاسبة</label>
             <select class="text-field" id="nvImport"><option value="">— اختر —</option></select>
           </div>
-          <div>
+          <div id="nvPepBox" hidden>
+            <label for="nvPep">الببتيد</label>
+            <select class="text-field" id="nvPep" aria-describedby="nvPepHint"><option value="">— اختر من القائمة —</option><option value="other">آخر (اكتب الاسم)</option></select>
+            <p class="hint pep-hint" id="nvPepHint">ببتيدات قائمة AURAPEPT. بعد ذلك، أدخل ما هو مكتوب على قارورتك. <a class="pep-link" id="nvPepLink" href="../peptides/" hidden>عرض بطاقته في القائمة</a></p>
+          </div>
+          <div id="nvNameBox">
             <label for="nvName">الاسم (اختياري)</label>
-            <input class="text-field" id="nvName" type="text" maxlength="40" placeholder="مثال: BPC-157" autocomplete="off">
+            <input class="text-field" id="nvName" type="text" maxlength="40" placeholder="مثال: الاسم على الملصق" autocomplete="off">
           </div>
           <div class="form-row">
             <div>
