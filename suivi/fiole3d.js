@@ -178,6 +178,40 @@ const FLOOR_FRAG = /* glsl */ `
     gl_FragColor = vec4(linearToOutputTexel(vec4(causticColor, 1.0)).rgb * k, a);
   }`;
 
+/* Couleur du liquide : la teinte choisie pour la fiole, ou « incolore » (liquide clair, légèrement bleuté) */
+export const CLEAR_HEX = "#b9cbe0";
+export function liquidLook(hex, dark) {
+  if (!hex || hex.toLowerCase() === CLEAR_HEX) {
+    return { tint: new THREE.Color(dark ? "#9cc0ee" : "#a8c6e6"), deep: new THREE.Color(dark ? "#4a78b8" : "#4b74a6"), density: dark ? 0.95 : 1 };
+  }
+  const base = new THREE.Color(hex);
+  return { tint: base.clone().lerp(new THREE.Color("#ffffff"), 0.12), deep: base.clone().multiplyScalar(0.8), density: dark ? 3.4 : 3 };
+}
+// Capsule et bague en aluminium anodisé doré (fréquent sur les fioles de peptides)
+export function goldMaterials() {
+  return {
+    crimp: new THREE.MeshStandardMaterial({ color: "#c9a14c", metalness: 1, roughness: 0.3 }),
+    cap: new THREE.MeshStandardMaterial({ color: "#d9b45e", metalness: 1, roughness: 0.22 }),
+  };
+}
+// Graduations blanches imprimées sur le verre (petits arcs sur la paroi, côté droit vu de face)
+export function addGraduations(group) {
+  const mat = new THREE.MeshBasicMaterial({ color: "#ffffff", transparent: true, opacity: 0.85, depthWrite: false, side: THREE.DoubleSide });
+  for (let i = 0; i <= 10; i++) {
+    const major = i % 2 === 0;
+    const g = new THREE.CylinderGeometry(1.004, 1.004, major ? 0.032 : 0.024, 10, 1, true, 0.42, major ? 0.42 : 0.24);
+    const m = new THREE.Mesh(g, mat);
+    m.position.y = 0.45 + i * 0.16;
+    m.renderOrder = 7;
+    group.add(m);
+  }
+  // trait vertical qui relie les graduations
+  const spine = new THREE.Mesh(new THREE.CylinderGeometry(1.004, 1.004, 1.62, 6, 1, true, 0.82, 0.03), mat);
+  spine.position.y = 0.45 + 0.8;
+  spine.renderOrder = 7;
+  group.add(spine);
+}
+
 /* Studio virtuel : dégradé gris, grandes bandes lumineuses (softbox), plafond, fenêtre chaude.
    Rendu une fois dans une carte d'environnement (reflets du verre, du liquide et du métal). */
 export function createStudio(renderer, scene) {
@@ -279,10 +313,17 @@ export function createVial3D(canvas, { reduceMotion = false } = {}) {
     vial.add(mesh);
     if (m.uniforms.P0) liquidMeshes.push(mesh);
   });
-  const metal = new THREE.MeshStandardMaterial({ color: "#d9dce1", metalness: 1, roughness: 0.27 });
-  const capMat = new THREE.MeshPhysicalMaterial({ color: "#c23a22", roughness: 0.42, clearcoat: 0.8, clearcoatRoughness: 0.22 });
+  const gold = goldMaterials();
   const rubber = new THREE.MeshStandardMaterial({ color: "#4e5157", roughness: 0.88, metalness: 0 });
-  vial.add(new THREE.Mesh(lathe(CRIMP), metal), new THREE.Mesh(lathe(CAP), capMat), new THREE.Mesh(lathe(STOPPER), rubber));
+  vial.add(new THREE.Mesh(lathe(CRIMP), gold.crimp), new THREE.Mesh(lathe(CAP), gold.cap), new THREE.Mesh(lathe(STOPPER), rubber));
+  addGraduations(vial);
+  let liquidHex = CLEAR_HEX;
+  function applyLiquid() {
+    const look = liquidLook(liquidHex, dark);
+    liqU.tint.value.copy(look.tint);
+    liqU.deep.value.copy(look.deep);
+    liqU.density.value = look.density;
+  }
   const key = new THREE.DirectionalLight("#ffffff", 1.4);
   key.position.set(-4, 7, 5);
   scene.add(key);
@@ -304,9 +345,7 @@ export function createVial3D(canvas, { reduceMotion = false } = {}) {
     if (isDark === dark) return;
     dark = isDark;
     buildEnv(dark);
-    liqU.tint.value.set(dark ? "#9cc0ee" : "#a8c6e6");
-    liqU.deep.value.set(dark ? "#4a78b8" : "#4b74a6");
-    liqU.density.value = dark ? 0.95 : 1;
+    applyLiquid();
     glassU.gain.value = dark ? 0.75 : 1;
     floor.material.uniforms.causticColor.value.set(dark ? "#bfd6ff" : "#fff1dc");
     floor.material.uniforms.shadow.value = dark ? 0.9 : 1;
@@ -413,7 +452,7 @@ export function createVial3D(canvas, { reduceMotion = false } = {}) {
       wake();
     },
     ticks() {},
-    // Couleur de la capsule « flip-off » (choisie pour chaque fiole)
-    color(hex) { capMat.color.set(hex); wake(); },
+    // Couleur du liquide (choisie pour chaque fiole) ; la capsule reste dorée
+    color(hex) { liquidHex = hex; applyLiquid(); wake(); },
   };
 }

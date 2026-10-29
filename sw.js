@@ -2,7 +2,7 @@
 // Pages, styles et scripts : toujours la version en ligne (revérifiée auprès du serveur), la mémoire seulement
 // hors connexion. Ainsi une page neuve n'est jamais affichée avec un ancien style (icônes géantes, menu cassé).
 // Polices, images, modèle 3D et moteur 3D (lourds, rarement modifiés) : mémoire d'abord, mise à jour en arrière-plan.
-const VERSION = "aurapept-2026-10-29c";
+const VERSION = "aurapept-2026-10-29d";
 const CORE = [
   "/", "/404.html", "/manifest.webmanifest",
   "/assets/style.css", "/assets/app.js", "/assets/theme.js",

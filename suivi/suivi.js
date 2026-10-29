@@ -47,12 +47,12 @@ const fDayYear = new Intl.DateTimeFormat(LOCALE, { day: "numeric", month: "short
 const fWhen = new Intl.DateTimeFormat(LOCALE, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 const dayLabel = (ms) => (new Date(ms).getFullYear() === new Date().getFullYear() ? fDay : fDayYear).format(ms);
 
-/* Couleurs des fioles : capsule de la fiole 3D et cartes de l'étagère */
+/* Couleur de chaque fiole : elle teinte le liquide (fiole 3D, étagère, liste). « Incolore » = liquide clair. */
 const PALETTE = [
-  ["shu", "#c23a22", "Rouge", "Red", "أحمر"], ["ai", "#2f5f9f", "Bleu", "Blue", "أزرق"],
-  ["sora", "#25869e", "Turquoise", "Teal", "فيروزي"], ["matcha", "#4f7a3a", "Vert", "Green", "أخضر"],
-  ["kin", "#a8770f", "Or", "Gold", "ذهبي"], ["sakura", "#c95b80", "Rose", "Pink", "وردي"],
-  ["fuji", "#7a5ca8", "Violet", "Purple", "بنفسجي"], ["sumi", "#4a4a50", "Gris", "Gray", "رمادي"],
+  ["sumi", "#b9cbe0", "Incolore", "Clear", "شفاف"], ["ai", "#2f6fd0", "Bleu", "Blue", "أزرق"],
+  ["sora", "#1f9bb5", "Turquoise", "Teal", "فيروزي"], ["matcha", "#4f9a3a", "Vert", "Green", "أخضر"],
+  ["kin", "#e0bd3f", "Jaune", "Yellow", "أصفر"], ["sakura", "#d65b8a", "Rose", "Pink", "وردي"],
+  ["fuji", "#8a62c8", "Violet", "Purple", "بنفسجي"], ["shu", "#d4452c", "Rouge", "Red", "أحمر"],
 ];
 const colorOf = (id) => PALETTE.find((c) => c[0] === id) || PALETTE[0];
 const colorName = (c) => t(c[2], c[3], c[4]);
@@ -91,7 +91,7 @@ function cleanVial(v) {
     id: typeof v.id === "string" && v.id ? v.id.slice(0, 40) : uid(),
     name: typeof v.name === "string" ? v.name.slice(0, 40) : "",
     total, water, date: v.date, dose: num(v.dose, 1e9), doseUnit: v.doseUnit === "mg" ? "mg" : "mcg", logs,
-    color: PALETTE.some((c) => c[0] === v.color) ? v.color : "shu",
+    color: PALETTE.some((c) => c[0] === v.color) ? v.color : "sumi",
     bud: typeof v.bud === "string" && Number.isFinite(parseDay(v.bud)) ? v.bud : "",
   };
 }
@@ -294,10 +294,12 @@ function miniVial(hex, frac) {
   const h = (34 * Math.max(0, Math.min(1, frac))).toFixed(1);
   return `<svg class="mini-vial" viewBox="0 0 40 64" aria-hidden="true">
     <path class="mv-glass" d="M14 16h12v3c0 2.5 9 3.5 9 9v28a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5V28c0-5.5 9-6.5 9-9z"/>
-    <rect class="mv-liquid" x="7" y="${(58 - h).toFixed(1)}" width="26" height="${h}" rx="2.5"/>
+    <rect x="7" y="${(58 - h).toFixed(1)}" width="26" height="${h}" rx="2.5" fill="${hex}" fill-opacity=".72"/>
+    <path class="mv-ticks" d="M27 30h4M28 35h3M27 40h4M28 45h3M27 50h4"/>
+    <path class="mv-shine" d="M10 30v22"/>
     <path class="mv-edge" d="M14 16h12v3c0 2.5 9 3.5 9 9v28a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5V28c0-5.5 9-6.5 9-9z"/>
     <rect class="mv-crimp" x="11" y="9" width="18" height="8" rx="1.5"/>
-    <rect x="12" y="2" width="16" height="8" rx="2.5" fill="${hex}"/>
+    <rect class="mv-cap" x="12" y="2" width="16" height="8" rx="2.5"/>
   </svg>`;
 }
 // Étagère en 3D (verre, liquide, capsule de couleur, planche en bois) ; sinon les cartes ci-dessous
@@ -311,7 +313,6 @@ import("/suivi/etagere3d.js").then(({ createShelf3D }) => {
   const s3 = createShelf3D($("shelfCanvas"), $("shelfLabels"), { reduceMotion, onPick: pickVial });
   if (!s3) { $("shelf3d").hidden = true; return; }
   shelf3d = s3;
-  $("shelfList").hidden = true;
   renderShelf();
 }).catch(() => {});
 function vialInfo(v) {
@@ -322,20 +323,44 @@ function vialInfo(v) {
   if (end) return [t(`Vide vers le ${dayLabel(end)}`, `Empty around ${dayLabel(end)}`, `تفرغ تقريبًا في ${dayLabel(end)}`), false];
   return [doses(v.logs.length), false];
 }
+// Jours restants avant que la fiole soit vide (au rythme moyen), ou ce qui la résume le mieux
+function daysLeft(v) {
+  const s = status(v), end = emptyAt(v);
+  if (budPassed(v)) return [t("Date limite dépassée", "Use-before passed", "تجاوزت التاريخ"), true];
+  if (s.left <= 0) return [t("Vide", "Empty", "فارغة"), true];
+  if (end) return [days(Math.max(0, dayDiff(Date.now(), end))), false];
+  return [doses(v.logs.length), false];
+}
+// En-tête de la vitrine : la fiole qui sera vide en premier
+function renderInventory() {
+  const inUse = store.vials.filter((v) => status(v).left > 0);
+  $("shelfTitle").textContent = t(`Inventaire · ${inUse.length} en cours`, `Inventory · ${inUse.length} in use`, `المخزون · ${inUse.length} قيد الاستخدام`);
+  let first = null;
+  inUse.forEach((v) => { const e = emptyAt(v); if (e && (!first || e < first.e)) first = { v, e }; });
+  if (first) {
+    const d = Math.max(0, dayDiff(Date.now(), first.e));
+    const name = first.v.name || t("ta fiole", "your vial", "قارورتك");
+    $("invBig").textContent = String(d);
+    $("invUnit").textContent = d > 1 ? t("jours", "days", "يومًا") : t("jour", "day", "يوم");
+    $("invSub").textContent = t(`avant que ${name} soit vide · ${dayLabel(first.e)}`, `until ${name} runs out · ${dayLabel(first.e)}`, `حتى تفرغ ${name} · ${dayLabel(first.e)}`);
+  } else {
+    $("invBig").textContent = String(store.vials.length);
+    $("invUnit").textContent = store.vials.length > 1 ? t("fioles", "vials", "قوارير") : t("fiole", "vial", "قارورة");
+    $("invSub").textContent = t("Note au moins 2 prises sur une fiole pour estimer quand elle sera vide.", "Log at least 2 doses on a vial to estimate when it runs out.", "سجّل جرعتين على الأقل لتقدير موعد نفاد القارورة.");
+  }
+}
 function renderShelf3d() {
   $("shelfLabels").replaceChildren(...store.vials.map((v) => {
-    const s = status(v), c = colorOf(v.color), [info, alert] = vialInfo(v);
+    const s = status(v), c = colorOf(v.color), [info, alert] = daysLeft(v);
     const name = v.name || t("Fiole sans nom", "Unnamed vial", "قارورة بلا اسم");
     const b = document.createElement("button");
     b.type = "button";
     b.className = "shelf-tag";
     b.dataset.id = v.id;
-    b.style.setProperty("--vc", c[1]);
     b.setAttribute("aria-pressed", String(v.id === store.current));
     const nm = document.createElement("b"); nm.textContent = name;
-    const pc = document.createElement("span"); pc.className = "st-pct"; pc.textContent = ltr(`${fmt(s.frac * 100, 0)} %`);
-    const inf = document.createElement("small"); inf.textContent = info; if (alert) inf.className = "is-alert";
-    b.append(nm, pc, inf);
+    const inf = document.createElement("span"); inf.textContent = info; if (alert) inf.className = "is-alert";
+    b.append(nm, inf);
     b.setAttribute("aria-label", `${name}, ${colorName(c)}, ${t("reste", "left", "المتبقي")} ${fmt(s.frac * 100, 0)} %, ${info}`);
     b.addEventListener("click", () => pickVial(v.id));
     return b;
@@ -344,9 +369,9 @@ function renderShelf3d() {
 }
 function renderShelf() {
   $("shelf").hidden = !store.vials.length;
-  $("shelfCount").textContent = vialsTxt(store.vials.length);
-  $("shelfNew").hidden = !shelf3d;
-  if (shelf3d) { renderShelf3d(); return; }
+  renderInventory();
+  if (shelf3d) renderShelf3d();
+  // Liste « Toutes les fioles » : une ligne par fiole (mini-fiole, nom, prises, jours, date de fin)
   const cards = store.vials.map((v) => {
     const s = status(v), c = colorOf(v.color), end = emptyAt(v);
     const li = document.createElement("li");
@@ -360,32 +385,23 @@ function renderShelf() {
     body.className = "vc-body";
     const nm = document.createElement("b"); nm.className = "vc-name"; nm.textContent = name;
     const pct = document.createElement("span"); pct.className = "vc-pct"; pct.textContent = ltr(`${fmt(s.frac * 100, 0)} %`);
-    const meta = document.createElement("span"); meta.className = "vc-meta"; meta.textContent = `${mass(s.left)} · ${vol(s.ml)}`;
-    const info = document.createElement("span"); info.className = "vc-end";
-    if (budPassed(v)) { info.textContent = t("Date limite dépassée", "Use-before date passed", "تجاوزت تاريخ الاستخدام"); info.classList.add("is-alert"); }
-    else if (s.left <= 0) info.textContent = t("Fiole vide", "Vial empty", "القارورة فارغة");
-    else if (v.bud) info.textContent = t(`À utiliser avant le ${dayLabel(parseDay(v.bud))}`, `Use before ${dayLabel(parseDay(v.bud))}`, `استخدمها قبل ${dayLabel(parseDay(v.bud))}`);
-    else if (end) info.textContent = t(`Vide vers le ${dayLabel(end)}`, `Empty around ${dayLabel(end)}`, `تفرغ تقريبًا في ${dayLabel(end)}`);
-    else info.textContent = doses(v.logs.length);
-    const bar = document.createElement("span"); bar.className = "vc-bar";
-    const fill = document.createElement("i"); fill.style.width = `${Math.round(s.frac * 100)}%`; bar.append(fill);
-    body.append(nm, pct, meta, info, bar);
+    const meta = document.createElement("span"); meta.className = "vc-meta";
+    const parts = [doses(v.logs.length)];
+    if (end && s.left > 0) parts.push(days(Math.max(0, dayDiff(Date.now(), end))), t(`vide le ${dayLabel(end)}`, `runs out ${dayLabel(end)}`, `تفرغ في ${dayLabel(end)}`));
+    meta.textContent = parts.join(" · ");
+    const [infoTxt, alert] = vialInfo(v);
+    const info = document.createElement("span"); info.className = "vc-end"; info.textContent = `${mass(s.left)} · ${vol(s.ml)}${end || alert || v.bud ? "" : ""}`;
+    if (alert || v.bud) { info.textContent = infoTxt; if (alert) info.classList.add("is-alert"); }
+    body.append(nm, meta, info);
     b.innerHTML = miniVial(c[1], s.frac);
-    b.append(body);
+    const chev = document.createElement("span"); chev.className = "vc-chev"; chev.setAttribute("aria-hidden", "true");
+    b.append(body, pct, chev);
     b.setAttribute("aria-label", `${name}, ${colorName(c)}, ${t("reste", "left", "المتبقي")} ${fmt(s.frac * 100, 0)} %`);
-    b.addEventListener("click", () => pickVial(v.id));
+    b.addEventListener("click", () => { pickVial(v.id); $("vialStage").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); });
     li.append(b);
     return li;
   });
-  const li = document.createElement("li");
-  const add = document.createElement("button");
-  add.type = "button";
-  add.className = "vcard vcard-new";
-  add.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
-  add.append(t("Nouvelle fiole", "New vial", "قارورة جديدة"));
-  add.addEventListener("click", () => $("newVialBtn").click());
-  li.append(add);
-  $("shelfList").replaceChildren(...cards, li);
+  $("shelfList").replaceChildren(...cards);
 }
 
 function renderStage(instant) {
@@ -950,6 +966,7 @@ $("delVial").addEventListener("click", () => {
 function resetDel() { $("delVial").classList.remove("is-confirm"); $("delVial").lastChild.textContent = t(" Supprimer cette fiole", " Delete this vial", " حذف هذه القارورة"); }
 
 $("shelfNew").addEventListener("click", () => $("newVialBtn").click());
+$("invExport").addEventListener("click", () => $("exportBtn").click());
 
 /* ── Sauvegarde : exporter les fioles dans un fichier, et l'importer sur un autre appareil ── */
 const vialsTxt = (n) => t(n > 1 ? `${n} fioles` : `${n} fiole`, n === 1 ? "1 vial" : `${n} vials`, arCount(n, ["قارورة واحدة", "قارورتان", "قوارير", "قارورة"]));
