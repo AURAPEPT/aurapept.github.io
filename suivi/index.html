@@ -95,13 +95,17 @@
     <p class="exp-banner" role="note"><b>Expérimental et éducatif.</b> Cet outil sert à suivre une fiole dans un cadre de recherche : il compte seulement ce que tu notes. Ce n'est pas un avis médical et aucune quantité n'est recommandée. Tes données restent sur ton appareil, rien n'est envoyé.</p>
   </section>
 
+  <section class="shelf" id="shelf" aria-labelledby="shelfTitle" hidden>
+    <div class="shelf-head"><h2 class="panel-title" id="shelfTitle"><span class="jp">棚</span>Mon étagère</h2><span class="count" id="shelfCount"></span></div>
+    <ul class="shelf-list" id="shelfList"></ul>
+  </section>
+
   <section class="track" id="suivi" aria-label="Suivi de fiole">
     <div class="panel vial-stage" id="vialStage">
       <div class="panel-head">
         <h2 class="panel-title"><span class="jp">小瓶</span>Ma fiole</h2>
         <button class="link-btn" id="newVialBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Nouvelle fiole</button>
       </div>
-      <div class="vial-tabs" id="vialTabs" role="group" aria-label="Mes fioles" hidden></div>
       <div class="vial-scene">
         <span class="stage-tag" aria-hidden="true">残量</span>
         <div class="vial-view" id="vialView" role="img" aria-label="Fiole">
@@ -127,6 +131,7 @@
         <p class="tl-label" id="tlLabel"></p>
       </div>
       <div class="stage-foot" id="stageFoot" hidden>
+        <button class="link-btn" id="editVial" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg> Modifier la fiole</button>
         <button class="link-btn" id="delVial" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg> Supprimer cette fiole</button>
       </div>
     </div>
@@ -164,6 +169,17 @@
             </div>
           </div>
           <p class="hint">La prise habituelle pré-remplit tes prises et sert à compter celles qui restent.</p>
+          <div class="form-row">
+            <div>
+              <span class="form-label" id="lblNvColor">Couleur de la fiole</span>
+              <div class="swatches" id="nvColor" role="group" aria-labelledby="lblNvColor"></div>
+            </div>
+            <div>
+              <label for="nvBud">À utiliser avant (facultatif)</label>
+              <input class="text-field" id="nvBud" type="date">
+              <p class="hint">Seulement si tu as une date (étiquette, fournisseur) : le site ne la calcule pas.</p>
+            </div>
+          </div>
           <p class="form-error" id="nvError" role="alert" hidden></p>
           <div class="form-actions">
             <button class="btn btn-primary" id="nvCreate" type="button">Créer la fiole</button>
@@ -186,10 +202,24 @@
             <label for="dsTime">Date et heure</label>
             <input class="text-field" id="dsTime" type="datetime-local">
           </div>
+          <div class="site-field">
+            <span class="form-label" id="lblSite">Endroit de la prise (facultatif)</span>
+            <div class="site-pick">
+              <div class="site-map" id="siteMap" aria-hidden="true"></div>
+              <div class="site-list" id="siteList" role="group" aria-labelledby="lblSite"></div>
+            </div>
+            <p class="hint">Gauche et droite = les tiennes. La couleur montre le repos depuis la dernière prise à cet endroit.</p>
+            <p class="site-legend"><span><i class="is-fresh"></i>Moins de 2 jours</span><span><i class="is-mid"></i>2 à 6 jours</span><span><i class="is-rest"></i>7 jours et plus, ou jamais</span></p>
+          </div>
+          <div>
+            <label for="dsNote">Note (facultatif)</label>
+            <input class="text-field" id="dsNote" type="text" maxlength="140" placeholder="Ex. : après le sport" autocomplete="off">
+          </div>
           <p class="preview" id="dsPreview" aria-live="polite"></p>
           <p class="form-error" id="dsError" role="alert" hidden></p>
           <div class="form-actions">
             <button class="btn btn-primary" id="dsAdd" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Ajouter la prise</button>
+            <button class="btn" id="dsCancel" type="button" hidden>Annuler</button>
           </div>
         </div>
         <dl class="stats track-stats">

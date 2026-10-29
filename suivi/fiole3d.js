@@ -406,5 +406,7 @@ export function createVial3D(canvas, { reduceMotion = false } = {}) {
       wake();
     },
     ticks() {},
+    // Couleur de la capsule « flip-off » (choisie pour chaque fiole)
+    color(hex) { capMat.color.set(hex); wake(); },
   };
 }

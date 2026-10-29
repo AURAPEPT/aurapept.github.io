@@ -95,13 +95,17 @@
     <p class="exp-banner" role="note"><b>Experimental and educational.</b> This tool tracks a vial in a research setting: it only counts what you log. It is not medical advice and no amount is recommended. Your data stays on your device, nothing is sent.</p>
   </section>
 
+  <section class="shelf" id="shelf" aria-labelledby="shelfTitle" hidden>
+    <div class="shelf-head"><h2 class="panel-title" id="shelfTitle"><span class="jp">棚</span>My shelf</h2><span class="count" id="shelfCount"></span></div>
+    <ul class="shelf-list" id="shelfList"></ul>
+  </section>
+
   <section class="track" id="suivi" aria-label="Vial tracker">
     <div class="panel vial-stage" id="vialStage">
       <div class="panel-head">
         <h2 class="panel-title"><span class="jp">小瓶</span>My vial</h2>
         <button class="link-btn" id="newVialBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>New vial</button>
       </div>
-      <div class="vial-tabs" id="vialTabs" role="group" aria-label="My vials" hidden></div>
       <div class="vial-scene">
         <span class="stage-tag" aria-hidden="true">残量</span>
         <div class="vial-view" id="vialView" role="img" aria-label="Vial">
@@ -127,6 +131,7 @@
         <p class="tl-label" id="tlLabel"></p>
       </div>
       <div class="stage-foot" id="stageFoot" hidden>
+        <button class="link-btn" id="editVial" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg> Edit the vial</button>
         <button class="link-btn" id="delVial" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg> Delete this vial</button>
       </div>
     </div>
@@ -164,6 +169,17 @@
             </div>
           </div>
           <p class="hint">The usual dose pre-fills your doses and is used to count how many are left.</p>
+          <div class="form-row">
+            <div>
+              <span class="form-label" id="lblNvColor">Vial color</span>
+              <div class="swatches" id="nvColor" role="group" aria-labelledby="lblNvColor"></div>
+            </div>
+            <div>
+              <label for="nvBud">Use before (optional)</label>
+              <input class="text-field" id="nvBud" type="date">
+              <p class="hint">Only if you have a date (label, supplier): the site does not work it out.</p>
+            </div>
+          </div>
           <p class="form-error" id="nvError" role="alert" hidden></p>
           <div class="form-actions">
             <button class="btn btn-primary" id="nvCreate" type="button">Create the vial</button>
@@ -186,10 +202,24 @@
             <label for="dsTime">Date and time</label>
             <input class="text-field" id="dsTime" type="datetime-local">
           </div>
+          <div class="site-field">
+            <span class="form-label" id="lblSite">Injection site (optional)</span>
+            <div class="site-pick">
+              <div class="site-map" id="siteMap" aria-hidden="true"></div>
+              <div class="site-list" id="siteList" role="group" aria-labelledby="lblSite"></div>
+            </div>
+            <p class="hint">Left and right are yours. The color shows the rest since the last dose at that site.</p>
+            <p class="site-legend"><span><i class="is-fresh"></i>Under 2 days</span><span><i class="is-mid"></i>2 to 6 days</span><span><i class="is-rest"></i>7 days or more, or never</span></p>
+          </div>
+          <div>
+            <label for="dsNote">Note (optional)</label>
+            <input class="text-field" id="dsNote" type="text" maxlength="140" placeholder="E.g. after training" autocomplete="off">
+          </div>
           <p class="preview" id="dsPreview" aria-live="polite"></p>
           <p class="form-error" id="dsError" role="alert" hidden></p>
           <div class="form-actions">
             <button class="btn btn-primary" id="dsAdd" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add the dose</button>
+            <button class="btn" id="dsCancel" type="button" hidden>Cancel</button>
           </div>
         </div>
         <dl class="stats track-stats">

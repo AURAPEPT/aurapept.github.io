@@ -47,6 +47,29 @@ const fDayYear = new Intl.DateTimeFormat(LOCALE, { day: "numeric", month: "short
 const fWhen = new Intl.DateTimeFormat(LOCALE, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 const dayLabel = (ms) => (new Date(ms).getFullYear() === new Date().getFullYear() ? fDay : fDayYear).format(ms);
 
+/* Couleurs des fioles : capsule de la fiole 3D et cartes de l'étagère */
+const PALETTE = [
+  ["shu", "#c23a22", "Rouge", "Red", "أحمر"], ["ai", "#2f5f9f", "Bleu", "Blue", "أزرق"],
+  ["sora", "#25869e", "Turquoise", "Teal", "فيروزي"], ["matcha", "#4f7a3a", "Vert", "Green", "أخضر"],
+  ["kin", "#a8770f", "Or", "Gold", "ذهبي"], ["sakura", "#c95b80", "Rose", "Pink", "وردي"],
+  ["fuji", "#7a5ca8", "Violet", "Purple", "بنفسجي"], ["sumi", "#4a4a50", "Gris", "Gray", "رمادي"],
+];
+const colorOf = (id) => PALETTE.find((c) => c[0] === id) || PALETTE[0];
+const colorName = (c) => t(c[2], c[3], c[4]);
+
+/* Endroits d'injection : « gauche » = la gauche de la personne. Ventre et cuisses vus de face, bras et fessiers de dos. */
+const SITES = [
+  { id: "abd-l", fr: "Ventre gauche", en: "Left abdomen", ar: "يسار البطن" },
+  { id: "abd-r", fr: "Ventre droit", en: "Right abdomen", ar: "يمين البطن" },
+  { id: "thigh-l", fr: "Cuisse gauche", en: "Left thigh", ar: "الفخذ الأيسر" },
+  { id: "thigh-r", fr: "Cuisse droite", en: "Right thigh", ar: "الفخذ الأيمن" },
+  { id: "arm-l", fr: "Bras gauche", en: "Left arm", ar: "الذراع الأيسر" },
+  { id: "arm-r", fr: "Bras droit", en: "Right arm", ar: "الذراع الأيمن" },
+  { id: "glute-l", fr: "Fessier gauche", en: "Left glute", ar: "الألية اليسرى" },
+  { id: "glute-r", fr: "Fessier droit", en: "Right glute", ar: "الألية اليمنى" },
+];
+const siteName = (id) => { const x = SITES.find((k) => k.id === id); return x ? t(x.fr, x.en, x.ar) : ""; };
+
 /* Stockage */
 const KEY = "aurapept-suivi";
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -59,12 +82,17 @@ function cleanVial(v) {
   const logs = v.logs
     .filter((l) => l && typeof l.t === "string" && Number.isFinite(parseDT(l.t)) && num(l.mcg, 1e9))
     .slice(0, 1000)
-    .map((l) => ({ id: typeof l.id === "string" ? l.id.slice(0, 40) : uid(), t: l.t.slice(0, 16), mcg: l.mcg }))
+    .map((l) => ({
+      id: typeof l.id === "string" ? l.id.slice(0, 40) : uid(), t: l.t.slice(0, 16), mcg: l.mcg,
+      site: SITES.some((k) => k.id === l.site) ? l.site : "", note: typeof l.note === "string" ? l.note.slice(0, 140) : "",
+    }))
     .sort((a, b) => parseDT(a.t) - parseDT(b.t));
   return {
     id: typeof v.id === "string" && v.id ? v.id.slice(0, 40) : uid(),
     name: typeof v.name === "string" ? v.name.slice(0, 40) : "",
     total, water, date: v.date, dose: num(v.dose, 1e9), doseUnit: v.doseUnit === "mg" ? "mg" : "mcg", logs,
+    color: PALETTE.some((c) => c[0] === v.color) ? v.color : "shu",
+    bud: typeof v.bud === "string" && Number.isFinite(parseDay(v.bud)) ? v.bud : "",
   };
 }
 function load() {
@@ -83,6 +111,13 @@ function save() {
 }
 const current = () => store.vials.find((v) => v.id === store.current) || null;
 const startOf = (v) => Math.min(parseDay(v.date), ...v.logs.map((l) => parseDT(l.t)));
+// Date où la fiole serait vide, au rythme moyen depuis la reconstitution (au moins 2 prises)
+function emptyAt(v) {
+  const s = status(v), now = Date.now();
+  if (v.logs.length < 2 || !(s.used > 0) || !(s.left > 0)) return null;
+  return now + s.left / (s.used / Math.max(DAY, now - parseDay(v.date)));
+}
+const budPassed = (v) => !!v.bud && dayDiff(parseDay(v.bud), Date.now()) > 0;
 function status(v, at = Infinity) {
   const used = v.logs.reduce((s, l) => (parseDT(l.t) <= at ? s + l.mcg : s), 0);
   const left = Math.max(0, v.total - used);
@@ -207,6 +242,7 @@ const svgVial = (() => {
       energy += splash;
       wake();
     },
+    color(hex) { svg.querySelector(".v-cap").style.fill = hex; },
     ticks(water) {
       if (!(water > 0)) { $("vTicks").innerHTML = ""; return; }
       const step = water <= 1 ? 0.25 : water <= 3 ? 0.5 : water <= 6 ? 1 : 2;
@@ -225,9 +261,10 @@ const svgVial = (() => {
 
 // Fiole réaliste en 3D (verre, reflets, liquide) : remplace le dessin si WebGL est disponible
 let vialImpl = svgVial;
-const vialLast = { f: 0, water: 0 };
+const vialLast = { f: 0, water: 0, color: PALETTE[0][1] };
 const vial = {
   set(f, opts) { vialLast.f = f; vialImpl.set(f, opts); },
+  color(hex) { vialLast.color = hex; vialImpl.color?.(hex); },
   ticks(w) { vialLast.water = w; vialImpl.ticks(w); },
   // « −250 mcg » qui s'envole au-dessus de la fiole après une prise
   float(text) {
@@ -246,22 +283,68 @@ import("/suivi/fiole3d.js").then(({ createVial3D }) => {
   $("vialSvg").setAttribute("hidden", ""); // (un <svg> n'a pas la propriété .hidden)
   vialImpl = v3;
   v3.set(vialLast.f, { instant: true });
+  v3.color(vialLast.color);
   document.querySelector(".vial-hint").textContent = t("Fais glisser pour tourner autour de la fiole", "Drag to turn around the vial", "اسحب للدوران حول القارورة");
 }).catch(() => { $("vial3d").hidden = true; });
 
 /* ── Affichage ── */
 let viewAt = Infinity; // moment affiché par la frise (Infinity = maintenant)
-function renderTabs() {
-  $("vialTabs").replaceChildren(...store.vials.map((v) => {
+/* Étagère : une carte par fiole, avec sa couleur, une mini-fiole qui se vide et ce qu'il reste */
+function miniVial(hex, frac) {
+  const h = (34 * Math.max(0, Math.min(1, frac))).toFixed(1);
+  return `<svg class="mini-vial" viewBox="0 0 40 64" aria-hidden="true">
+    <path class="mv-glass" d="M14 16h12v3c0 2.5 9 3.5 9 9v28a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5V28c0-5.5 9-6.5 9-9z"/>
+    <rect class="mv-liquid" x="7" y="${(58 - h).toFixed(1)}" width="26" height="${h}" rx="2.5"/>
+    <path class="mv-edge" d="M14 16h12v3c0 2.5 9 3.5 9 9v28a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5V28c0-5.5 9-6.5 9-9z"/>
+    <rect class="mv-crimp" x="11" y="9" width="18" height="8" rx="1.5"/>
+    <rect x="12" y="2" width="16" height="8" rx="2.5" fill="${hex}"/>
+  </svg>`;
+}
+function renderShelf() {
+  $("shelf").hidden = !store.vials.length;
+  $("shelfCount").textContent = vialsTxt(store.vials.length);
+  const cards = store.vials.map((v) => {
+    const s = status(v), c = colorOf(v.color), end = emptyAt(v);
+    const li = document.createElement("li");
     const b = document.createElement("button");
     b.type = "button";
-    b.className = "chip";
-    b.textContent = v.name || `${massTxt(v.total)} · ${fmt(v.water)} mL`;
+    b.className = "vcard";
     b.setAttribute("aria-pressed", String(v.id === store.current));
-    b.addEventListener("click", () => { store.current = v.id; save(); viewAt = Infinity; showForm(false); renderAll(true); });
-    return b;
-  }));
-  $("vialTabs").hidden = store.vials.length < 2;
+    b.style.setProperty("--vc", c[1]);
+    const name = v.name || t("Fiole sans nom", "Unnamed vial", "قارورة بلا اسم");
+    const body = document.createElement("span");
+    body.className = "vc-body";
+    const nm = document.createElement("b"); nm.className = "vc-name"; nm.textContent = name;
+    const pct = document.createElement("span"); pct.className = "vc-pct"; pct.textContent = ltr(`${fmt(s.frac * 100, 0)} %`);
+    const meta = document.createElement("span"); meta.className = "vc-meta"; meta.textContent = `${mass(s.left)} · ${vol(s.ml)}`;
+    const info = document.createElement("span"); info.className = "vc-end";
+    if (budPassed(v)) { info.textContent = t("Date limite dépassée", "Use-before date passed", "تجاوزت تاريخ الاستخدام"); info.classList.add("is-alert"); }
+    else if (s.left <= 0) info.textContent = t("Fiole vide", "Vial empty", "القارورة فارغة");
+    else if (v.bud) info.textContent = t(`À utiliser avant le ${dayLabel(parseDay(v.bud))}`, `Use before ${dayLabel(parseDay(v.bud))}`, `استخدمها قبل ${dayLabel(parseDay(v.bud))}`);
+    else if (end) info.textContent = t(`Vide vers le ${dayLabel(end)}`, `Empty around ${dayLabel(end)}`, `تفرغ تقريبًا في ${dayLabel(end)}`);
+    else info.textContent = doses(v.logs.length);
+    const bar = document.createElement("span"); bar.className = "vc-bar";
+    const fill = document.createElement("i"); fill.style.width = `${Math.round(s.frac * 100)}%`; bar.append(fill);
+    body.append(nm, pct, meta, info, bar);
+    b.innerHTML = miniVial(c[1], s.frac);
+    b.append(body);
+    b.setAttribute("aria-label", `${name}, ${colorName(c)}, ${t("reste", "left", "المتبقي")} ${fmt(s.frac * 100, 0)} %`);
+    b.addEventListener("click", () => {
+      if (v.id === store.current) return;
+      store.current = v.id; save(); viewAt = Infinity; endEdit(); showForm(false); renderAll(true);
+    });
+    li.append(b);
+    return li;
+  });
+  const li = document.createElement("li");
+  const add = document.createElement("button");
+  add.type = "button";
+  add.className = "vcard vcard-new";
+  add.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+  add.append(t("Nouvelle fiole", "New vial", "قارورة جديدة"));
+  add.addEventListener("click", () => $("newVialBtn").click());
+  li.append(add);
+  $("shelfList").replaceChildren(...cards, li);
 }
 
 function renderStage(instant) {
@@ -281,6 +364,7 @@ function renderStage(instant) {
     return;
   }
   const s = status(v, viewAt);
+  vial.color(colorOf(v.color)[1]);
   vial.ticks(v.water);
   vial.set(s.frac, { instant });
   $("roName").textContent = v.name || t("Fiole sans nom", "Unnamed vial", "قارورة بلا اسم");
@@ -376,7 +460,8 @@ function renderPanel() {
   const s = status(v);
   $("dosePanel").dataset.printTitle = `${v.name || t("Fiole sans nom", "Unnamed vial", "قارورة بلا اسم")} · ${massTxt(v.total)} / ${fmt(v.water)} mL · ${dayLabel(parseDay(v.date))}`;
   const pill = $("vialStatus");
-  const [tone, label] = s.left <= 0 ? ["alert", t("Fiole vide", "Vial empty", "القارورة فارغة")]
+  const [tone, label] = budPassed(v) ? ["alert", t("Date limite dépassée", "Use-before date passed", "تجاوزت تاريخ الاستخدام")]
+    : s.left <= 0 ? ["alert", t("Fiole vide", "Vial empty", "القارورة فارغة")]
     : s.frac < 0.2 ? ["warn", t("Bientôt vide", "Almost empty", "على وشك النفاد")]
     : ["ok", t("En cours", "In use", "قيد الاستخدام")];
   pill.dataset.tone = tone;
@@ -395,10 +480,11 @@ function renderPanel() {
   }
   $("stSince").replaceChildren(since === 0 ? t("Aujourd'hui", "Today", "اليوم") : days(since), small(t(`depuis le ${dayLabel(parseDay(v.date))}`, `since ${dayLabel(parseDay(v.date))}`, `منذ ${dayLabel(parseDay(v.date))}`)));
   // Au rythme moyen depuis la reconstitution, date où la fiole serait vide
-  const elapsed = Math.max(DAY, now - parseDay(v.date));
-  if (v.logs.length >= 2 && s.used > 0 && s.left > 0) {
-    const empty = now + s.left / (s.used / elapsed);
-    $("stEmpty").replaceChildren(dayLabel(empty), small(t("au rythme actuel", "at the current pace", "بالوتيرة الحالية")));
+  const empty = emptyAt(v);
+  if (empty) {
+    $("stEmpty").replaceChildren(dayLabel(empty), small(v.bud
+      ? t(`à utiliser avant le ${dayLabel(parseDay(v.bud))}`, `use before ${dayLabel(parseDay(v.bud))}`, `استخدمها قبل ${dayLabel(parseDay(v.bud))}`)
+      : t("au rythme actuel", "at the current pace", "بالوتيرة الحالية")));
   } else {
     $("stEmpty").replaceChildren(s.left <= 0 ? t("Déjà vide", "Already empty", "فارغة بالفعل") : "—", small(s.left <= 0 ? "" : t("après 2 prises", "after 2 doses", "بعد جرعتين")));
   }
@@ -412,9 +498,83 @@ function renderPanel() {
     } else $("dsAmount").value = "";
   }
   updatePreview();
+  renderSites();
   renderHistory(v);
 }
 function small(text) { const e = document.createElement("small"); e.textContent = text; return e; }
+
+/* Endroit de la prise : silhouette de face et de dos + liste de boutons (accessible au clavier).
+   La couleur montre le repos depuis la dernière prise notée à cet endroit, toutes fioles confondues. */
+let site = "";
+let editing = null; // id de la prise en cours de modification
+function lastBySite() {
+  const last = {};
+  store.vials.forEach((v) => v.logs.forEach((l) => {
+    if (!l.site || l.id === editing) return;
+    const ms = parseDT(l.t);
+    if (!(last[l.site] >= ms)) last[l.site] = ms;
+  }));
+  return last;
+}
+const restLevel = (ms) => { if (ms === undefined) return "rest"; const d = dayDiff(ms, Date.now()); return d < 2 ? "fresh" : d < 7 ? "mid" : "rest"; };
+const SIDE = { fr: ["D", "G"], en: ["R", "L"], ar: ["يمين", "يسار"] }[LANG] || ["R", "L"];
+function figure(ox, zones, sideLeftFirst, label) {
+  const [right, left] = SIDE;
+  const marks = sideLeftFirst ? [left, right] : [right, left];
+  return `<g transform="translate(${ox} 0)">
+    <g class="bm-body">
+      <circle cx="60" cy="24" r="15"/><rect x="53" y="37" width="14" height="10" rx="4"/>
+      <path d="M30 51 Q60 43 90 51 Q98 54 98 63 L92 132 Q60 140 28 132 L22 63 Q22 54 30 51 Z"/>
+      <rect x="4" y="55" width="16" height="96" rx="8" transform="rotate(9 12 55)"/>
+      <rect x="100" y="55" width="16" height="96" rx="8" transform="rotate(-9 108 55)"/>
+      <rect x="34" y="128" width="23" height="112" rx="11"/><rect x="63" y="128" width="23" height="112" rx="11"/>
+    </g>
+    ${zones.map(([id, cx, cy, rx, ry]) => `<ellipse class="bm-zone" data-site="${id}" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"/>`).join("")}
+    <text class="bm-side" x="4" y="16">${marks[0]}</text><text class="bm-side" x="116" y="16" text-anchor="end">${marks[1]}</text>
+    <text class="bm-label" x="60" y="258">${label}</text>
+  </g>`;
+}
+function buildSiteMap() {
+  // De face, la gauche de la personne est à droite du dessin ; de dos, elle est à gauche
+  $("siteMap").innerHTML = `<svg viewBox="0 0 284 264" role="presentation">
+    ${figure(8, [["abd-r", 48, 104, 10, 13], ["abd-l", 72, 104, 10, 13], ["thigh-r", 45, 170, 9, 20], ["thigh-l", 75, 170, 9, 20]], false, t("Devant", "Front", "الأمام"))}
+    ${figure(156, [["arm-l", 8, 88, 7, 15], ["arm-r", 112, 88, 7, 15], ["glute-l", 48, 130, 11, 10], ["glute-r", 72, 130, 11, 10]], true, t("Dos", "Back", "الخلف"))}
+  </svg>`;
+  $("siteMap").querySelectorAll(".bm-zone").forEach((z) => z.addEventListener("click", () => selectSite(site === z.dataset.site ? "" : z.dataset.site)));
+  $("siteList").replaceChildren(...SITES.map((k) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "site-btn";
+    b.dataset.site = k.id;
+    b.addEventListener("click", () => selectSite(site === k.id ? "" : k.id));
+    return b;
+  }));
+}
+function renderSites() {
+  const last = lastBySite(), now = Date.now();
+  // Le plus reposé : jamais utilisé en premier, sinon la dernière prise la plus ancienne
+  let best = null;
+  SITES.forEach((k) => { if (best === null || (last[k.id] ?? -Infinity) < (last[best] ?? -Infinity)) best = k.id; });
+  $("siteMap").querySelectorAll(".bm-zone").forEach((z) => {
+    z.setAttribute("class", `bm-zone is-${restLevel(last[z.dataset.site])}${z.dataset.site === site ? " is-sel" : ""}`);
+  });
+  $("siteList").querySelectorAll(".site-btn").forEach((b) => {
+    const id = b.dataset.site, ms = last[id];
+    const d = ms === undefined ? null : dayDiff(ms, now);
+    const dot = document.createElement("i");
+    dot.className = `is-${restLevel(ms)}`;
+    const nm = document.createElement("b");
+    nm.textContent = siteName(id);
+    const rest = document.createElement("span");
+    rest.textContent = d === null ? t("jamais utilisé", "never used", "لم يُستخدم")
+      : d === 0 ? t("utilisé aujourd'hui", "used today", "استُخدم اليوم")
+      : t(`repos : ${days(d)}`, `rested ${days(d)}`, `راحة: ${days(d)}`);
+    b.replaceChildren(dot, nm, rest);
+    if (id === best) { const em = document.createElement("em"); em.textContent = t("le plus reposé", "most rested", "الأكثر راحة"); b.append(em); }
+    b.setAttribute("aria-pressed", String(id === site));
+  });
+}
+function selectSite(id) { site = id; renderSites(); }
 
 function doseMcg(v) {
   const n = parseNum($("dsAmount").value);
@@ -426,6 +586,7 @@ function updatePreview() {
   const v = current();
   if (!v) return;
   const mcg = doseMcg(v), s = status(v);
+  if (editing) s.left += v.logs.find((l) => l.id === editing)?.mcg || 0; // la prise modifiée est remise dans la fiole
   const p = $("dsPreview");
   if (!(mcg > 0)) { p.textContent = t("Indique la quantité prélevée.", "Enter the amount drawn.", "أدخل الكمية المسحوبة."); return; }
   const ml = mcg / s.conc;
@@ -446,26 +607,63 @@ $("dsAdd").addEventListener("click", () => {
   const mcg = doseMcg(v);
   const when = parseDT($("dsTime").value);
   const s = status(v);
+  const old = editing ? v.logs.find((l) => l.id === editing) : null;
+  if (old) s.left += old.mcg;
   if (!(mcg > 0)) return err(t("Indique une quantité positive, par exemple 250.", "Enter a positive amount, for example 250.", "أدخل كمية موجبة، مثل 250."));
   if (!Number.isFinite(when)) return err(t("Indique la date et l'heure de la prise.", "Enter the date and time of the dose.", "أدخل تاريخ الجرعة ووقتها."));
   if (when < parseDay(v.date)) return err(t("Cette date est avant la reconstitution de la fiole.", "This date is before the vial was reconstituted.", "هذا التاريخ قبل تحضير القارورة."));
   if (when > Date.now() + 5 * 60000) return err(t("Cette date est dans le futur.", "This date is in the future.", "هذا التاريخ في المستقبل."));
   if (mcg > s.left + 1e-6) return err(t(`Il ne reste que ${massTxt(s.left)} dans la fiole.`, `Only ${massTxt(s.left)} is left in the vial.`, `لم يتبقَّ في القارورة سوى ${mass(s.left)}.`));
-  if (v.logs.length >= 1000) return err(t("Limite de 1000 prises atteinte pour cette fiole.", "Limit of 1000 doses reached for this vial.", "تم بلوغ حد 1000 جرعة لهذه القارورة."));
-  v.logs.push({ id: uid(), t: toDT(when), mcg: Math.round(mcg * 1000) / 1000 });
+  if (!old && v.logs.length >= 1000) return err(t("Limite de 1000 prises atteinte pour cette fiole.", "Limit of 1000 doses reached for this vial.", "تم بلوغ حد 1000 جرعة لهذه القارورة."));
+  const backup = JSON.stringify(v.logs);
+  const entry = { t: toDT(when), mcg: Math.round(mcg * 1000) / 1000, site, note: $("dsNote").value.trim().slice(0, 140) };
+  if (old) Object.assign(old, entry); else v.logs.push({ id: uid(), ...entry });
   v.logs.sort((a, b) => parseDT(a.t) - parseDT(b.t));
-  if (!save()) { v.logs = v.logs.filter((l) => l.t !== toDT(when) || l.mcg !== Math.round(mcg * 1000) / 1000); return; }
+  if (!save()) { v.logs = JSON.parse(backup); return; }
   $("dsError").hidden = true;
   viewAt = Infinity;
   stopPlay();
-  vial.float(`−${massTxt(mcg)}`);
+  if (!old) vial.float(`−${massTxt(mcg)}`);
+  endEdit();
   renderStage();
-  vial.set(status(v).frac, { splash: 1.2 });
+  vial.set(status(v).frac, { splash: old ? 0.6 : 1.2 });
+  renderShelf();
   renderPanel();
-  $("dsTime").value = toDT(Date.now());
-  toast(t("Prise ajoutée", "Dose added", "تمت إضافة الجرعة"));
+  toast(old ? t("Prise modifiée", "Dose updated", "تم تعديل الجرعة") : t("Prise ajoutée", "Dose added", "تمت إضافة الجرعة"));
   $("srLive").textContent = $("vialSvg").getAttribute("aria-label");
 });
+
+// Modifier une prise : le formulaire se remplit avec ses valeurs, le bouton devient « Enregistrer la modification »
+function startEdit(v, l) {
+  editing = l.id;
+  const mg = l.mcg >= 1000;
+  $("dsAmount").value = fmtIn(mg ? l.mcg / 1000 : l.mcg);
+  $("dsAmount").dataset.touched = "1";
+  setSeg("dsUnit", mg ? "mg" : "mcg");
+  $("dsTime").value = l.t;
+  $("dsNote").value = l.note || "";
+  site = l.site || "";
+  $("dsAdd").lastChild.textContent = t("Enregistrer la modification", "Save changes", "حفظ التعديل");
+  $("dsCancel").hidden = false;
+  $("dosePanel").classList.add("is-editing");
+  $("dsError").hidden = true;
+  renderSites();
+  updatePreview();
+  $("dosePanel").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  $("dsAmount").focus({ preventScroll: true });
+}
+function endEdit() {
+  if (!editing && $("dsCancel").hidden) { site = ""; $("dsNote").value = ""; $("dsTime").value = toDT(Date.now()); return; }
+  editing = null;
+  site = "";
+  $("dsNote").value = "";
+  $("dsTime").value = toDT(Date.now());
+  delete $("dsAmount").dataset.touched;
+  $("dsAdd").lastChild.textContent = t("Ajouter la prise", "Add the dose", "أضف الجرعة");
+  $("dsCancel").hidden = true;
+  $("dosePanel").classList.remove("is-editing");
+}
+$("dsCancel").addEventListener("click", () => { endEdit(); renderPanel(); });
 
 /* Historique, regroupé par semaine depuis la reconstitution */
 function renderHistory(v) {
@@ -508,7 +706,11 @@ function renderHistory(v) {
       li.className = "hist-item";
       const when = document.createElement("span");
       when.className = "hist-when";
-      when.textContent = fWhen.format(parseDT(l.t));
+      const whenTxt = document.createElement("span");
+      whenTxt.textContent = fWhen.format(parseDT(l.t));
+      when.append(whenTxt);
+      if (l.site) { const sm = document.createElement("small"); sm.className = "hist-site"; sm.textContent = siteName(l.site); when.append(sm); }
+      if (l.note) { const nt = document.createElement("small"); nt.className = "hist-note"; nt.textContent = l.note; when.append(nt); }
       const amt = document.createElement("span");
       amt.className = "hist-amt";
       const am = document.createElement("b");
@@ -520,7 +722,16 @@ function renderHistory(v) {
       del.type = "button";
       del.className = "link-btn";
       del.textContent = t("Supprimer", "Delete", "حذف");
-      del.setAttribute("aria-label", `${t("Supprimer la prise du", "Delete the dose of", "حذف جرعة")} ${when.textContent}`);
+      del.setAttribute("aria-label", `${t("Supprimer la prise du", "Delete the dose of", "حذف جرعة")} ${whenTxt.textContent}`);
+      const ed = document.createElement("button");
+      ed.type = "button";
+      ed.className = "link-btn";
+      ed.textContent = t("Modifier", "Edit", "تعديل");
+      ed.setAttribute("aria-label", `${t("Modifier la prise du", "Edit the dose of", "تعديل جرعة")} ${whenTxt.textContent}`);
+      ed.addEventListener("click", () => startEdit(v, l));
+      const acts = document.createElement("span");
+      acts.className = "hist-acts";
+      acts.append(ed, del);
       let timer = 0;
       del.addEventListener("click", () => {
         if (!del.classList.contains("is-confirm")) {
@@ -530,15 +741,17 @@ function renderHistory(v) {
           return;
         }
         clearTimeout(timer);
+        if (editing === l.id) endEdit();
         v.logs = v.logs.filter((x) => x.id !== l.id);
         save();
+        renderShelf();
         viewAt = Infinity;
         renderStage();
         vial.set(status(v).frac, { splash: 0.8 });
         renderPanel();
         toast(t("Prise supprimée", "Dose deleted", "تم حذف الجرعة"));
       });
-      li.append(when, amt, del);
+      li.append(when, amt, acts);
       ul.append(li);
     });
     sec.append(head, ul);
@@ -546,17 +759,44 @@ function renderHistory(v) {
   }));
 }
 
-/* ── Nouvelle fiole ── */
+/* ── Nouvelle fiole, ou modification de la fiole affichée ── */
+let editingVial = null;
+let nvColor = "shu";
+function renderSwatches() {
+  $("nvColor").replaceChildren(...PALETTE.map((c) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "swatch";
+    b.style.setProperty("--sw", c[1]);
+    b.setAttribute("aria-label", colorName(c));
+    b.title = colorName(c);
+    b.setAttribute("aria-pressed", String(c[0] === nvColor));
+    b.addEventListener("click", () => { nvColor = c[0]; renderSwatches(); });
+    return b;
+  }));
+}
+function setFormMode(edit) {
+  $("nvTitle").lastChild.textContent = edit ? t("Modifier la fiole", "Edit the vial", "تعديل القارورة") : t("Nouvelle fiole", "New vial", "قارورة جديدة");
+  $("nvCreate").textContent = edit ? t("Enregistrer", "Save", "حفظ") : t("Créer la fiole", "Create the vial", "إنشاء القارورة");
+  $("nvImportBox").hidden = edit || !saved.length;
+}
 function showForm(show) {
   $("newVial").hidden = !show;
   $("nvCancel").hidden = !store.vials.length;
+  if (!show && editingVial) { editingVial = null; setFormMode(false); }
   renderPanel();
   if (show) {
     $("nvError").hidden = true;
     if (!$("nvDate").value) $("nvDate").value = toDT(Date.now()).slice(0, 10);
+    if (!editingVial) {
+      // Nouvelle fiole : la première couleur pas encore utilisée sur l'étagère
+      const used = new Set(store.vials.map((v) => v.color));
+      nvColor = (PALETTE.find((c) => !used.has(c[0])) || PALETTE[store.vials.length % PALETTE.length])[0];
+    }
+    renderSwatches();
   }
 }
-$("newVialBtn").addEventListener("click", () => { showForm(true); $("newVial").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); $("nvName").focus({ preventScroll: true }); });
+$("newVialBtn").addEventListener("click", () => { editingVial = null; setFormMode(false); $("nvBud").value = ""; showForm(true); $("newVial").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); $("nvName").focus({ preventScroll: true }); });
 $("nvCancel").addEventListener("click", () => showForm(false));
 
 // Reprendre un flacon enregistré dans « Mes flacons » du calculateur
@@ -582,8 +822,25 @@ saved.forEach((x, i) => {
 });
 $("nvImport").addEventListener("change", (e) => { if (e.target.value !== "") fillForm(saved[+e.target.value]); });
 
+$("editVial").addEventListener("click", () => {
+  const v = current();
+  if (!v) return;
+  editingVial = v.id;
+  const mg = v.total >= 1000;
+  fillForm({ n: v.name, v: fmtIn(mg ? v.total / 1000 : v.total), vu: mg ? "mg" : "mcg", w: fmtIn(v.water),
+    d: v.dose ? fmtIn(v.doseUnit === "mg" ? v.dose / 1000 : v.dose) : "", du: v.doseUnit, date: v.date });
+  $("nvBud").value = v.bud || "";
+  nvColor = v.color;
+  setFormMode(true);
+  showForm(true);
+  $("newVial").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  $("nvName").focus({ preventScroll: true });
+});
+
 $("nvCreate").addEventListener("click", () => {
   const err = (msg) => { $("nvError").textContent = msg; $("nvError").hidden = false; };
+  const bud = $("nvBud").value;
+  if (bud && !Number.isFinite(parseDay(bud))) return err(t("La date limite n'est pas valide.", "The use-before date is not valid.", "تاريخ الاستخدام غير صالح."));
   const total = toMcg(parseNum($("nvTotal").value), segValue("nvTotalUnit"));
   const water = parseNum($("nvWater").value);
   const doseRaw = parseNum($("nvDose").value);
@@ -593,15 +850,34 @@ $("nvCreate").addEventListener("click", () => {
   if (!Number.isFinite(parseDay(date))) return err(t("Indique la date de reconstitution.", "Enter the reconstitution date.", "أدخل تاريخ التحضير."));
   if (parseDay(date) > Date.now()) return err(t("La date de reconstitution est dans le futur.", "The reconstitution date is in the future.", "تاريخ التحضير في المستقبل."));
   if ($("nvDose").value.trim() !== "" && !(doseRaw > 0)) return err(t("La prise habituelle doit être un nombre positif, ou rester vide.", "The usual dose must be a positive number, or stay empty.", "يجب أن تكون الجرعة المعتادة رقمًا موجبًا، أو تُترك فارغة."));
-  if (store.vials.length >= 20) return err(t("Limite de 20 fioles atteinte : supprime une ancienne fiole.", "Limit of 20 vials reached: delete an old one.", "تم بلوغ حد 20 قارورة: احذف قارورة قديمة."));
-  const v = {
-    id: uid(), name: $("nvName").value.trim().slice(0, 40), total, water, date,
-    dose: doseRaw > 0 ? toMcg(doseRaw, segValue("nvDoseUnit")) : 0, doseUnit: segValue("nvDoseUnit"), logs: [],
+  const fields = {
+    name: $("nvName").value.trim().slice(0, 40), total, water, date, color: nvColor, bud: bud || "",
+    dose: doseRaw > 0 ? toMcg(doseRaw, segValue("nvDoseUnit")) : 0, doseUnit: segValue("nvDoseUnit"),
   };
+  const ed = editingVial ? store.vials.find((x) => x.id === editingVial) : null;
+  if (ed) {
+    // Modification : les prises déjà notées doivent rester possibles avec les nouveaux réglages
+    const used = ed.logs.reduce((n, l) => n + l.mcg, 0);
+    if (ed.logs.some((l) => parseDT(l.t) < parseDay(date))) return err(t("Une prise est notée avant cette date de reconstitution.", "A dose is logged before this reconstitution date.", "هناك جرعة مسجّلة قبل تاريخ التحضير هذا."));
+    if (total + 1e-6 < used) return err(t(`Le contenu ne peut pas être plus petit que ce qui a déjà été noté (${massTxt(used)}).`, `The content can't be less than what is already logged (${massTxt(used)}).`, `لا يمكن أن يكون المحتوى أقل مما سُجّل بالفعل (${mass(used)}).`));
+    const backup = JSON.stringify(ed);
+    Object.assign(ed, fields);
+    if (!save()) { Object.assign(ed, JSON.parse(backup)); return; }
+    ["nvName", "nvTotal", "nvWater", "nvDose", "nvBud"].forEach((id) => ($(id).value = ""));
+    editingVial = null;
+    setFormMode(false);
+    showForm(false);
+    renderAll(true);
+    toast(t("Fiole modifiée", "Vial updated", "تم تعديل القارورة"));
+    $("vialStage").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    return;
+  }
+  if (store.vials.length >= 20) return err(t("Limite de 20 fioles atteinte : supprime une ancienne fiole.", "Limit of 20 vials reached: delete an old one.", "تم بلوغ حد 20 قارورة: احذف قارورة قديمة."));
+  const v = { id: uid(), ...fields, logs: [] };
   store.vials.push(v);
   store.current = v.id;
   if (!save()) { store.vials.pop(); return; }
-  ["nvName", "nvTotal", "nvWater", "nvDose"].forEach((id) => ($(id).value = ""));
+  ["nvName", "nvTotal", "nvWater", "nvDose", "nvBud"].forEach((id) => ($(id).value = ""));
   $("nvImport").value = "";
   delete $("dsAmount").dataset.touched;
   viewAt = Infinity;
@@ -623,6 +899,7 @@ $("delVial").addEventListener("click", () => {
     return;
   }
   clearTimeout(delTimer);
+  endEdit();
   store.vials = store.vials.filter((v) => v.id !== store.current);
   store.current = store.vials[0]?.id || null;
   save();
@@ -684,13 +961,14 @@ $("importFile").addEventListener("change", async (e) => {
 function renderAll(instant) {
   if (!current() && store.vials.length) store.current = store.vials[0].id;
   delete $("dsAmount").dataset.touched;
-  renderTabs();
+  renderShelf();
   renderStage(instant);
   renderPanel();
 }
 
 /* Démarrage : arrivée depuis le calculateur (?n=…&v=…), sinon dernière fiole suivie */
 $("dsTime").value = toDT(Date.now());
+buildSiteMap();
 const q = new URLSearchParams(location.search);
 renderAll(true);
 if (q.has("v") && q.has("w")) {

@@ -97,13 +97,17 @@
     <p class="exp-banner" role="note"><b>تجريبي وتعليمي.</b> هذه الأداة لمتابعة قارورة في إطار بحثي: تحسب فقط ما تسجّله. ليست نصيحة طبية ولا توصي بأي كمية. تبقى بياناتك على جهازك، ولا يُرسل أي شيء.</p>
   </section>
 
+  <section class="shelf" id="shelf" aria-labelledby="shelfTitle" hidden>
+    <div class="shelf-head"><h2 class="panel-title" id="shelfTitle"><span class="jp">棚</span>رفّي</h2><span class="count" id="shelfCount"></span></div>
+    <ul class="shelf-list" id="shelfList"></ul>
+  </section>
+
   <section class="track" id="suivi" aria-label="متابعة القارورة">
     <div class="panel vial-stage" id="vialStage">
       <div class="panel-head">
         <h2 class="panel-title"><span class="jp">小瓶</span>قارورتي</h2>
         <button class="link-btn" id="newVialBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>قارورة جديدة</button>
       </div>
-      <div class="vial-tabs" id="vialTabs" role="group" aria-label="قواريري" hidden></div>
       <div class="vial-scene">
         <span class="stage-tag" aria-hidden="true">残量</span>
         <div class="vial-view" id="vialView" role="img" aria-label="القارورة">
@@ -129,6 +133,7 @@
         <p class="tl-label" id="tlLabel"></p>
       </div>
       <div class="stage-foot" id="stageFoot" hidden>
+        <button class="link-btn" id="editVial" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg> تعديل القارورة</button>
         <button class="link-btn" id="delVial" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg> حذف هذه القارورة</button>
       </div>
     </div>
@@ -166,6 +171,17 @@
             </div>
           </div>
           <p class="hint">تملأ الجرعة المعتادة جرعاتك مسبقًا، وتُستخدم لحساب عدد الجرعات المتبقية.</p>
+          <div class="form-row">
+            <div>
+              <span class="form-label" id="lblNvColor">لون القارورة</span>
+              <div class="swatches" id="nvColor" role="group" aria-labelledby="lblNvColor"></div>
+            </div>
+            <div>
+              <label for="nvBud">استخدمها قبل (اختياري)</label>
+              <input class="text-field" id="nvBud" type="date">
+              <p class="hint">فقط إذا كان لديك تاريخ (الملصق، المورّد): الموقع لا يحسبه.</p>
+            </div>
+          </div>
           <p class="form-error" id="nvError" role="alert" hidden></p>
           <div class="form-actions">
             <button class="btn btn-primary" id="nvCreate" type="button">إنشاء القارورة</button>
@@ -188,10 +204,24 @@
             <label for="dsTime">التاريخ والوقت</label>
             <input class="text-field" id="dsTime" type="datetime-local">
           </div>
+          <div class="site-field">
+            <span class="form-label" id="lblSite">مكان الحقن (اختياري)</span>
+            <div class="site-pick">
+              <div class="site-map" id="siteMap" aria-hidden="true"></div>
+              <div class="site-list" id="siteList" role="group" aria-labelledby="lblSite"></div>
+            </div>
+            <p class="hint">اليسار واليمين بالنسبة إليك. يُظهر اللون مدة الراحة منذ آخر جرعة في هذا المكان.</p>
+            <p class="site-legend"><span><i class="is-fresh"></i>أقل من يومين</span><span><i class="is-mid"></i>من 2 إلى 6 أيام</span><span><i class="is-rest"></i>7 أيام أو أكثر، أو لم يُستخدم</span></p>
+          </div>
+          <div>
+            <label for="dsNote">ملاحظة (اختياري)</label>
+            <input class="text-field" id="dsNote" type="text" maxlength="140" placeholder="مثال: بعد الرياضة" autocomplete="off">
+          </div>
           <p class="preview" id="dsPreview" aria-live="polite"></p>
           <p class="form-error" id="dsError" role="alert" hidden></p>
           <div class="form-actions">
             <button class="btn btn-primary" id="dsAdd" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>أضف الجرعة</button>
+            <button class="btn" id="dsCancel" type="button" hidden>إلغاء</button>
           </div>
         </div>
         <dl class="stats track-stats">
