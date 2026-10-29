@@ -67,6 +67,8 @@ const SITES = [
   { id: "arm-r", fr: "Bras droit", en: "Right arm", ar: "الذراع الأيمن" },
   { id: "glute-l", fr: "Fessier gauche", en: "Left glute", ar: "الألية اليسرى" },
   { id: "glute-r", fr: "Fessier droit", en: "Right glute", ar: "الألية اليمنى" },
+  { id: "flank-l", fr: "Flanc gauche", en: "Left flank", ar: "الخاصرة اليسرى" },
+  { id: "flank-r", fr: "Flanc droit", en: "Right flank", ar: "الخاصرة اليمنى" },
 ];
 const siteName = (id) => { const x = SITES.find((k) => k.id === id); return x ? t(x.fr, x.en, x.ar) : ""; };
 
@@ -573,28 +575,35 @@ function lastBySite() {
   }));
   return last;
 }
-const restLevel = (ms) => { if (ms === undefined) return "rest"; const d = dayDiff(ms, Date.now()); return d < 2 ? "fresh" : d < 7 ? "mid" : "rest"; };
-const SIDE = { fr: ["D", "G"], en: ["R", "L"], ar: ["يمين", "يسار"] }[LANG] || ["R", "L"];
-// Croquis anatomiques rendus depuis le modèle BodyParts3D (images 300 × 720) et position de chaque endroit sur l'image.
+const SIDE = { fr: ["D", "G"], en: ["R", "L"], ar: ["ي", "س"] }[LANG] || ["R", "L"];
+// Silhouettes rendues depuis le modèle BodyParts3D (images 300 × 720) et position de chaque endroit sur l'image.
 // De face, la gauche de la personne est à droite de l'image ; de dos, elle est à gauche.
-const BODY_MAP = {"front": [["abd-l", 176.9, 304.3, 17.1, 20.6], ["abd-r", 123.1, 304.3, 17.1, 20.6], ["thigh-l", 186.9, 425.6, 18.3, 35], ["thigh-r", 113.6, 425.6, 18.3, 35]], "back": [["arm-l", 67.5, 201.9, 13, 24.7], ["arm-r", 232.2, 201.9, 13, 24.7], ["glute-l", 107.7, 343.4, 20.4, 17.3], ["glute-r", 192.3, 343.4, 20.4, 17.3]]};
+const BODY_MAP = {"front": [["abd-l", 176.9, 304.3, 17.1, 20.6], ["abd-r", 123.1, 304.3, 17.1, 20.6], ["thigh-l", 186.9, 425.6, 18.3, 35], ["thigh-r", 113.6, 425.6, 18.3, 35]], "back": [["arm-l", 67.5, 201.9, 13, 24.7], ["arm-r", 232.2, 201.9, 13, 24.7], ["glute-l", 110.1, 351.6, 20.4, 16.5], ["glute-r", 189.9, 351.6, 20.4, 16.5], ["flank-l", 107.2, 296.1, 13, 22.6], ["flank-r", 192.8, 296.1, 13, 22.6]]};
+const NAVEL = [150, 302.3, 12.2];
+const RECENT_DAYS = 3;
 function bodyView(key, label, marks) {
+  // Chaque zone : une surface de clic plus large (invisible), la pilule, la pastille « 2 j » au-dessus, la coche au centre
+  const hits = (x, y, own) => BODY_MAP[key].some(([o, ox, oy, orx, ory]) => o !== own && Math.abs(x - ox) < orx + 30 && Math.abs(y - oy) < ory + 15);
+  const zonesSvg = BODY_MAP[key].map(([id, cx, cy, rx, ry]) => { const by = hits(cx, cy - ry - 16, id) ? cy + ry + 16 : cy - ry - 16; return `<g class="bm-z" data-site="${id}">
+      <rect class="bm-hit" x="${(cx - rx - 10).toFixed(1)}" y="${(cy - ry - 8).toFixed(1)}" width="${(2 * rx + 20).toFixed(1)}" height="${(2 * ry + 16).toFixed(1)}"/>
+      <rect class="bm-zone" x="${(cx - rx).toFixed(1)}" y="${(cy - ry).toFixed(1)}" width="${(2 * rx).toFixed(1)}" height="${(2 * ry).toFixed(1)}" rx="${Math.min(rx, ry).toFixed(1)}"/>
+      <g class="bm-badge" transform="translate(${cx.toFixed(1)} ${by.toFixed(1)})"><rect x="-23" y="-15" width="46" height="30" rx="15"/><text y="6"></text></g>
+      <g class="bm-check" transform="translate(${cx.toFixed(1)} ${cy.toFixed(1)})"><circle r="14"/><path d="M-6.5 0.5l4.5 4.5 8.5-9.5"/></g>
+    </g>`; }).join("");
+  const navel = key === "front" ? `<circle class="bm-navel" cx="${NAVEL[0]}" cy="${NAVEL[1]}" r="${NAVEL[2]}"/>` : "";
   return `<figure class="bm-view">
     <div class="bm-frame">
       <img src="/suivi/img/corps-${key === "front" ? "face" : "dos"}.webp" alt="" width="300" height="720" decoding="async">
-      <svg viewBox="0 0 300 720" aria-hidden="true">
-        ${BODY_MAP[key].map(([id, cx, cy, rx, ry]) => `<ellipse class="bm-zone" data-site="${id}" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"/>`).join("")}
-        <text class="bm-side" x="14" y="44">${marks[0]}</text><text class="bm-side" x="286" y="44" text-anchor="end">${marks[1]}</text>
-      </svg>
+      <svg viewBox="0 0 300 720" aria-hidden="true">${navel}${zonesSvg}</svg>
     </div>
-    <figcaption>${label}</figcaption>
+    <figcaption><span>${marks[0]}</span>${label}<span>${marks[1]}</span></figcaption>
   </figure>`;
 }
 function buildSiteMap() {
   const [right, left] = SIDE;
   $("siteMap").innerHTML = bodyView("front", t("Devant", "Front", "الأمام"), [right, left]) + bodyView("back", t("Dos", "Back", "الخلف"), [left, right])
-    + `<p class="bm-credit">${t("Croquis d'après BodyParts3D, © DBCLS, CC BY 4.0", "Sketch based on BodyParts3D, © DBCLS, CC BY 4.0", "رسم مأخوذ من BodyParts3D، © DBCLS، CC BY 4.0")}</p>`;
-  $("siteMap").querySelectorAll(".bm-zone").forEach((z) => z.addEventListener("click", () => selectSite(site === z.dataset.site ? "" : z.dataset.site)));
+    + `<p class="bm-credit">${t("Silhouette d'après BodyParts3D, © DBCLS, CC BY 4.0", "Silhouette based on BodyParts3D, © DBCLS, CC BY 4.0", "صورة مأخوذة من BodyParts3D، © DBCLS، CC BY 4.0")}</p>`;
+  $("siteMap").querySelectorAll(".bm-z").forEach((z) => z.addEventListener("click", () => selectSite(site === z.dataset.site ? "" : z.dataset.site)));
   $("siteList").replaceChildren(...SITES.map((k) => {
     const b = document.createElement("button");
     b.type = "button";
@@ -603,30 +612,56 @@ function buildSiteMap() {
     b.addEventListener("click", () => selectSite(site === k.id ? "" : k.id));
     return b;
   }));
+  $("siteToggle").addEventListener("click", () => {
+    const open = $("siteList").hidden;
+    $("siteList").hidden = !open;
+    $("siteToggle").setAttribute("aria-expanded", String(open));
+  });
 }
+// État d'un endroit : le plus reposé (vert, coché), utilisé ces 3 derniers jours (orange, « 2 j »), ou disponible
+const restDays = (ms) => (ms === undefined ? null : dayDiff(ms, Date.now()));
+// Pastille courte : « 2 j » / « 2d » ; en arabe un mot (اليوم, أمس, يومان, 3 أيام), la pastille s'élargit
+const badgeTxt = (d) => (LANG === "ar" ? ["اليوم", "أمس", "يومان"][d] || `${d} أيام` : `${d}${t(" j", "d", "")}`);
 function renderSites() {
-  const last = lastBySite(), now = Date.now();
-  // Le plus reposé : jamais utilisé en premier, sinon la dernière prise la plus ancienne
+  const last = lastBySite();
+  // Le plus reposé : rien n'est coché tant qu'aucune prise n'a d'endroit ; à égalité (jamais utilisé), le premier de la liste
   let best = null;
-  SITES.forEach((k) => { if (best === null || (last[k.id] ?? -Infinity) < (last[best] ?? -Infinity)) best = k.id; });
-  $("siteMap").querySelectorAll(".bm-zone").forEach((z) => {
-    z.setAttribute("class", `bm-zone is-${restLevel(last[z.dataset.site])}${z.dataset.site === site ? " is-sel" : ""}`);
+  if (Object.keys(last).length) SITES.forEach((k) => { if (best === null || (last[k.id] ?? -Infinity) < (last[best] ?? -Infinity)) best = k.id; });
+  const state = (id) => (id === best ? "best" : restDays(last[id]) !== null && restDays(last[id]) <= RECENT_DAYS ? "recent" : "free");
+  $("siteMap").querySelectorAll(".bm-z").forEach((z) => {
+    const id = z.dataset.site, d = restDays(last[id]);
+    z.setAttribute("class", `bm-z is-${state(id)}${id === site ? " is-sel" : ""}`);
+    const txt = d === null ? "" : badgeTxt(d), w = Math.max(46, txt.length * 11 + 14);
+    z.querySelector(".bm-badge text").textContent = txt;
+    z.querySelector(".bm-badge rect").setAttribute("x", String(-w / 2));
+    z.querySelector(".bm-badge rect").setAttribute("width", String(w));
   });
   $("siteList").querySelectorAll(".site-btn").forEach((b) => {
-    const id = b.dataset.site, ms = last[id];
-    const d = ms === undefined ? null : dayDiff(ms, now);
+    const id = b.dataset.site, d = restDays(last[id]);
     const dot = document.createElement("i");
-    dot.className = `is-${restLevel(ms)}`;
+    dot.className = `is-${state(id)}`;
     const nm = document.createElement("b");
     nm.textContent = siteName(id);
     const rest = document.createElement("span");
     rest.textContent = d === null ? t("jamais utilisé", "never used", "لم يُستخدم")
       : d === 0 ? t("utilisé aujourd'hui", "used today", "استُخدم اليوم")
-      : t(`repos : ${days(d)}`, `rested ${days(d)}`, `راحة: ${days(d)}`);
+      : t(`il y a ${days(d)}`, `${days(d)} ago`, `منذ ${days(d)}`);
     b.replaceChildren(dot, nm, rest);
-    if (id === best) { const em = document.createElement("em"); em.textContent = t("le plus reposé", "most rested", "الأكثر راحة"); b.append(em); }
     b.setAttribute("aria-pressed", String(id === site));
   });
+  // Dernier endroit utilisé (en-tête) et carte de l'endroit choisi, ou du dernier utilisé
+  let lastId = null;
+  Object.keys(last).forEach((id) => { if (lastId === null || last[id] > last[lastId]) lastId = id; });
+  $("siteLast").textContent = lastId ? t(`Dernier : ${siteName(lastId).toLowerCase()}`, `Last: ${siteName(lastId).toLowerCase()}`, `الأخير: ${siteName(lastId)}`) : "";
+  const shown = site || lastId || best;
+  const st = state(shown), d = restDays(last[shown]);
+  $("siteCard").hidden = !shown;
+  $("siteCard").dataset.state = st;
+  $("scK").textContent = st === "best" ? t("Le plus reposé", "Most rested", "الأكثر راحة") : st === "recent" ? t("Utilisé récemment", "Used recently", "استُخدم مؤخرًا") : t("Disponible", "Available", "متاح");
+  $("scName").textContent = siteName(shown) + (site ? "" : ` · ${t("non choisi", "not selected", "غير محدد")}`);
+  $("scWhen").textContent = d === null ? t("Jamais utilisé", "Never used", "لم يُستخدم قط")
+    : d === 0 ? t("Dernière prise : aujourd'hui", "Last used today", "آخر استخدام: اليوم")
+    : t(`Dernière prise : il y a ${days(d)}`, `Last used ${days(d)} ago`, `آخر استخدام: منذ ${days(d)}`);
 }
 function selectSite(id) { site = id; renderSites(); }
 

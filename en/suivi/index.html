@@ -221,13 +221,13 @@
             <input class="text-field" id="dsTime" type="datetime-local">
           </div>
           <div class="site-field">
-            <span class="form-label" id="lblSite">Injection site (optional)</span>
-            <div class="site-pick">
-              <div class="site-map" id="siteMap" aria-hidden="true"></div>
-              <div class="site-list" id="siteList" role="group" aria-labelledby="lblSite"></div>
-            </div>
-            <p class="hint">Left and right are yours. The color shows the rest since the last dose at that site.</p>
-            <p class="site-legend"><span><i class="is-fresh"></i>Under 2 days</span><span><i class="is-mid"></i>2 to 6 days</span><span><i class="is-rest"></i>7 days or more, or never</span></p>
+            <div class="site-head"><span class="form-label" id="lblSite">Injection site (optional)</span><span class="site-last" id="siteLast"></span></div>
+            <div class="site-map" id="siteMap" aria-hidden="true"></div>
+            <p class="site-legend"><span><i class="is-best"></i>Most rested</span><span><i class="is-recent"></i>Used in the last 3 days</span><span><i class="is-free"></i>Available</span></p>
+            <div class="site-card" id="siteCard" hidden><p class="sc-k" id="scK"></p><p class="sc-name" id="scName"></p><p class="sc-when" id="scWhen"></p></div>
+            <p class="hint">Tap an area on the body. R and L = your right and left.</p>
+            <button class="link-btn site-toggle" id="siteToggle" type="button" aria-expanded="false" aria-controls="siteList">All sites</button>
+            <div class="site-list" id="siteList" role="group" aria-labelledby="lblSite" hidden></div>
           </div>
           <div>
             <label for="dsNote">Note (optional)</label>

@@ -223,13 +223,13 @@
             <input class="text-field" id="dsTime" type="datetime-local">
           </div>
           <div class="site-field">
-            <span class="form-label" id="lblSite">مكان الحقن (اختياري)</span>
-            <div class="site-pick">
-              <div class="site-map" id="siteMap" aria-hidden="true"></div>
-              <div class="site-list" id="siteList" role="group" aria-labelledby="lblSite"></div>
-            </div>
-            <p class="hint">اليسار واليمين بالنسبة إليك. يُظهر اللون مدة الراحة منذ آخر جرعة في هذا المكان.</p>
-            <p class="site-legend"><span><i class="is-fresh"></i>أقل من يومين</span><span><i class="is-mid"></i>من 2 إلى 6 أيام</span><span><i class="is-rest"></i>7 أيام أو أكثر، أو لم يُستخدم</span></p>
+            <div class="site-head"><span class="form-label" id="lblSite">مكان الحقن (اختياري)</span><span class="site-last" id="siteLast"></span></div>
+            <div class="site-map" id="siteMap" aria-hidden="true"></div>
+            <p class="site-legend"><span><i class="is-best"></i>الأكثر راحة</span><span><i class="is-recent"></i>استُخدم خلال آخر 3 أيام</span><span><i class="is-free"></i>متاح</span></p>
+            <div class="site-card" id="siteCard" hidden><p class="sc-k" id="scK"></p><p class="sc-name" id="scName"></p><p class="sc-when" id="scWhen"></p></div>
+            <p class="hint">المس منطقة على الجسم. ي و س = يمينك ويسارك.</p>
+            <button class="link-btn site-toggle" id="siteToggle" type="button" aria-expanded="false" aria-controls="siteList">كل الأماكن</button>
+            <div class="site-list" id="siteList" role="group" aria-labelledby="lblSite" hidden></div>
           </div>
           <div>
             <label for="dsNote">ملاحظة (اختياري)</label>

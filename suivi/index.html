@@ -221,13 +221,13 @@
             <input class="text-field" id="dsTime" type="datetime-local">
           </div>
           <div class="site-field">
-            <span class="form-label" id="lblSite">Endroit de la prise (facultatif)</span>
-            <div class="site-pick">
-              <div class="site-map" id="siteMap" aria-hidden="true"></div>
-              <div class="site-list" id="siteList" role="group" aria-labelledby="lblSite"></div>
-            </div>
-            <p class="hint">Gauche et droite = les tiennes. La couleur montre le repos depuis la dernière prise à cet endroit.</p>
-            <p class="site-legend"><span><i class="is-fresh"></i>Moins de 2 jours</span><span><i class="is-mid"></i>2 à 6 jours</span><span><i class="is-rest"></i>7 jours et plus, ou jamais</span></p>
+            <div class="site-head"><span class="form-label" id="lblSite">Endroit de la prise (facultatif)</span><span class="site-last" id="siteLast"></span></div>
+            <div class="site-map" id="siteMap" aria-hidden="true"></div>
+            <p class="site-legend"><span><i class="is-best"></i>Le plus reposé</span><span><i class="is-recent"></i>Utilisé ces 3 derniers jours</span><span><i class="is-free"></i>Disponible</span></p>
+            <div class="site-card" id="siteCard" hidden><p class="sc-k" id="scK"></p><p class="sc-name" id="scName"></p><p class="sc-when" id="scWhen"></p></div>
+            <p class="hint">Touche une zone sur le corps. D et G = ta droite et ta gauche.</p>
+            <button class="link-btn site-toggle" id="siteToggle" type="button" aria-expanded="false" aria-controls="siteList">Tous les endroits</button>
+            <div class="site-list" id="siteList" role="group" aria-labelledby="lblSite" hidden></div>
           </div>
           <div>
             <label for="dsNote">Note (facultatif)</label>
