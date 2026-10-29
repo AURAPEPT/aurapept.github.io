@@ -26,7 +26,7 @@ const line = (pts) => pts.reduce((acc, p) => (Array.isArray(p) ? acc.concat(p) :
 
 /* Profils (unités : rayon extérieur = 1, hauteur du verre 3,17) */
 // Paroi extérieure, du centre du fond jusqu'au haut de la bague du col
-const OUTER = line([
+export const OUTER = line([
   V2(0, 0.012), V2(0.6, 0.004), V2(0.86, 0),
   arc(0.86, 0.14, 0.14, -90, 0),
   V2(1, 0.6), V2(1, 1.4), V2(1, 2.25),
@@ -39,7 +39,7 @@ const OUTER = line([
   V2(0.45, 3.17),
 ]);
 // Paroi intérieure, du haut du col jusqu'au centre du fond (fond épais avec un léger dôme)
-const INNER = line([
+export const INNER = line([
   V2(0.45, 3.17), V2(0.43, 3.13), V2(0.43, 2.8),
   bez(V2(0.43, 2.8), V2(0.43, 2.69), V2(0.62, 2.665), 8),
   bez(V2(0.62, 2.665), V2(0.94, 2.62), V2(0.94, 2.25), 14),
@@ -49,7 +49,7 @@ const INNER = line([
   bez(V2(0.25, 0.175), V2(0.08, 0.235), V2(0, 0.24), 5),
 ]);
 // Volume du liquide : la cavité, légèrement en retrait du verre, arrêtée sous le bouchon
-const LIQUID = line([
+export const LIQUID = line([
   V2(0, 0.252),
   bez(V2(0, 0.252), V2(0.08, 0.247), V2(0.25, 0.187), 5),
   V2(0.5, 0.177), V2(0.79, 0.177),
@@ -60,7 +60,7 @@ const LIQUID = line([
   V2(0, 2.76),
 ]);
 // Bague aluminium sertie sous la lèvre du col
-const CRIMP = line([
+export const CRIMP = line([
   V2(0.6, 2.905), V2(0.66, 2.9),
   bez(V2(0.66, 2.9), V2(0.735, 2.905), V2(0.738, 2.96), 5),
   V2(0.738, 3.1), V2(0.738, 3.17),
@@ -68,25 +68,25 @@ const CRIMP = line([
   V2(0.46, 3.222),
 ]);
 // Capsule plastique « flip-off »
-const CAP = line([
+export const CAP = line([
   V2(0.6, 3.214), V2(0.705, 3.218),
   bez(V2(0.705, 3.218), V2(0.728, 3.23), V2(0.728, 3.27), 4),
   bez(V2(0.728, 3.27), V2(0.728, 3.318), V2(0.66, 3.33), 5),
   bez(V2(0.66, 3.33), V2(0.3, 3.355), V2(0, 3.36), 6),
 ]);
-const STOPPER = line([V2(0, 2.78), V2(0.424, 2.78), V2(0.427, 2.83), V2(0.427, 3.16), V2(0.46, 3.17), V2(0.46, 3.215), V2(0, 3.215)]);
+export const STOPPER = line([V2(0, 2.78), V2(0.424, 2.78), V2(0.427, 2.83), V2(0.427, 3.16), V2(0.46, 3.17), V2(0.46, 3.215), V2(0, 3.215)]);
 
-const Y_EMPTY = 0.2, Y_FULL = 1.82; // hauteur du liquide pour 0 % et 100 % de l'eau ajoutée
+export const Y_EMPTY = 0.2, Y_FULL = 1.82; // hauteur du liquide pour 0 % et 100 % de l'eau ajoutée
 
 // Conversion pour l'écran (tone mapping + sRGB). Teinte du verre ou du liquide : convertie puis multipliée par l'opacité.
 // Reflets : c'est de la lumière ajoutée, multipliée par Fresnel AVANT la conversion (une bande de studio très vive
 // reste visible même avec 4 % de réflexion).
-const ENV_GLSL = /* glsl */ `
+export const ENV_GLSL = /* glsl */ `
   uniform samplerCube envMap;
   vec3 envAt(vec3 d) { return textureCube(envMap, d).rgb; }
   vec3 outCol(vec3 c) { return linearToOutputTexel(vec4(toneMapping(c), 1.0)).rgb; }
 `;
-const VERT = /* glsl */ `
+export const VERT = /* glsl */ `
   varying vec3 vN; varying vec3 vW;
   void main() {
     vec4 w = modelMatrix * vec4(position, 1.0);
@@ -96,7 +96,7 @@ const VERT = /* glsl */ `
   }`;
 // Verre : réflexion de Fresnel (forte sur les bords, faible de face) + absorption légère dans l'épaisseur.
 // Sortie en alpha prémultiplié : les reflets s'ajoutent à la lumière, les bords assombrissent un peu ce qui est derrière.
-const GLASS_FRAG = /* glsl */ `
+export const GLASS_FRAG = /* glsl */ `
   ${ENV_GLSL}
   uniform vec3 tint; uniform float absorb; uniform float gain;
   varying vec3 vN; varying vec3 vW;
@@ -115,7 +115,7 @@ const GLASS_FRAG = /* glsl */ `
     gl_FragColor = vec4(col, a);
   }`;
 // Liquide : paroi du volume, coupée par un plan horizontal (le niveau) qui ondule.
-const LIQ_FRAG = /* glsl */ `
+export const LIQ_FRAG = /* glsl */ `
   ${ENV_GLSL}
   uniform vec3 P0; uniform vec3 Nrm; uniform float time; uniform float ripple;
   uniform vec3 tint; uniform vec3 deep; uniform float density;
@@ -142,7 +142,7 @@ const LIQ_FRAG = /* glsl */ `
   }`;
 // Surface du liquide : un disque dans le plan du niveau, découpé à la forme intérieure de la fiole
 // (cylindre, et arrondi du fond quand il reste très peu de liquide). Elle reflète le studio comme un miroir d'eau.
-const SURF_FRAG = /* glsl */ `
+export const SURF_FRAG = /* glsl */ `
   ${ENV_GLSL}
   uniform mat4 toLocal; uniform vec3 Nrm; uniform vec3 tint; uniform float density;
   varying vec3 vN; varying vec3 vW;
@@ -178,24 +178,9 @@ const FLOOR_FRAG = /* glsl */ `
     gl_FragColor = vec4(linearToOutputTexel(vec4(causticColor, 1.0)).rgb * k, a);
   }`;
 
-export function createVial3D(canvas, { reduceMotion = false } = {}) {
-  let renderer;
-  try {
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "low-power" });
-  } catch (e) {
-    return null;
-  }
-  if (!renderer.getContext()) return null;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(22, 1, 0.1, 60);
-  const TARGET = new THREE.Vector3(0, 1.62, 0);
-
-  /* Studio virtuel : dégradé gris, grandes bandes lumineuses (softbox), plafond, fenêtre chaude */
+/* Studio virtuel : dégradé gris, grandes bandes lumineuses (softbox), plafond, fenêtre chaude.
+   Rendu une fois dans une carte d'environnement (reflets du verre, du liquide et du métal). */
+export function createStudio(renderer, scene) {
   const envScene = new THREE.Scene();
   const sky = new THREE.SphereGeometry(20, 32, 16);
   const skyCols = [];
@@ -236,6 +221,28 @@ export function createVial3D(canvas, { reduceMotion = false } = {}) {
     envPm = pmrem.fromCubemap(cubeRT.texture).texture;
     scene.environment = envPm;
   }
+
+  return { cubeRT, buildEnv };
+}
+
+export function createVial3D(canvas, { reduceMotion = false } = {}) {
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "low-power" });
+  } catch (e) {
+    return null;
+  }
+  if (!renderer.getContext()) return null;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(22, 1, 0.1, 60);
+  const TARGET = new THREE.Vector3(0, 1.62, 0);
+
+  const { cubeRT, buildEnv } = createStudio(renderer, scene);
 
   /* La fiole */
   const vial = new THREE.Group();

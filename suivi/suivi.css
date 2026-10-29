@@ -216,15 +216,22 @@ html[lang="ar"] :is(.ro-k, .history h3) { font-size: .86rem; letter-spacing: 0; 
 /* Endroit de la prise : silhouette de face et de dos + boutons */
 .site-pick { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 14px; align-items: start; }
 @media (max-width: 560px) { .site-pick { grid-template-columns: minmax(0, 1fr); } }
-.site-map svg { display: block; width: 100%; max-width: 300px; height: auto; margin-inline: auto; direction: ltr; }
-.bm-body > * { fill: var(--field); stroke: var(--line-strong); stroke-width: 1.4; }
-.bm-zone { cursor: pointer; stroke: var(--paper); stroke-width: 1.5; transition: fill .2s, stroke .2s; }
-.bm-zone.is-fresh { fill: var(--shu); fill-opacity: .7; }
-.bm-zone.is-mid { fill: var(--kin); fill-opacity: .65; }
-.bm-zone.is-rest { fill: var(--matcha); fill-opacity: .55; }
-.bm-zone.is-sel { stroke: var(--sumi); stroke-width: 3; }
-.bm-side { fill: var(--muted); font: 700 10px var(--f-body); }
-.bm-label { fill: var(--sumi-2); font: 700 12px var(--f-body); text-anchor: middle; }
+/* Croquis anatomiques (face / dos) avec les zones par-dessus */
+.site-map { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; direction: ltr; padding: 10px 8px 6px; border-radius: 14px;
+  background: radial-gradient(ellipse 70% 60% at 50% 45%, var(--paper), transparent 75%), var(--field); }
+.bm-view { margin: 0; text-align: center; }
+.bm-frame { position: relative; width: 100%; max-width: 150px; margin-inline: auto; aspect-ratio: 300 / 720; }
+.bm-frame img, .bm-frame svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.bm-frame img { filter: drop-shadow(0 6px 8px rgba(40, 30, 20, .12)); }
+.bm-view figcaption { margin-top: 2px; font: 700 .76rem/1.2 var(--f-body); color: var(--sumi-2); }
+.bm-credit { grid-column: 1 / -1; margin: 2px 0 0; font-size: .64rem; color: var(--muted); text-align: center; }
+.bm-zone { cursor: pointer; stroke-width: 3; stroke-dasharray: 7 5; transition: fill .2s, stroke .2s, stroke-width .2s; }
+.bm-zone.is-fresh { fill: var(--shu); fill-opacity: .42; stroke: var(--shu); }
+.bm-zone.is-mid { fill: var(--kin); fill-opacity: .4; stroke: var(--kin); }
+.bm-zone.is-rest { fill: var(--matcha); fill-opacity: .34; stroke: var(--matcha); }
+@media (hover: hover) { .bm-zone:hover { fill-opacity: .6; } }
+.bm-zone.is-sel { fill-opacity: .7; stroke: var(--sumi); stroke-width: 5; stroke-dasharray: none; }
+.bm-side { fill: var(--muted); font: 700 26px var(--f-body); }
 .site-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .site-btn {
   position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 7px; align-items: center; padding: 7px 9px;
@@ -255,3 +262,27 @@ html[dir="rtl"] #dosePanel.is-editing .form-body { box-shadow: inset -4px 0 0 va
 /* Mode sombre : pourcentage des cartes éclairci pour rester lisible sur fond foncé */
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .vc-pct { color: var(--sumi); color: color-mix(in srgb, var(--vc) 50%, #fff); } }
 :root[data-theme="dark"] .vc-pct { color: var(--sumi); color: color-mix(in srgb, var(--vc) 50%, #fff); }
+
+/* Étagère 3D : canvas + étiquettes en papier sous chaque fiole */
+.shelf3d { position: relative; margin: 0 -4px; }
+#shelfCanvas { display: block; width: 100%; height: 300px; cursor: pointer; }
+.shelf-labels { position: absolute; inset: 0; pointer-events: none; }
+.shelf-tag {
+  --vc: var(--shu);
+  position: absolute; transform: translateX(-50%); pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 6px 8px 7px; border: 1px solid var(--line); border-top: 3px solid var(--vc); border-radius: 4px 4px 9px 9px;
+  background: var(--tag, #fffdf8); color: var(--tag-ink, #1c1a17); box-shadow: 0 6px 14px -10px rgba(0, 0, 0, .55);
+  font: inherit; text-align: center; cursor: pointer; transition: transform .15s, box-shadow .15s;
+}
+.shelf-tag b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 700 .86rem/1.25 var(--f-display); }
+.shelf-tag .st-pct { font: 800 1rem/1.1 var(--f-display); color: var(--tag-ink, #1c1a17); color: color-mix(in srgb, var(--vc) 62%, #000); font-variant-numeric: tabular-nums; }
+.shelf-tag small { font-size: .7rem; line-height: 1.25; color: var(--tag-muted, #6d6559); }
+.shelf-tag small.is-alert { color: #b3311b; font-weight: 700; }
+.shelf-tag[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--vc), 0 8px 18px -10px rgba(0, 0, 0, .6); transform: translateX(-50%) translateY(-2px); }
+.shelf-actions { margin: 16px 0 0; text-align: center; }
+@media (max-width: 560px) {
+  .shelf-tag { padding: 4px 5px 5px; }
+  .shelf-tag b { font-size: .74rem; }
+  .shelf-tag .st-pct { font-size: .86rem; }
+  .shelf-tag small { font-size: .62rem; }
+}

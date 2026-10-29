@@ -300,9 +300,53 @@ function miniVial(hex, frac) {
     <rect x="12" y="2" width="16" height="8" rx="2.5" fill="${hex}"/>
   </svg>`;
 }
+// Étagère en 3D (verre, liquide, capsule de couleur, planche en bois) ; sinon les cartes ci-dessous
+let shelf3d = null;
+function pickVial(id) {
+  if (id === store.current) return;
+  store.current = id; save(); viewAt = Infinity; endEdit(); showForm(false); renderAll(true);
+}
+import("/suivi/etagere3d.js").then(({ createShelf3D }) => {
+  $("shelf3d").hidden = false;
+  const s3 = createShelf3D($("shelfCanvas"), $("shelfLabels"), { reduceMotion, onPick: pickVial });
+  if (!s3) { $("shelf3d").hidden = true; return; }
+  shelf3d = s3;
+  $("shelfList").hidden = true;
+  renderShelf();
+}).catch(() => {});
+function vialInfo(v) {
+  const s = status(v), end = emptyAt(v);
+  if (budPassed(v)) return [t("Date limite dépassée", "Use-before date passed", "تجاوزت تاريخ الاستخدام"), true];
+  if (s.left <= 0) return [t("Fiole vide", "Vial empty", "القارورة فارغة"), true];
+  if (v.bud) return [t(`À utiliser avant le ${dayLabel(parseDay(v.bud))}`, `Use before ${dayLabel(parseDay(v.bud))}`, `استخدمها قبل ${dayLabel(parseDay(v.bud))}`), false];
+  if (end) return [t(`Vide vers le ${dayLabel(end)}`, `Empty around ${dayLabel(end)}`, `تفرغ تقريبًا في ${dayLabel(end)}`), false];
+  return [doses(v.logs.length), false];
+}
+function renderShelf3d() {
+  $("shelfLabels").replaceChildren(...store.vials.map((v) => {
+    const s = status(v), c = colorOf(v.color), [info, alert] = vialInfo(v);
+    const name = v.name || t("Fiole sans nom", "Unnamed vial", "قارورة بلا اسم");
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "shelf-tag";
+    b.dataset.id = v.id;
+    b.style.setProperty("--vc", c[1]);
+    b.setAttribute("aria-pressed", String(v.id === store.current));
+    const nm = document.createElement("b"); nm.textContent = name;
+    const pc = document.createElement("span"); pc.className = "st-pct"; pc.textContent = ltr(`${fmt(s.frac * 100, 0)} %`);
+    const inf = document.createElement("small"); inf.textContent = info; if (alert) inf.className = "is-alert";
+    b.append(nm, pc, inf);
+    b.setAttribute("aria-label", `${name}, ${colorName(c)}, ${t("reste", "left", "المتبقي")} ${fmt(s.frac * 100, 0)} %, ${info}`);
+    b.addEventListener("click", () => pickVial(v.id));
+    return b;
+  }));
+  shelf3d.update(store.vials.map((v) => ({ id: v.id, color: colorOf(v.color)[1], frac: status(v).frac, selected: v.id === store.current })));
+}
 function renderShelf() {
   $("shelf").hidden = !store.vials.length;
   $("shelfCount").textContent = vialsTxt(store.vials.length);
+  $("shelfNew").hidden = !shelf3d;
+  if (shelf3d) { renderShelf3d(); return; }
   const cards = store.vials.map((v) => {
     const s = status(v), c = colorOf(v.color), end = emptyAt(v);
     const li = document.createElement("li");
@@ -329,10 +373,7 @@ function renderShelf() {
     b.innerHTML = miniVial(c[1], s.frac);
     b.append(body);
     b.setAttribute("aria-label", `${name}, ${colorName(c)}, ${t("reste", "left", "المتبقي")} ${fmt(s.frac * 100, 0)} %`);
-    b.addEventListener("click", () => {
-      if (v.id === store.current) return;
-      store.current = v.id; save(); viewAt = Infinity; endEdit(); showForm(false); renderAll(true);
-    });
+    b.addEventListener("click", () => pickVial(v.id));
     li.append(b);
     return li;
   });
@@ -518,28 +559,25 @@ function lastBySite() {
 }
 const restLevel = (ms) => { if (ms === undefined) return "rest"; const d = dayDiff(ms, Date.now()); return d < 2 ? "fresh" : d < 7 ? "mid" : "rest"; };
 const SIDE = { fr: ["D", "G"], en: ["R", "L"], ar: ["يمين", "يسار"] }[LANG] || ["R", "L"];
-function figure(ox, zones, sideLeftFirst, label) {
-  const [right, left] = SIDE;
-  const marks = sideLeftFirst ? [left, right] : [right, left];
-  return `<g transform="translate(${ox} 0)">
-    <g class="bm-body">
-      <circle cx="60" cy="24" r="15"/><rect x="53" y="37" width="14" height="10" rx="4"/>
-      <path d="M30 51 Q60 43 90 51 Q98 54 98 63 L92 132 Q60 140 28 132 L22 63 Q22 54 30 51 Z"/>
-      <rect x="4" y="55" width="16" height="96" rx="8" transform="rotate(9 12 55)"/>
-      <rect x="100" y="55" width="16" height="96" rx="8" transform="rotate(-9 108 55)"/>
-      <rect x="34" y="128" width="23" height="112" rx="11"/><rect x="63" y="128" width="23" height="112" rx="11"/>
-    </g>
-    ${zones.map(([id, cx, cy, rx, ry]) => `<ellipse class="bm-zone" data-site="${id}" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"/>`).join("")}
-    <text class="bm-side" x="4" y="16">${marks[0]}</text><text class="bm-side" x="116" y="16" text-anchor="end">${marks[1]}</text>
-    <text class="bm-label" x="60" y="258">${label}</text>
-  </g>`;
+// Croquis anatomiques rendus depuis le modèle BodyParts3D (images 300 × 720) et position de chaque endroit sur l'image.
+// De face, la gauche de la personne est à droite de l'image ; de dos, elle est à gauche.
+const BODY_MAP = {"front": [["abd-l", 176.9, 304.3, 17.1, 20.6], ["abd-r", 123.1, 304.3, 17.1, 20.6], ["thigh-l", 186.9, 425.6, 18.3, 35], ["thigh-r", 113.6, 425.6, 18.3, 35]], "back": [["arm-l", 67.5, 201.9, 13, 24.7], ["arm-r", 232.2, 201.9, 13, 24.7], ["glute-l", 107.7, 343.4, 20.4, 17.3], ["glute-r", 192.3, 343.4, 20.4, 17.3]]};
+function bodyView(key, label, marks) {
+  return `<figure class="bm-view">
+    <div class="bm-frame">
+      <img src="/suivi/img/corps-${key === "front" ? "face" : "dos"}.webp" alt="" width="300" height="720" decoding="async">
+      <svg viewBox="0 0 300 720" aria-hidden="true">
+        ${BODY_MAP[key].map(([id, cx, cy, rx, ry]) => `<ellipse class="bm-zone" data-site="${id}" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"/>`).join("")}
+        <text class="bm-side" x="14" y="44">${marks[0]}</text><text class="bm-side" x="286" y="44" text-anchor="end">${marks[1]}</text>
+      </svg>
+    </div>
+    <figcaption>${label}</figcaption>
+  </figure>`;
 }
 function buildSiteMap() {
-  // De face, la gauche de la personne est à droite du dessin ; de dos, elle est à gauche
-  $("siteMap").innerHTML = `<svg viewBox="0 0 284 264" role="presentation">
-    ${figure(8, [["abd-r", 48, 104, 10, 13], ["abd-l", 72, 104, 10, 13], ["thigh-r", 45, 170, 9, 20], ["thigh-l", 75, 170, 9, 20]], false, t("Devant", "Front", "الأمام"))}
-    ${figure(156, [["arm-l", 8, 88, 7, 15], ["arm-r", 112, 88, 7, 15], ["glute-l", 48, 130, 11, 10], ["glute-r", 72, 130, 11, 10]], true, t("Dos", "Back", "الخلف"))}
-  </svg>`;
+  const [right, left] = SIDE;
+  $("siteMap").innerHTML = bodyView("front", t("Devant", "Front", "الأمام"), [right, left]) + bodyView("back", t("Dos", "Back", "الخلف"), [left, right])
+    + `<p class="bm-credit">${t("Croquis d'après BodyParts3D, © DBCLS, CC BY 4.0", "Sketch based on BodyParts3D, © DBCLS, CC BY 4.0", "رسم مأخوذ من BodyParts3D، © DBCLS، CC BY 4.0")}</p>`;
   $("siteMap").querySelectorAll(".bm-zone").forEach((z) => z.addEventListener("click", () => selectSite(site === z.dataset.site ? "" : z.dataset.site)));
   $("siteList").replaceChildren(...SITES.map((k) => {
     const b = document.createElement("button");
@@ -910,6 +948,8 @@ $("delVial").addEventListener("click", () => {
   toast(t("Fiole supprimée", "Vial deleted", "تم حذف القارورة"));
 });
 function resetDel() { $("delVial").classList.remove("is-confirm"); $("delVial").lastChild.textContent = t(" Supprimer cette fiole", " Delete this vial", " حذف هذه القارورة"); }
+
+$("shelfNew").addEventListener("click", () => $("newVialBtn").click());
 
 /* ── Sauvegarde : exporter les fioles dans un fichier, et l'importer sur un autre appareil ── */
 const vialsTxt = (n) => t(n > 1 ? `${n} fioles` : `${n} fiole`, n === 1 ? "1 vial" : `${n} vials`, arCount(n, ["قارورة واحدة", "قارورتان", "قوارير", "قارورة"]));
