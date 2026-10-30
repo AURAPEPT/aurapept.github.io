@@ -140,27 +140,32 @@
         <li class="step">
           <div class="step-top">
             <span class="hanko" aria-hidden="true">一</span>
+            <div><h3 id="lblPep">Peptide</h3><p id="pepHint">Optional. Pick it from the Peptide list: the content menu adapts to it.</p></div>
+          </div>
+          <div class="step-body">
+            <select class="text-field" id="pep" aria-labelledby="lblPep" aria-describedby="pepHint"><option value="">— Choose from the list (optional) —</option></select>
+            <a class="pep-link" id="pepLink" href="../peptides/" hidden>See its page in the list</a>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-top">
+            <span class="hanko" aria-hidden="true">二</span>
             <div><h3 id="lblVial">Vial content</h3><p>The amount printed on the vial label.</p></div>
           </div>
           <div class="step-body">
-            <div class="field">
+            <select class="text-field" id="vialPick" aria-labelledby="lblVial"><option value="">— Choose —</option><option value="other">Other amount</option></select>
+            <div class="field" id="vialBox" hidden>
               <input id="vial" type="text" inputmode="decimal" autocomplete="off" value="5" aria-labelledby="lblVial">
               <div class="seg" data-group="vialUnit" role="group" aria-label="Vial unit">
                 <button type="button" data-v="mg" aria-pressed="true">mg</button>
                 <button type="button" data-v="mcg" aria-pressed="false">mcg</button>
               </div>
             </div>
-            <div class="chips">
-              <span class="k">Shortcuts</span>
-              <button type="button" class="chip" data-preset="vial" data-value="2" data-unit="mg">2 mg</button>
-              <button type="button" class="chip" data-preset="vial" data-value="5" data-unit="mg">5 mg</button>
-              <button type="button" class="chip" data-preset="vial" data-value="10" data-unit="mg">10 mg</button>
-            </div>
           </div>
         </li>
         <li class="step">
           <div class="step-top">
-            <span class="hanko" aria-hidden="true">二</span>
+            <span class="hanko" aria-hidden="true">三</span>
             <div><h3 id="lblWater">Water added</h3><p>The volume of water injected into the vial.</p></div>
           </div>
           <div class="step-body">
@@ -178,7 +183,7 @@
         </li>
         <li class="step">
           <div class="step-top">
-            <span class="hanko" aria-hidden="true">三</span>
+            <span class="hanko" aria-hidden="true">四</span>
             <div><h3 id="lblDose">Amount per dose</h3><p>What you want to draw each time.</p></div>
           </div>
           <div class="step-body">
@@ -193,7 +198,7 @@
         </li>
         <li class="step">
           <div class="step-top">
-            <span class="hanko" aria-hidden="true">四</span>
+            <span class="hanko" aria-hidden="true">五</span>
             <div><h3>U-100 syringe</h3><p>Its total capacity, shown on the packaging.</p></div>
           </div>
           <div class="step-body">

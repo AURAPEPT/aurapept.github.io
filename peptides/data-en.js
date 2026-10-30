@@ -37,6 +37,7 @@ export const PEPTIDES = [
     but: "Reduce appetite and lose fat, including liver fat.",
     zones: ["graisse", "cerveau", "foie", "pancreas", "estomac"],
     source: { label: "Jastreboff et al., NEJM, 2023", url: "https://doi.org/10.1056/NEJMoa2301972" },
+    flacon: { mg: [10, 15, 20], eau: [2] },
   },
   {
     id: "tesamorelin", nom: "Tesamorelin", alias: ["Egrifta"], cat: "graisse",

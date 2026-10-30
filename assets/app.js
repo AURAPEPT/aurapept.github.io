@@ -255,6 +255,7 @@ function params() {
   });
   const n = $("labelName").value.trim();
   if (n) p.set("n", n);
+  if (currentPep()) p.set("p", currentPep());
   return p;
 }
 
@@ -267,6 +268,9 @@ function apply(values) {
   setGroup("syringe", values.s);
   $("half").checked = !!values.h;
   $("labelName").value = values.n || "";
+  pepWanted = /^[a-z0-9+-]{1,40}$/.test(values.p || "") ? values.p : "";
+  if (PEPS.length) $("pep").value = pepOf(pepWanted) ? pepWanted : pepByName(values.n)?.id || "";
+  setVialChoices(false);
 }
 
 function loadParams() {
@@ -275,7 +279,7 @@ function loadParams() {
   apply({
     v: pick("v"), w: pick("w"), d: pick("d"),
     vu: pick("vu", ["mg", "mcg"]), du: pick("du", ["mg", "mcg"]), s: pick("s", ["0.3", "0.5", "1"]),
-    h: p.get("h") === "1", n: pick("n"),
+    h: p.get("h") === "1", n: pick("n"), p: p.get("p") || "",
   });
 }
 
@@ -328,6 +332,86 @@ $("themeBtn").addEventListener("click", () => {
   setTheme(next, true);
   toast(THEME_UI[next][0]);
 });
+
+/* Peptide (menu de la Liste) et contenu du flacon (menu déroulant + « Autre quantité »).
+   Un peptide peut proposer ses propres contenus et son volume d'eau : champ « flacon » de peptides/data.js. */
+const VIAL_MG = [1, 2, 5, 10, 15, 20, 30, 50, 100, 500];
+let PEPS = [], vialList = VIAL_MG, pepWanted = "";
+const pepOf = (id) => PEPS.find((p) => p.id === id);
+const pepByName = (n) => {
+  const k = (n || "").trim().toLowerCase();
+  return k ? PEPS.find((p) => [p.nom, ...(p.alias || [])].some((a) => a.toLowerCase() === k)) : undefined;
+};
+const currentPep = () => (PEPS.length ? $("pep").value : pepWanted);
+const vialListed = () => state.vialUnit === "mg" && vialList.includes(parseNum($("vial").value));
+function fillVialPick(list) {
+  vialList = list;
+  const sel = $("vialPick");
+  sel.querySelectorAll("option[data-n]").forEach((o) => o.remove());
+  list.forEach((n) => {
+    const o = document.createElement("option");
+    o.value = String(n);
+    o.dataset.n = "";
+    o.textContent = ltr(`${fmt(n)} mg`);
+    sel.insertBefore(o, sel.lastElementChild);
+  });
+}
+function syncVialPick() {
+  const v = $("vial").value.trim();
+  const pick = vialListed() ? String(parseNum(v)) : v ? "other" : "";
+  $("vialPick").value = pick;
+  $("vialBox").hidden = pick !== "other";
+}
+// adapt = le peptide vient d'être choisi : un contenu qui n'est plus proposé est retiré et une eau unique est remplie.
+// Sinon (lien partagé, flacon rechargé, réinitialisation) rien n'est effacé : une valeur hors liste passe en « Autre quantité ».
+function setVialChoices(adapt) {
+  const p = pepOf(currentPep()), was = vialListed();
+  fillVialPick(p?.flacon?.mg || VIAL_MG);
+  if (adapt && was && !vialListed()) $("vial").value = "";
+  if (adapt && p?.flacon?.eau?.length === 1) $("water").value = String(p.flacon.eau[0]);
+  syncVialPick();
+  $("pepLink").hidden = !p;
+  if (p) $("pepLink").href = `${$("pepLink").getAttribute("href").split("#")[0]}#${encodeURIComponent(p.id)}`;
+}
+$("vialPick").addEventListener("change", () => {
+  const v = $("vialPick").value;
+  if (v === "other") {
+    if (vialListed()) $("vial").value = "";
+    $("vialBox").hidden = false;
+    $("vial").focus();
+  } else {
+    $("vial").value = v;
+    setGroup("vialUnit", "mg");
+    $("vialBox").hidden = true;
+  }
+  calc();
+});
+$("pep").addEventListener("change", () => {
+  const p = pepOf($("pep").value), name = $("labelName").value.trim();
+  // Le nom de l'étiquette suit le peptide, sauf s'il a été écrit à la main
+  if (!name || pepByName(name)) $("labelName").value = p ? p.nom.slice(0, 40) : "";
+  setVialChoices(true);
+  calc();
+});
+// Mêmes données que la page Liste des peptides ; si elles ne se chargent pas, l'étape « Peptide » est masquée
+import(`/peptides/${AR ? "data-ar.js" : EN ? "data-en.js" : "data.js"}`).then(({ CATEGORIES, PEPTIDES }) => {
+  if (!Array.isArray(PEPTIDES) || !PEPTIDES.length) throw new Error("liste vide");
+  PEPS = PEPTIDES;
+  CATEGORIES.forEach((c) => {
+    const g = document.createElement("optgroup");
+    g.label = c.label;
+    PEPTIDES.filter((p) => p.cat === c.id).forEach((p) => {
+      const o = document.createElement("option");
+      o.value = p.id;
+      o.textContent = p.nom;
+      g.append(o);
+    });
+    if (g.children.length) $("pep").append(g);
+  });
+  $("pep").value = pepOf(pepWanted) ? pepWanted : pepByName($("labelName").value)?.id || "";
+  setVialChoices(false);
+  if (booted) calc();
+}).catch(() => { $("pep").closest(".step").hidden = true; });
 
 /* Événements */
 document.querySelectorAll("[data-group]").forEach((g) =>
@@ -393,7 +477,7 @@ function renderVials() {
     const load = mk("button", "btn", t("Charger", "Load", "تحميل"));
     load.type = "button";
     load.addEventListener("click", () => {
-      apply({ v: x.v, w: x.w, d: x.d, vu: x.vu, du: x.du, s: x.s, h: x.h, n: x.n });
+      apply({ v: x.v, w: x.w, d: x.d, vu: x.vu, du: x.du, s: x.s, h: x.h, n: x.n, p: x.p });
       if (x.date) $("date").value = x.date;
       calc();
       toast(t("Flacon chargé", "Vial loaded", "تم تحميل القارورة"));
@@ -416,7 +500,7 @@ function renderVials() {
     });
     // Ouvre le suivi de fiole pré-rempli avec ce flacon (page suivi/ de la même langue)
     const track = mk("a", "btn", t("Suivre", "Track", "متابعة"));
-    const q = new URLSearchParams({ n: x.n || "", v: x.v, vu: x.vu, w: x.w, d: x.d, du: x.du, date: x.date || "" });
+    const q = new URLSearchParams({ n: x.n || "", p: x.p || "", v: x.v, vu: x.vu, w: x.w, d: x.d, du: x.du, date: x.date || "" });
     track.href = `suivi/?${q}`;
     actions.append(load, track, del);
     li.append(actions);
@@ -429,7 +513,7 @@ $("saveVial").addEventListener("click", () => {
   const date = /^\d{4}-\d{2}-\d{2}$/.test($("date").value) ? $("date").value : "";
   const entry = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    n: $("labelName").value.trim().slice(0, 40), date,
+    n: $("labelName").value.trim().slice(0, 40), p: currentPep(), date,
     v: $("vial").value.trim().slice(0, 12), vu: state.vialUnit, w: $("water").value.trim().slice(0, 12),
     d: $("dose").value.trim().slice(0, 12), du: state.doseUnit, s: state.syringe, h: $("half").checked,
   };

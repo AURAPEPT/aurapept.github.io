@@ -942,8 +942,8 @@ import(`/peptides/${{ en: "data-en.js", ar: "data-ar.js" }[LANG] || "data.js"}`)
 // Quantité et eau : une liste de choix (générale, ou propre au peptide choisi) + « Autre » pour écrire sa valeur
 const VIAL_MG = [1, 2, 5, 10, 15, 20, 30, 50, 100, 500];
 const WATER_ML = [1, 2, 3, 5];
-// Choix propres à certains peptides de la Liste (identifiants de peptides/data.js)
-const PEP_CHOICES = { retatrutide: { total: [10, 15, 20], water: [2] } };
+// Choix propres à un peptide : champ « flacon » de peptides/data.js ({ mg: [...], eau: [...] }), partagé avec le calculateur
+const pepChoices = (id, k) => pepOf(id)?.flacon?.[k === "total" ? "mg" : "eau"];
 const pickers = {
   total: { sel: "nvTotalPick", box: "nvTotalBox", input: "nvTotal", unit: "mg", list: VIAL_MG, listed: () => segValue("nvTotalUnit") === "mg" },
   water: { sel: "nvWaterPick", box: "nvWaterBox", input: "nvWater", unit: "mL", list: WATER_ML, listed: () => true },
@@ -973,7 +973,7 @@ function syncPicker(k) {
 function setChoices(id, adapt) {
   ["total", "water"].forEach((k) => {
     const P = pickers[k], was = inList(k);
-    fillPicker(k, PEP_CHOICES[id]?.[k] || (k === "total" ? VIAL_MG : WATER_ML));
+    fillPicker(k, pepChoices(id, k) || (k === "total" ? VIAL_MG : WATER_ML));
     if (adapt && was && !inList(k)) $(P.input).value = "";
     if (adapt && k === "water" && P.list.length === 1 && !$(P.input).value.trim()) $(P.input).value = fmtIn(P.list[0]);
     syncPicker(k);
@@ -1177,7 +1177,7 @@ buildSiteMap();
 const q = new URLSearchParams(location.search);
 renderAll(true);
 if (q.has("v") && q.has("w")) {
-  fillForm({ n: q.get("n"), v: (q.get("v") || "").slice(0, 12), vu: q.get("vu"), w: (q.get("w") || "").slice(0, 12), d: (q.get("d") || "").slice(0, 12), du: q.get("du"), date: q.get("date") });
+  fillForm({ n: q.get("n"), p: q.get("p"), v: (q.get("v") || "").slice(0, 12), vu: q.get("vu"), w: (q.get("w") || "").slice(0, 12), d: (q.get("d") || "").slice(0, 12), du: q.get("du"), date: q.get("date") });
   showForm(true);
   try { history.replaceState(null, "", location.pathname); } catch (e) {}
 } else if (!store.vials.length) {

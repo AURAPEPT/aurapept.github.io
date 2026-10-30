@@ -8,6 +8,8 @@
 //   zones  : zones du corps à allumer (voir ZONES dans body.js)
 //   source : { label, url } vers une source vérifiable
 //   mix    : pour un mélange, les peptides qu'il contient (ids)
+//   flacon : (facultatif) choix proposés dans le calculateur et le suivi de fiole :
+//            { mg: contenus du flacon en mg, eau: volumes d'eau en mL ; une seule eau = remplie toute seule }
 
 export const CATEGORIES = [
   { id: "graisse", label: "GLP-1 · Perte de graisse", short: "Perte de graisse" },
@@ -26,6 +28,7 @@ export const PEPTIDES = [
     but: "Réduire l'appétit et faire perdre de la graisse, y compris celle du foie.",
     zones: ["graisse", "cerveau", "foie", "pancreas", "estomac"],
     source: { label: "Jastreboff et al., NEJM, 2023", url: "https://doi.org/10.1056/NEJMoa2301972" },
+    flacon: { mg: [10, 15, 20], eau: [2] },
   },
   {
     id: "tesamorelin", nom: "Tesamorelin", alias: ["Egrifta"], cat: "graisse",

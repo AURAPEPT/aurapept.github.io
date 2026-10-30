@@ -141,27 +141,32 @@
         <li class="step">
           <div class="step-top">
             <span class="hanko" aria-hidden="true">一</span>
+            <div><h3 id="lblPep">الببتيد</h3><p id="pepHint">اختياري. اختره من قائمة الببتيدات: تتكيّف قائمة المحتوى معه.</p></div>
+          </div>
+          <div class="step-body">
+            <select class="text-field" id="pep" aria-labelledby="lblPep" aria-describedby="pepHint"><option value="">— اختر من القائمة (اختياري) —</option></select>
+            <a class="pep-link" id="pepLink" href="../peptides/" hidden>عرض بطاقته في القائمة</a>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-top">
+            <span class="hanko" aria-hidden="true">二</span>
             <div><h3 id="lblVial">محتوى القارورة</h3><p>الكمية المكتوبة على ملصق القارورة.</p></div>
           </div>
           <div class="step-body">
-            <div class="field">
+            <select class="text-field" id="vialPick" aria-labelledby="lblVial"><option value="">— اختر —</option><option value="other">كمية أخرى</option></select>
+            <div class="field" id="vialBox" hidden>
               <input id="vial" type="text" inputmode="decimal" autocomplete="off" value="5" aria-labelledby="lblVial">
               <div class="seg" data-group="vialUnit" role="group" aria-label="وحدة القارورة">
                 <button type="button" data-v="mg" aria-pressed="true">mg</button>
                 <button type="button" data-v="mcg" aria-pressed="false">mcg</button>
               </div>
             </div>
-            <div class="chips">
-              <span class="k">اختصارات</span>
-              <button type="button" class="chip" data-preset="vial" data-value="2" data-unit="mg"><bdi dir="ltr">2 mg</bdi></button>
-              <button type="button" class="chip" data-preset="vial" data-value="5" data-unit="mg"><bdi dir="ltr">5 mg</bdi></button>
-              <button type="button" class="chip" data-preset="vial" data-value="10" data-unit="mg"><bdi dir="ltr">10 mg</bdi></button>
-            </div>
           </div>
         </li>
         <li class="step">
           <div class="step-top">
-            <span class="hanko" aria-hidden="true">二</span>
+            <span class="hanko" aria-hidden="true">三</span>
             <div><h3 id="lblWater">الماء المضاف</h3><p>حجم الماء الذي تحقنه في القارورة.</p></div>
           </div>
           <div class="step-body">
@@ -179,7 +184,7 @@
         </li>
         <li class="step">
           <div class="step-top">
-            <span class="hanko" aria-hidden="true">三</span>
+            <span class="hanko" aria-hidden="true">四</span>
             <div><h3 id="lblDose">الكمية لكل جرعة</h3><p>ما تريد سحبه في كل مرة.</p></div>
           </div>
           <div class="step-body">
@@ -194,7 +199,7 @@
         </li>
         <li class="step">
           <div class="step-top">
-            <span class="hanko" aria-hidden="true">四</span>
+            <span class="hanko" aria-hidden="true">五</span>
             <div><h3>حقنة U-100</h3><p>سعتها الكاملة، المكتوبة على العبوة.</p></div>
           </div>
           <div class="step-body">
