@@ -8,7 +8,7 @@
 //   zones  : zones du corps à allumer (voir ZONES dans body.js)
 //   source : { label, url } vers une source vérifiable
 //   mix    : pour un mélange, les peptides qu'il contient (ids)
-//   flacon : (facultatif) choix proposés dans le calculateur et le suivi de fiole :
+//   flacon : (facultatif) choix proposés dans le suivi de fiole :
 //            { mg: contenus du flacon en mg, eau: volumes d'eau en mL ; une seule eau = remplie toute seule }
 
 export const CATEGORIES = [

@@ -942,7 +942,7 @@ import(`/peptides/${{ en: "data-en.js", ar: "data-ar.js" }[LANG] || "data.js"}`)
 // Quantité et eau : une liste de choix (générale, ou propre au peptide choisi) + « Autre » pour écrire sa valeur
 const VIAL_MG = [1, 2, 5, 10, 15, 20, 30, 50, 100, 500];
 const WATER_ML = [1, 2, 3, 5];
-// Choix propres à un peptide : champ « flacon » de peptides/data.js ({ mg: [...], eau: [...] }), partagé avec le calculateur
+// Choix propres à un peptide : champ « flacon » de peptides/data.js ({ mg: [...], eau: [...] })
 const pepChoices = (id, k) => pepOf(id)?.flacon?.[k === "total" ? "mg" : "eau"];
 const pickers = {
   total: { sel: "nvTotalPick", box: "nvTotalBox", input: "nvTotal", unit: "mg", list: VIAL_MG, listed: () => segValue("nvTotalUnit") === "mg" },
