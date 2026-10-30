@@ -937,6 +937,33 @@ import(`/peptides/${{ en: "data-en.js", ar: "data-ar.js" }[LANG] || "data.js"}`)
   syncPep(formPep, $("nvName").value);
 }).catch(() => {});
 
+// Quantité de la fiole : valeurs courantes en mg, ou « Autre quantité » pour écrire la sienne (mg ou mcg)
+const VIAL_MG = [1, 2, 5, 10, 15, 20, 30, 50, 100, 500];
+VIAL_MG.forEach((n) => {
+  const o = document.createElement("option");
+  o.value = String(n);
+  o.textContent = ltr(`${fmtIn(n)} mg`);
+  $("nvTotalPick").insertBefore(o, $("nvTotalPick").lastElementChild);
+});
+const isPreset = () => segValue("nvTotalUnit") === "mg" && VIAL_MG.includes(parseNum($("nvTotal").value));
+function syncTotal() {
+  const pick = isPreset() ? String(parseNum($("nvTotal").value)) : $("nvTotal").value.trim() ? "other" : "";
+  $("nvTotalPick").value = pick;
+  $("nvTotalBox").hidden = pick !== "other";
+}
+$("nvTotalPick").addEventListener("change", () => {
+  const v = $("nvTotalPick").value;
+  if (v === "other") {
+    if (isPreset()) $("nvTotal").value = "";
+    $("nvTotalBox").hidden = false;
+    $("nvTotal").focus();
+    return;
+  }
+  $("nvTotal").value = v ? fmtIn(+v) : "";
+  setSeg("nvTotalUnit", "mg");
+  $("nvTotalBox").hidden = true;
+});
+
 // Reprendre un flacon enregistré dans « Mes flacons » du calculateur
 function readSaved() {
   try { const v = JSON.parse(localStorage.getItem("aurapept-flacons") || "[]"); return Array.isArray(v) ? v.filter((x) => x && typeof x === "object") : []; } catch (e) { return []; }
@@ -946,6 +973,7 @@ function fillForm(x) {
   syncPep(x.p, $("nvName").value);
   $("nvTotal").value = x.v || "";
   setSeg("nvTotalUnit", x.vu === "mcg" ? "mcg" : "mg");
+  syncTotal();
   $("nvWater").value = x.w || "";
   $("nvDose").value = x.d || "";
   setSeg("nvDoseUnit", x.du === "mg" ? "mg" : "mcg");
@@ -1005,6 +1033,7 @@ $("nvCreate").addEventListener("click", () => {
     if (!save()) { Object.assign(ed, JSON.parse(backup)); return; }
     ["nvName", "nvTotal", "nvWater", "nvDose", "nvBud"].forEach((id) => ($(id).value = ""));
     syncPep("", "");
+    syncTotal();
     editingVial = null;
     setFormMode(false);
     showForm(false);
@@ -1020,6 +1049,7 @@ $("nvCreate").addEventListener("click", () => {
   if (!save()) { store.vials.pop(); return; }
   ["nvName", "nvTotal", "nvWater", "nvDose", "nvBud"].forEach((id) => ($(id).value = ""));
   syncPep("", "");
+  syncTotal();
   $("nvImport").value = "";
   delete $("dsAmount").dataset.touched;
   viewAt = Infinity;

@@ -173,8 +173,9 @@
           </div>
           <div class="form-row">
             <div>
-              <span class="form-label" id="lblNvTotal">Vial content</span>
-              <div class="field"><input id="nvTotal" type="text" inputmode="decimal" autocomplete="off" aria-labelledby="lblNvTotal"><div class="seg" id="nvTotalUnit" role="group" aria-label="Content unit"><button type="button" data-v="mg" aria-pressed="true">mg</button><button type="button" data-v="mcg" aria-pressed="false">mcg</button></div></div>
+              <label for="nvTotalPick" id="lblNvTotal">Vial content</label>
+              <select class="text-field" id="nvTotalPick"><option value="">— Choose —</option><option value="other">Other amount</option></select>
+              <div class="field total-other" id="nvTotalBox" hidden><input id="nvTotal" type="text" inputmode="decimal" autocomplete="off" aria-labelledby="lblNvTotal"><div class="seg" id="nvTotalUnit" role="group" aria-label="Content unit"><button type="button" data-v="mg" aria-pressed="true">mg</button><button type="button" data-v="mcg" aria-pressed="false">mcg</button></div></div>
             </div>
             <div>
               <span class="form-label" id="lblNvWater">Water added</span>
