@@ -180,8 +180,9 @@
               <div class="field total-other" id="nvTotalBox" hidden><input id="nvTotal" type="text" inputmode="decimal" autocomplete="off" aria-labelledby="lblNvTotal"><div class="seg" id="nvTotalUnit" role="group" aria-label="وحدة المحتوى"><button type="button" data-v="mg" aria-pressed="true">mg</button><button type="button" data-v="mcg" aria-pressed="false">mcg</button></div></div>
             </div>
             <div>
-              <span class="form-label" id="lblNvWater">الماء المضاف</span>
-              <div class="field"><input id="nvWater" type="text" inputmode="decimal" autocomplete="off" aria-labelledby="lblNvWater"><span class="suffix">mL</span></div>
+              <label for="nvWaterPick" id="lblNvWater">الماء المضاف</label>
+              <select class="text-field" id="nvWaterPick"><option value="">— اختر —</option><option value="other">حجم آخر</option></select>
+              <div class="field total-other" id="nvWaterBox" hidden><input id="nvWater" type="text" inputmode="decimal" autocomplete="off" aria-labelledby="lblNvWater"><span class="suffix">mL</span></div>
             </div>
           </div>
           <div class="form-row">

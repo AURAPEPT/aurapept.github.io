@@ -873,7 +873,7 @@ function setFormMode(edit) {
 function showForm(show) {
   $("newVial").hidden = !show;
   $("nvCancel").hidden = !store.vials.length;
-  if (!show && editingVial) { editingVial = null; setFormMode(false); }
+  if (!show && editingVial) { editingVial = null; setFormMode(false); clearForm(); } // modification annulée : le formulaire repart à vide
   renderPanel();
   if (show) {
     $("nvError").hidden = true;
@@ -886,7 +886,7 @@ function showForm(show) {
     renderSwatches();
   }
 }
-$("newVialBtn").addEventListener("click", () => { editingVial = null; setFormMode(false); $("nvBud").value = ""; showForm(true); $("newVial").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); focusName(); });
+$("newVialBtn").addEventListener("click", () => { if (editingVial) clearForm(); editingVial = null; setFormMode(false); $("nvBud").value = ""; showForm(true); $("newVial").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" }); focusName(); });
 $("nvCancel").addEventListener("click", () => showForm(false));
 
 // Menu des peptides de la Liste (mêmes données que /peptides/). Tant qu'il n'est pas chargé, le champ Nom reste seul.
@@ -916,6 +916,7 @@ $("nvPep").addEventListener("change", () => {
   if (p) $("nvName").value = p.nom.slice(0, 40);
   else if (v === "" || pepByName($("nvName").value)) $("nvName").value = "";
   showPep();
+  setChoices(p ? p.id : "", true);
   if (v === "other") $("nvName").focus();
 });
 import(`/peptides/${{ en: "data-en.js", ar: "data-ar.js" }[LANG] || "data.js"}`).then(({ CATEGORIES, PEPTIDES }) => {
@@ -935,34 +936,71 @@ import(`/peptides/${{ en: "data-en.js", ar: "data-ar.js" }[LANG] || "data.js"}`)
   });
   $("nvPepBox").hidden = false;
   syncPep(formPep, $("nvName").value);
+  setChoices(currentPep(), false);
 }).catch(() => {});
 
-// Quantité de la fiole : valeurs courantes en mg, ou « Autre quantité » pour écrire la sienne (mg ou mcg)
+// Quantité et eau : une liste de choix (générale, ou propre au peptide choisi) + « Autre » pour écrire sa valeur
 const VIAL_MG = [1, 2, 5, 10, 15, 20, 30, 50, 100, 500];
-VIAL_MG.forEach((n) => {
-  const o = document.createElement("option");
-  o.value = String(n);
-  o.textContent = ltr(`${fmtIn(n)} mg`);
-  $("nvTotalPick").insertBefore(o, $("nvTotalPick").lastElementChild);
-});
-const isPreset = () => segValue("nvTotalUnit") === "mg" && VIAL_MG.includes(parseNum($("nvTotal").value));
-function syncTotal() {
-  const pick = isPreset() ? String(parseNum($("nvTotal").value)) : $("nvTotal").value.trim() ? "other" : "";
-  $("nvTotalPick").value = pick;
-  $("nvTotalBox").hidden = pick !== "other";
+const WATER_ML = [1, 2, 3, 5];
+// Choix propres à certains peptides de la Liste (identifiants de peptides/data.js)
+const PEP_CHOICES = { retatrutide: { total: [10, 15, 20], water: [2] } };
+const pickers = {
+  total: { sel: "nvTotalPick", box: "nvTotalBox", input: "nvTotal", unit: "mg", list: VIAL_MG, listed: () => segValue("nvTotalUnit") === "mg" },
+  water: { sel: "nvWaterPick", box: "nvWaterBox", input: "nvWater", unit: "mL", list: WATER_ML, listed: () => true },
+};
+const currentPep = () => (PEPS.length ? (pepOf($("nvPep").value) ? $("nvPep").value : "") : formPep);
+const inList = (k) => pickers[k].listed() && pickers[k].list.includes(parseNum($(pickers[k].input).value));
+function fillPicker(k, list) {
+  const P = pickers[k], sel = $(P.sel);
+  P.list = list;
+  sel.querySelectorAll("option[data-n]").forEach((o) => o.remove());
+  list.forEach((n) => {
+    const o = document.createElement("option");
+    o.value = String(n);
+    o.dataset.n = "";
+    o.textContent = ltr(`${fmtIn(n)} ${P.unit}`);
+    sel.insertBefore(o, sel.lastElementChild);
+  });
 }
-$("nvTotalPick").addEventListener("change", () => {
-  const v = $("nvTotalPick").value;
-  if (v === "other") {
-    if (isPreset()) $("nvTotal").value = "";
-    $("nvTotalBox").hidden = false;
-    $("nvTotal").focus();
-    return;
-  }
-  $("nvTotal").value = v ? fmtIn(+v) : "";
-  setSeg("nvTotalUnit", "mg");
-  $("nvTotalBox").hidden = true;
+function syncPicker(k) {
+  const P = pickers[k], v = $(P.input).value.trim();
+  const pick = inList(k) ? String(parseNum(v)) : v ? "other" : "";
+  $(P.sel).value = pick;
+  $(P.box).hidden = pick !== "other";
+}
+// adapt = l'utilisateur vient de changer de peptide : une valeur de l'ancienne liste absente de la nouvelle est retirée,
+// et s'il n'y a qu'une eau possible elle est remplie. Sinon (fiole modifiée, reprise…) rien n'est effacé.
+function setChoices(id, adapt) {
+  ["total", "water"].forEach((k) => {
+    const P = pickers[k], was = inList(k);
+    fillPicker(k, PEP_CHOICES[id]?.[k] || (k === "total" ? VIAL_MG : WATER_ML));
+    if (adapt && was && !inList(k)) $(P.input).value = "";
+    if (adapt && k === "water" && P.list.length === 1 && !$(P.input).value.trim()) $(P.input).value = fmtIn(P.list[0]);
+    syncPicker(k);
+  });
+}
+Object.entries(pickers).forEach(([k, P]) => {
+  fillPicker(k, P.list);
+  $(P.sel).addEventListener("change", () => {
+    const v = $(P.sel).value;
+    if (v === "other") {
+      if (inList(k)) $(P.input).value = "";
+      $(P.box).hidden = false;
+      $(P.input).focus();
+      return;
+    }
+    $(P.input).value = v ? fmtIn(+v) : "";
+    if (k === "total") setSeg("nvTotalUnit", "mg");
+    $(P.box).hidden = true;
+  });
 });
+
+function clearForm() {
+  ["nvName", "nvTotal", "nvWater", "nvDose", "nvBud", "nvDate"].forEach((id) => ($(id).value = "")); // la date reviendra à aujourd'hui
+  syncPep("", "");
+  setChoices("", false);
+  $("nvImport").value = "";
+}
 
 // Reprendre un flacon enregistré dans « Mes flacons » du calculateur
 function readSaved() {
@@ -973,11 +1011,11 @@ function fillForm(x) {
   syncPep(x.p, $("nvName").value);
   $("nvTotal").value = x.v || "";
   setSeg("nvTotalUnit", x.vu === "mcg" ? "mcg" : "mg");
-  syncTotal();
   $("nvWater").value = x.w || "";
   $("nvDose").value = x.d || "";
   setSeg("nvDoseUnit", x.du === "mg" ? "mg" : "mcg");
   if (/^\d{4}-\d{2}-\d{2}$/.test(x.date || "")) $("nvDate").value = x.date;
+  setChoices(currentPep(), false);
 }
 const saved = readSaved();
 $("nvImportBox").hidden = !saved.length;
@@ -1031,12 +1069,7 @@ $("nvCreate").addEventListener("click", () => {
     const backup = JSON.stringify(ed);
     Object.assign(ed, fields);
     if (!save()) { Object.assign(ed, JSON.parse(backup)); return; }
-    ["nvName", "nvTotal", "nvWater", "nvDose", "nvBud"].forEach((id) => ($(id).value = ""));
-    syncPep("", "");
-    syncTotal();
-    editingVial = null;
-    setFormMode(false);
-    showForm(false);
+    showForm(false); // quitte la modification et vide le formulaire
     renderAll(true);
     toast(t("Fiole modifiée", "Vial updated", "تم تعديل القارورة"));
     $("vialStage").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
@@ -1047,10 +1080,7 @@ $("nvCreate").addEventListener("click", () => {
   store.vials.push(v);
   store.current = v.id;
   if (!save()) { store.vials.pop(); return; }
-  ["nvName", "nvTotal", "nvWater", "nvDose", "nvBud"].forEach((id) => ($(id).value = ""));
-  syncPep("", "");
-  syncTotal();
-  $("nvImport").value = "";
+  clearForm();
   delete $("dsAmount").dataset.touched;
   viewAt = Infinity;
   showForm(false);
